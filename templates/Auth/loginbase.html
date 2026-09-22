@@ -1,0 +1,99 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        {% block title %}
+        TLMS
+        {% endblock %}
+    </title>
+    <link rel="shortcut icon" href="{% static 'images/logo/favicon.png' %}" type="image/png" />
+    <link href="{% static 'fonts/noto-sans-v42-latin-regular.woff2' %}" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="{% static 'remixicon/remixicon.css' %}">
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        body {
+            font-family: 'Noto sans', sans-serif;
+        }
+
+        @font-face {
+            font-family: "remixicon";
+            src: url("{% static 'remixicon/remixicon.woff2' %}") format("woff2");
+            font-display: swap;
+        }
+
+        @font-face {
+            font-display: swap;
+            font-family: 'Noto Sans';
+            font-style: normal;
+            font-weight: 300;
+            src: url("{% static 'fonts/noto-sans-v42-latin-300.woff2' %}") format('woff2');
+        }
+
+        @font-face {
+            font-display: swap;
+            font-family: 'Noto Sans';
+            font-style: normal;
+            font-weight: 400;
+            src: url("{% static 'fonts/noto-sans-v42-latin-regular.woff2' %}") format('woff2');
+        }
+
+        @font-face {
+            font-display: swap;
+            font-family: 'Noto Sans';
+            font-style: italic;
+            font-weight: 400;
+            src: url("{% static 'fonts/noto-sans-v42-latin-italic.woff2' %}") format('woff2');
+        }
+
+        @font-face {
+            font-display: swap;
+            font-family: 'Noto Sans';
+            font-style: normal;
+            font-weight: 500;
+            src: url("{% static 'fonts/noto-sans-v42-latin-500.woff2' %}") format('woff2');
+        }
+
+        @font-face {
+            font-display: swap;
+            font-family: 'Noto Sans';
+            font-style: normal;
+            font-weight: 600;
+            src: url("{% static 'fonts/noto-sans-v42-latin-600.woff2' %}") format('woff2');
+        }
+
+        @font-face {
+            font-display: swap;
+            font-family: 'Noto Sans';
+            font-style: normal;
+            font-weight: 700;
+            src: url("{% static 'fonts/noto-sans-v42-latin-700.woff2' %}") format('woff2');
+        }
+
+        @font-face {
+            font-display: swap;
+            font-family: 'Noto Sans';
+            font-style: normal;
+            font-weight: 800;
+            src: url("{% static 'fonts/noto-sans-v42-latin-800.woff2' %}") format('woff2');
+        }
+    </style>
+</head>
+
+<body>
+    {% block content %}
+    {% endblock %}
+
+    <script src="{% static 'js/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'js/jquery/jquery.scrollbar.min.js' %}"></script>
+
+    {% block login_extra_js %}
+    {% endblock %}
+</body>
+
+</html>
