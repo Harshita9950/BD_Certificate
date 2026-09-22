@@ -61,13 +61,19 @@ class LoginPageView(View):
 class DashboardView(View):
     """
     GET /dashboard/
-    Placeholder — requires an active session.
+    Requires an active session. Unauthenticated requests redirect to /login/.
+    Auth context (user, role, permissions) is injected by TLPortalAuthMiddleware
+    via the auth_context template context processor — nothing is written to
+    localStorage or sessionStorage.
     """
 
     def get(self, request):
         if not request.user.is_authenticated:
-            return redirect('login_page')
-        return render(request, 'Auth/login.html')  # placeholder until dashboard template exists
+            return redirect(f'/login/?next={request.path}')
+        if not request.user.is_active:
+            logout(request)
+            return redirect('/login/')
+        return render(request, 'Authority/dashboard.html')
 
 
 # ─── CSRF Token ───────────────────────────────────────────────────────────────
@@ -101,16 +107,16 @@ class LoginView(APIView):
     authentication_classes = []  # Session doesn't exist yet at login time
 
     def post(self, request):
-        email    = request.data.get('email', '').strip()
+        username = request.data.get('username', '').strip()
         password = request.data.get('password', '')
 
-        if not email or not password:
+        if not username or not password:
             return Response(
-                {'detail': 'Email and password are required.', 'code': 'missing_credentials'},
+                {'detail': 'Username and password are required.', 'code': 'missing_credentials'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        user = authenticate(request, username=email, password=password)
+        user = authenticate(request, username=username, password=password)
 
         if user is None:
             return Response(

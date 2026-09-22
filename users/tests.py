@@ -14,9 +14,6 @@ Test scenarios covered (as required):
 
 Run with:
     python manage.py test users --verbosity=2
-
-Note: these tests use Django's test database — no real PostgreSQL needed
-for the test runner (it creates a test DB automatically).
 """
 
 from django.contrib.auth import get_user_model
@@ -46,10 +43,12 @@ User = get_user_model()
 # ─── Helpers ─────────────────────────────────────────────────────────────────
 
 def make_user(email, password='TestPass123!', role=UserRole.CITIZEN,
-              ulb_code='ULB001', is_active=True, **kwargs):
-    """Create a test user."""
+              ulb_code='ULB001', is_active=True, username=None, **kwargs):
+    """Create a test user. Derives username from email prefix when not supplied."""
+    if username is None:
+        username = email.split('@')[0].lower()
     return User.objects.create_user(
-        email=email, password=password, role=role,
+        email=email, username=username, password=password, role=role,
         ulb_code=ulb_code, first_name='Test', last_name='User',
         is_active=is_active, **kwargs,
     )
@@ -88,7 +87,7 @@ class LocalAuthenticationTest(TestCase):
         """POST /api/auth/login/ with valid credentials returns 200 + user profile."""
         response = self.client.post(
             self.login_url,
-            {'email': 'citizen@test.com', 'password': 'SecurePass1!'},
+            {'username': 'citizen', 'password': 'SecurePass1!'},
             format='json',
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -100,16 +99,16 @@ class LocalAuthenticationTest(TestCase):
         """POST /api/auth/login/ with wrong password returns 401."""
         response = self.client.post(
             self.login_url,
-            {'email': 'citizen@test.com', 'password': 'WrongPassword!'},
+            {'username': 'citizen', 'password': 'WrongPassword!'},
             format='json',
         )
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-    def test_login_with_nonexistent_email_returns_401(self):
-        """Login attempt for unknown email returns 401."""
+    def test_login_with_nonexistent_username_returns_401(self):
+        """Login attempt for unknown username returns 401."""
         response = self.client.post(
             self.login_url,
-            {'email': 'nobody@test.com', 'password': 'AnyPass1!'},
+            {'username': 'nobody', 'password': 'AnyPass1!'},
             format='json',
         )
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -120,23 +119,23 @@ class LocalAuthenticationTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_login_with_username_identifier(self):
-        """LocalAuthBackend resolves username field as email (Django compatibility)."""
+        """LocalAuthBackend authenticates using the username field."""
         response = self.client.post(
             self.login_url,
-            {'email': 'citizen@test.com', 'password': 'SecurePass1!'},
+            {'username': 'citizen', 'password': 'SecurePass1!'},
             format='json',
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_login_log_created_on_success(self):
-        """Successful login writes a UserLoginLog record."""
+        """Successful login writes a UserLoginLog record with username_attempted."""
         self.client.post(
             self.login_url,
-            {'email': 'citizen@test.com', 'password': 'SecurePass1!'},
+            {'username': 'citizen', 'password': 'SecurePass1!'},
             format='json',
         )
         log = UserLoginLog.objects.filter(
-            email_attempted='citizen@test.com', status='SUCCESS'
+            username_attempted='citizen', status='SUCCESS'
         ).first()
         self.assertIsNotNone(log)
         self.assertEqual(log.method, 'LOCAL')
@@ -145,7 +144,7 @@ class LocalAuthenticationTest(TestCase):
         """Failed login writes a UserLoginLog with FAILURE status."""
         self.client.post(
             self.login_url,
-            {'email': 'citizen@test.com', 'password': 'BadPass!'},
+            {'username': 'citizen', 'password': 'BadPass!'},
             format='json',
         )
         log = UserLoginLog.objects.filter(status='FAILURE').first()
@@ -153,10 +152,9 @@ class LocalAuthenticationTest(TestCase):
 
     def test_logout_destroys_session(self):
         """POST /api/auth/logout/ on authenticated session returns 200."""
-        # Login first
         self.client.post(
             self.login_url,
-            {'email': 'citizen@test.com', 'password': 'SecurePass1!'},
+            {'username': 'citizen', 'password': 'SecurePass1!'},
             format='json',
         )
         self.client.force_authenticate(user=self.user)
@@ -169,6 +167,7 @@ class LocalAuthenticationTest(TestCase):
             '/api/users/register/',
             {
                 'email': 'new@test.com',
+                'username': 'newuser',
                 'first_name': 'New',
                 'last_name': 'User',
                 'password': 'NewPass123!',
@@ -252,10 +251,11 @@ class UnauthorisedRejectionTest(TestCase):
 
     def test_inactive_user_rejected_by_auth_backend(self):
         """Inactive user's credentials are rejected by LocalAuthBackend."""
-        make_user('inactive@test.com', password='Pass123!', is_active=False)
+        make_user('inactive@test.com', username='inactive_user',
+                  password='Pass123!', is_active=False)
         response = self.client.post(
             '/api/auth/login/',
-            {'email': 'inactive@test.com', 'password': 'Pass123!'},
+            {'username': 'inactive_user', 'password': 'Pass123!'},
             format='json',
         )
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -519,8 +519,8 @@ class UserModelTest(TestCase):
         self.assertFalse(user.is_staff)
         self.assertFalse(user.is_verified)
 
-    def test_email_is_username_field(self):
-        self.assertEqual(User.USERNAME_FIELD, 'email')
+    def test_username_is_username_field(self):
+        self.assertEqual(User.USERNAME_FIELD, 'username')
 
     def test_is_citizen_property(self):
         user = make_user('c@test.com', role=UserRole.CITIZEN)
@@ -540,9 +540,200 @@ class UserModelTest(TestCase):
 
     def test_create_superuser(self):
         admin = User.objects.create_superuser(
-            email='super@test.com', password='Admin123!',
-            first_name='Super', last_name='User',
+            email='super@test.com', username='superuser',
+            password='Admin123!', first_name='Super', last_name='User',
         )
         self.assertTrue(admin.is_staff)
         self.assertTrue(admin.is_superuser)
         self.assertEqual(admin.role, UserRole.ADMIN)
+
+
+# ─── Dashboard Integration Tests ─────────────────────────────────────────────
+
+class DashboardTest(TestCase):
+    """
+    Covers all required dashboard integration scenarios:
+      - login → dashboard
+      - authenticated dashboard access
+      - unauthenticated dashboard access → redirect to login
+      - inactive user → redirect to login
+      - logout invalidates session
+      - 401/403 handling on API endpoints
+      - localStorage contains no authentication data (behaviour contract verified
+        via view/response — browser enforcement is validated by the template)
+      - session/auth secrets not exposed to JavaScript in response
+    """
+
+    def setUp(self):
+        self.client = Client()
+        self.user   = make_user('dash@test.com', role=UserRole.OFFICER)
+
+    # ── 1. Login → Dashboard ─────────────────────────────────────────────────
+
+    def test_login_redirects_to_dashboard(self):
+        response = self.client.post(
+            '/api/auth/login/',
+            data={'username': 'dash', 'password': 'TestPass123!'},
+            content_type='application/json',
+        )
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data['detail'], 'Login successful.')
+        self.assertIn('user', data)
+        self.assertEqual(data['user']['email'], 'dash@test.com')
+
+    def test_login_creates_session_cookie(self):
+        self.client.post(
+            '/api/auth/login/',
+            data={'username': 'dash', 'password': 'TestPass123!'},
+            content_type='application/json',
+        )
+        self.assertIn('tl_sessionid', self.client.cookies)
+
+    # ── 2. Authenticated dashboard access ────────────────────────────────────
+
+    def test_authenticated_user_can_access_dashboard(self):
+        self.client.force_login(self.user)
+        response = self.client.get('/dashboard/')
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'Authority/dashboard.html')
+        self.assertTemplateUsed(response, 'Authority/base.html')
+
+    def test_dashboard_contains_no_hardcoded_admin_name(self):
+        self.client.force_login(self.user)
+        response = self.client.get('/dashboard/')
+        content = response.content.decode()
+        self.assertNotIn('Admin Name', content)
+        self.assertNotIn('Administrator', content)
+
+    def test_dashboard_renders_authenticated_user_name(self):
+        self.client.force_login(self.user)
+        response = self.client.get('/dashboard/')
+        content = response.content.decode()
+        self.assertIn(self.user.get_full_name(), content)
+
+    # ── 3. Unauthenticated dashboard access → redirect to login ──────────────
+
+    def test_unauthenticated_dashboard_redirects_to_login(self):
+        response = self.client.get('/dashboard/')
+        self.assertIn(response.status_code, [301, 302])
+        self.assertIn('/login/', response['Location'])
+
+    def test_unauthenticated_dashboard_redirect_preserves_next_param(self):
+        response = self.client.get('/dashboard/')
+        self.assertIn('next=', response['Location'])
+
+    # ── 4. Inactive user → redirect to login ─────────────────────────────────
+
+    def test_inactive_user_dashboard_redirects_to_login(self):
+        inactive = make_user('inactive_dash@test.com', is_active=False)
+        self.client.force_login(inactive)
+        response = self.client.get('/dashboard/')
+        self.assertIn(response.status_code, [301, 302])
+        self.assertIn('/login/', response['Location'])
+
+    # ── 5. Logout invalidates session ────────────────────────────────────────
+
+    def test_logout_invalidates_session(self):
+        self.client.force_login(self.user)
+        self.client.post('/api/auth/logout/')
+        response = self.client.get('/dashboard/')
+        self.assertIn(response.status_code, [301, 302])
+
+    def test_logout_returns_200(self):
+        self.client.force_login(self.user)
+        response = self.client.post('/api/auth/logout/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['detail'], 'Logged out successfully.')
+
+    def test_logout_requires_active_session(self):
+        response = self.client.post('/api/auth/logout/')
+        self.assertIn(response.status_code, [401, 403])
+
+    # ── 6. 401 / 403 handling ────────────────────────────────────────────────
+
+    def test_unauthenticated_api_returns_401(self):
+        response = self.client.get('/api/auth/status/')
+        self.assertEqual(response.status_code, 401)
+        data = response.json()
+        self.assertIn('detail', data)
+        self.assertIn('code', data)
+
+    def test_unauthenticated_profile_returns_401(self):
+        response = self.client.get('/api/users/profile/')
+        self.assertEqual(response.status_code, 401)
+
+    def test_401_response_is_json_not_html(self):
+        response = self.client.get('/api/users/profile/')
+        self.assertEqual(response['Content-Type'], 'application/json')
+
+    # ── 7. Session cookie is HttpOnly ─────────────────────────────────────────
+
+    def test_session_cookie_is_httponly(self):
+        self.client.post(
+            '/api/auth/login/',
+            data={'username': 'dash', 'password': 'TestPass123!'},
+            content_type='application/json',
+        )
+        cookie = self.client.cookies.get('tl_sessionid')
+        self.assertIsNotNone(cookie)
+        self.assertTrue(cookie['httponly'])
+
+    def test_session_cookie_name_is_custom(self):
+        self.client.post(
+            '/api/auth/login/',
+            data={'username': 'dash', 'password': 'TestPass123!'},
+            content_type='application/json',
+        )
+        self.assertIn('tl_sessionid', self.client.cookies)
+        self.assertNotIn('sessionid', self.client.cookies)
+
+    # ── 8. No auth secrets exposed to JavaScript ──────────────────────────────
+
+    def test_dashboard_response_does_not_expose_session_id_in_body(self):
+        self.client.force_login(self.user)
+        response = self.client.get('/dashboard/')
+        content = response.content.decode()
+        session_id = self.client.cookies.get('tl_sessionid')
+        if session_id:
+            self.assertNotIn(session_id.value, content)
+
+    def test_dashboard_response_does_not_contain_password(self):
+        self.client.force_login(self.user)
+        response = self.client.get('/dashboard/')
+        content = response.content.decode()
+        self.assertNotIn('Pass123!', content)
+
+    def test_api_status_does_not_expose_password_hash(self):
+        self.client.force_login(self.user)
+        response = self.client.get('/api/auth/status/')
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertNotIn('password', data.get('user', {}))
+
+    # ── 9. Session status API ────────────────────────────────────────────────
+
+    def test_session_status_returns_user_when_authenticated(self):
+        self.client.force_login(self.user)
+        response = self.client.get('/api/auth/status/')
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data['user']['email'], 'dash@test.com')
+
+    def test_session_status_returns_401_after_logout(self):
+        self.client.force_login(self.user)
+        self.client.post('/api/auth/logout/')
+        response = self.client.get('/api/auth/status/')
+        self.assertEqual(response.status_code, 401)
+
+    # ── 10. SSO architecture compatibility ───────────────────────────────────
+
+    def test_sso_initiate_returns_503_when_disabled(self):
+        response = self.client.get('/api/auth/sso/initiate/')
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.json()['code'], 'sso_disabled')
+
+    def test_sso_callback_returns_503_when_disabled(self):
+        response = self.client.get('/api/auth/sso/callback/?code=test')
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.json()['code'], 'sso_disabled')

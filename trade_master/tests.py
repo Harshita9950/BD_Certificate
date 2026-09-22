@@ -30,8 +30,8 @@ def make_ulb():
 
 def make_user(email='user@test.com'):
     return User.objects.create_user(
-        email=email, password='Pass123!',
-        first_name='Test', last_name='User',
+        email=email, username=email.split('@')[0].lower(),
+        password='Pass123!', first_name='Test', last_name='User',
         role=UserRole.OFFICER,
     )
 

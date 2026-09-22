@@ -1,35 +1,5 @@
 """
 users/models.py
-===============
-Custom User model and supporting authorization models for the
-Municipal Trade Licence Management System.
-
-Design principles
------------------
-1. Email is the primary login credential (not username).
-   Mobile/username are stored as optional secondary identifiers.
-
-2. Role → Permission architecture.
-   Hard-coded "user type" checks are avoided. Roles are database records.
-   Fine-grained permissions are strings (e.g. 'application.approve')
-   assigned to roles and therefore to users.
-
-3. Central Portal / SSO readiness.
-   CentralIdentity stores an external identity reference so that the
-   same physical person authenticating via the Central Portal maps to
-   their existing local User without creating a duplicate account.
-
-4. Application-level authorization.
-   UserApplicationAccess records which applications (TRADE_LICENSE,
-   UD_TAX, etc.) a user is authorized to access, enabling future
-   multi-application portal support.
-
-5. Soft-delete only.
-   Users are never hard-deleted. Use is_active = False to deactivate.
-
-6. ULB / Zone / Ward context.
-   Officers are assigned to a ULB (Urban Local Body), zone, and ward.
-   This drives workflow routing and jurisdiction.
 """
 
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
@@ -74,24 +44,26 @@ class ApplicationCode(models.TextChoices):
 # ─── User Manager ─────────────────────────────────────────────────────────────
 
 class UserManager(BaseUserManager):
-    """Email-based user manager."""
 
-    def _create_user(self, email, password, **extra_fields):
+    def _create_user(self, email, username, password, **extra_fields):
         if not email:
             raise ValueError(_('An email address is required.'))
-        email = self.normalize_email(email)
-        user  = self.model(email=email, **extra_fields)
+        if not username:
+            raise ValueError(_('A username is required.'))
+        email    = self.normalize_email(email)
+        username = username.strip()
+        user     = self.model(email=email, username=username, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_user(self, email, password=None, **extra_fields):
+    def create_user(self, email, username, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', False)
         extra_fields.setdefault('is_superuser', False)
         extra_fields.setdefault('role', UserRole.CITIZEN)
-        return self._create_user(email, password, **extra_fields)
+        return self._create_user(email, username, password, **extra_fields)
 
-    def create_superuser(self, email, password, **extra_fields):
+    def create_superuser(self, email, username, password, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('role', UserRole.ADMIN)
@@ -99,7 +71,7 @@ class UserManager(BaseUserManager):
             raise ValueError(_('Superuser must have is_staff=True.'))
         if not extra_fields['is_superuser']:
             raise ValueError(_('Superuser must have is_superuser=True.'))
-        return self._create_user(email, password, **extra_fields)
+        return self._create_user(email, username, password, **extra_fields)
 
 
 # ─── Core User Model ──────────────────────────────────────────────────────────
@@ -116,8 +88,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     # ── Identity ──────────────────────────────────────────────────────────────
     email      = models.EmailField(_('email address'), unique=True, db_index=True)
     username   = models.CharField(
-        _('username'), max_length=150, unique=True, blank=True, null=True,
-        help_text=_('Optional. Used as an alternative login identifier for officers.'),
+        _('username'), max_length=150, unique=True, db_index=True,
     )
     mobile     = models.CharField(_('mobile number'), max_length=15, blank=True, default='')
     first_name = models.CharField(_('first name'), max_length=150, blank=True)
@@ -174,8 +145,8 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     objects = UserManager()
 
-    USERNAME_FIELD  = 'email'
-    REQUIRED_FIELDS = ['first_name', 'last_name']
+    USERNAME_FIELD  = 'username'
+    REQUIRED_FIELDS = ['email', 'first_name', 'last_name']
 
     class Meta:
         verbose_name        = _('User')
@@ -194,7 +165,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         return name or self.email
 
     def get_short_name(self):
-        return self.first_name or self.email.split('@')[0]
+        return self.first_name or self.username
 
     # ── Convenience role checks ───────────────────────────────────────────────
     @property
@@ -406,6 +377,7 @@ class UserLoginLog(models.Model):
         verbose_name=_('user'),
         help_text=_('Null if the login attempt could not be associated with a user.'),
     )
+    username_attempted = models.CharField(_('username attempted'), max_length=150, blank=True)
     email_attempted = models.EmailField(_('email attempted'), blank=True)
     method      = models.CharField(_('method'), max_length=10, choices=LoginMethod.choices)
     status      = models.CharField(_('status'), max_length=10, choices=LoginStatus.choices)
@@ -422,7 +394,7 @@ class UserLoginLog(models.Model):
         default_permissions = ('view',)
 
     def __str__(self):
-        return f'[{self.status}] {self.email_attempted} via {self.method} @ {self.timestamp}'
+        return f'[{self.status}] {self.username_attempted} via {self.method} @ {self.timestamp}'
 
 
 class UserOrganisationalScope(models.Model):

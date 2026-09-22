@@ -1,18 +1,5 @@
 """
 users/auth_backends.py
-========================
-Django authentication backends for TL_portal.
-
-Two backends are defined here:
-  1. LocalAuthBackend    — active, validates against local User table
-  2. CentralSSOBackend   — stub; delegates to CentralPortalService when enabled
-
-AUTHENTICATION_BACKENDS in settings.py controls which are active.
-Adding or removing a backend here is the only change needed to switch
-authentication providers for the entire application.
-
-Design rule: business views and APIs only ever touch request.user.
-They must never import or call anything from this file directly.
 """
 
 import logging
@@ -34,7 +21,7 @@ class _BaseAuthBackend:
         except User.DoesNotExist:
             return None
 
-    def _log_login(self, user, method, status, request, notes=''):
+    def _log_login(self, user, method, status, request, login_id='', notes=''):
         """Write an immutable UserLoginLog record. Never raises."""
         try:
             from users.models import UserLoginLog
@@ -42,6 +29,7 @@ class _BaseAuthBackend:
             ua = request.META.get('HTTP_USER_AGENT', '') if request else ''
             UserLoginLog.objects.create(
                 user=user if status == 'SUCCESS' else None,
+                username_attempted=login_id,
                 email_attempted=getattr(user, 'email', ''),
                 method=method,
                 status=status,
@@ -64,72 +52,47 @@ class _BaseAuthBackend:
 
 class LocalAuthBackend(_BaseAuthBackend):
     """
-    MODE 1 — Local login against the TL_portal User table.
-
-    Accepts any of: email, username, or mobile as the login identifier.
-    Password is validated with user.check_password().
-
+    Authenticates against the local User table using username + password.
     Called by django.contrib.auth.authenticate(request, username=..., password=...).
-    Django's built-in LoginView passes the form field as `username`; this
-    backend treats that value as an email first, then username, then mobile.
     """
 
-    def authenticate(self, request, username=None, email=None, password=None, **kwargs):
-        if password is None:
+    def authenticate(self, request, username=None, password=None, **kwargs):
+        if not username or password is None:
             return None
 
-        login_id = email or username
-        if not login_id:
-            return None
-
-        user = self._find_user(login_id)
-
-        if user is None:
-            logger.debug('LocalAuthBackend: no user for identifier=%s', login_id)
+        try:
+            user = User.objects.get(username__iexact=username)
+        except User.DoesNotExist:
+            logger.debug('LocalAuthBackend: no user for username=%s', username)
             self._log_login(
                 user=None, method='LOCAL', status='FAILURE',
-                request=request, notes=f'No user: {login_id}',
+                request=request, login_id=username,
+                notes=f'No user: {username}',
             )
             return None
 
         if not user.check_password(password):
-            logger.debug('LocalAuthBackend: wrong password for %s', user.email)
+            logger.debug('LocalAuthBackend: wrong password for %s', user.username)
             self._log_login(
                 user=user, method='LOCAL', status='FAILURE',
-                request=request, notes='Incorrect password',
+                request=request, login_id=username,
+                notes='Incorrect password',
             )
             return None
 
         if not user.is_active:
-            logger.warning('LocalAuthBackend: inactive user %s', user.email)
+            logger.warning('LocalAuthBackend: inactive user %s', user.username)
             self._log_login(
                 user=user, method='LOCAL', status='LOCKED',
-                request=request, notes='Account inactive',
+                request=request, login_id=username,
+                notes='Account inactive',
             )
             return None
 
-        logger.info('LocalAuthBackend: login OK for %s', user.email)
-        self._log_login(user=user, method='LOCAL', status='SUCCESS', request=request)
+        logger.info('LocalAuthBackend: login OK for %s', user.username)
+        self._log_login(user=user, method='LOCAL', status='SUCCESS',
+                        request=request, login_id=username)
         return user
-
-    @staticmethod
-    def _find_user(login_id: str):
-        """Try email → username → mobile. Returns User or None."""
-        try:
-            return User.objects.get(email__iexact=login_id)
-        except User.DoesNotExist:
-            pass
-        try:
-            return User.objects.get(username__iexact=login_id)
-        except User.DoesNotExist:
-            pass
-        stripped = login_id.lstrip('+')
-        if stripped.isdigit():
-            try:
-                return User.objects.get(mobile=login_id)
-            except User.DoesNotExist:
-                pass
-        return None
 
 
 # ─── Backend 2: Central Portal SSO ───────────────────────────────────────────
@@ -182,17 +145,19 @@ class CentralSSOBackend(_BaseAuthBackend):
             logger.error('CentralSSOBackend.authenticate failed: %s', exc)
             self._log_login(
                 user=None, method='SSO', status='FAILURE',
-                request=request, notes=str(exc),
+                request=request, login_id='', notes=str(exc),
             )
             return None
 
         if not user or not user.is_active:
             self._log_login(
                 user=user, method='SSO', status='LOCKED',
-                request=request, notes='Account inactive after SSO',
+                request=request, login_id=getattr(user, 'username', ''),
+                notes='Account inactive after SSO',
             )
             return None
 
         logger.info('CentralSSOBackend: SSO login OK for %s', user.email)
-        self._log_login(user=user, method='SSO', status='SUCCESS', request=request)
+        self._log_login(user=user, method='SSO', status='SUCCESS',
+                        request=request, login_id=getattr(user, 'username', ''))
         return user

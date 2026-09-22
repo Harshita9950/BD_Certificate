@@ -1,0 +1,47 @@
+{% extends 'Authority/base.html' %}
+{% load static %}
+
+{% block title %}TLMS Panel{% endblock %}
+
+{% block content %}
+<main class="content">
+    <!-- Breadcrumb -->
+    <section class="page-inner d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-3">
+        <div class="page-heading">
+            <h1 class="page-title">Dashboard | Trade License Management System</h1>
+        </div>
+    </section>
+
+    <!-- Application Cards -->
+    <section class="mb-4" aria-labelledby="applicationsTitle">
+        <div class="row g-3">
+            <div class="col-12 col-sm-12 col-md-12 col-xl-12">
+                <div class="main-card h-100">
+                    <div class="app-card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 id="applicationsTitle" class="mb-0 fw-semibold">
+                                Quick Access
+                            </h5>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-xl-2 col-lg-3 col-md-3 col-sm-4 col-6">
+                                <a href="{% url 'ulbs' %}" class="application-card text-decoration-none">
+                                    <div class="application-logo app-icon-blue">
+                                        <svg viewBox="0 0 24 24" fill="currentColor">
+                                            <path
+                                                d="M21 21H3C2.44772 21 2 20.5523 2 20V12.4868C2 12.1978 2.12501 11.9229 2.34282 11.733L6 8.54435V4C6 3.44772 6.44772 3 7 3H21C21.5523 3 22 3.44772 22 4V20C22 20.5523 21.5523 21 21 21ZM9 19H12V12.9416L8 9.45402L4 12.9416V19H7V15H9V19ZM14 19H20V5H8V7.12729C8.23444 7.12729 8.46888 7.20938 8.65718 7.37355L13.6572 11.733C13.875 11.9229 14 12.1978 14 12.4868V19ZM16 11H18V13H16V11ZM16 15H18V17H16V15ZM16 7H18V9H16V7ZM12 7H14V9H12V7Z">
+                                            </path>
+                                        </svg>
+                                    </div>
+                                    <span class="application-name">ULBs</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+</main>
+{% endblock %}

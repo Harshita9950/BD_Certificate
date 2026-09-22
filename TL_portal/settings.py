@@ -62,12 +62,12 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',                      # Before CommonMiddleware
     'django.contrib.sessions.middleware.SessionMiddleware',       # Loads session
-    'core.authentication.middleware.TLPortalAuthMiddleware',      # Attaches auth_context
     'core.authentication.middleware.SessionValidationMiddleware', # Flushes bad sessions
     'core.authentication.middleware.ApplicationAccessMiddleware', # CP app-access gate
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',                  # CSRF — do NOT remove
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',    # Sets request.user
+    'core.authentication.middleware.TLPortalAuthMiddleware',      # Attaches auth_context (needs request.user)
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -136,9 +136,9 @@ SESSION_COOKIE_NAME         = os.getenv('SESSION_COOKIE_NAME',    'tl_sessionid'
 SESSION_COOKIE_HTTPONLY     = True
 SESSION_COOKIE_SAMESITE     = os.getenv('SESSION_COOKIE_SAMESITE', 'Lax')
 SESSION_COOKIE_SECURE       = os.getenv('SESSION_COOKIE_SECURE',   'False') == 'True'
-SESSION_COOKIE_AGE          = int(os.getenv('SESSION_COOKIE_AGE',  str(60 * 60 * 8)))
+SESSION_COOKIE_AGE          = int(os.getenv('SESSION_COOKIE_AGE',  str(60 * 15)))
 SESSION_EXPIRE_AT_BROWSER_CLOSE = os.getenv('SESSION_EXPIRE_AT_BROWSER_CLOSE', 'False') == 'True'
-SESSION_SAVE_EVERY_REQUEST  = False
+SESSION_SAVE_EVERY_REQUEST  = True
 
 
 # ─── CSRF ────────────────────────────────────────────────────────────────────

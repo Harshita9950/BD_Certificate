@@ -81,7 +81,6 @@
 
         const loginBtn = document.getElementById("loginBtn");
         const errorDiv = document.getElementById("loginError");
-        const email = document.getElementById("username").value.trim();
         const password = document.getElementById("password").value;
         const csrfToken = document.cookie
             .split("; ")
@@ -100,7 +99,7 @@
                     "Content-Type": "application/json",
                     "X-CSRFToken": csrfToken,
                 },
-                body: JSON.stringify({ email, password }),
+                body: JSON.stringify({ username: document.getElementById("username").value.trim(), password }),
             });
             const data = await res.json();
 

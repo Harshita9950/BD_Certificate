@@ -19,7 +19,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model  = User
-        fields = ('id', 'email', 'first_name', 'last_name', 'mobile',
+        fields = ('id', 'email', 'username', 'first_name', 'last_name', 'mobile',
                   'password', 'password2')
         read_only_fields = ('id',)
 
@@ -40,11 +40,11 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model  = User
-        fields = ('id', 'email', 'first_name', 'last_name', 'mobile',
+        fields = ('id', 'email', 'username', 'first_name', 'last_name', 'mobile',
                   'role', 'ulb_code', 'department', 'zone', 'ward',
                   'is_verified', 'date_joined', 'full_name')
-        read_only_fields = ('id', 'email', 'role', 'ulb_code', 'is_verified',
-                            'date_joined', 'full_name')
+        read_only_fields = ('id', 'email', 'username', 'role', 'ulb_code',
+                            'is_verified', 'date_joined', 'full_name')
 
 
 class UserListSerializer(serializers.ModelSerializer):

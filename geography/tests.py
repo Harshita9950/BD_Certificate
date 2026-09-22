@@ -27,8 +27,8 @@ def make_ward(zone, code='W01', name='Test Ward'):
 
 def make_user(email, role=UserRole.OFFICER, ulb_code='U01'):
     return User.objects.create_user(
-        email=email, password='Pass123!',
-        first_name='Test', last_name='User',
+        email=email, username=email.split('@')[0].lower(),
+        password='Pass123!', first_name='Test', last_name='User',
         role=role, ulb_code=ulb_code,
     )
 
