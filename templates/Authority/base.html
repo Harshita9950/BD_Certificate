@@ -120,12 +120,83 @@
                         </svg>
                         <span class="sidebar-label">Dashboard</span>
                     </a>
+                    <button type="button" class="sidebar-link" data-bs-toggle="collapse" data-bs-target="#masters"
+                        aria-expanded="false">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M21 21H3C2.44772 21 2 20.5523 2 20V12.4868C2 12.1978 2.12501 11.9229 2.34282 11.733L6 8.54435V4C6 3.44772 6.44772 3 7 3H21C21.5523 3 22 3.44772 22 4V20C22 20.5523 21.5523 21 21 21ZM9 19H12V12.9416L8 9.45402L4 12.9416V19H7V15H9V19ZM14 19H20V5H8V7.12729C8.23444 7.12729 8.46888 7.20938 8.65718 7.37355L13.6572 11.733C13.875 11.9229 14 12.1978 14 12.4868V19ZM16 11H18V13H16V11ZM16 15H18V17H16V15ZM16 7H18V9H16V7ZM12 7H14V9H12V7Z" />
+                        </svg>
+                        <span class="sidebar-label">Masters</span>
+                        <svg class="sidebar-toggle-arrow" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M11.9999 13.1714L16.9497 8.22168L18.3639 9.63589L11.9999 15.9999L5.63599 9.63589L7.0502 8.22168L11.9999 13.1714Z" />
+                        </svg>
+                    </button>
+                    <div class="collapse" id="masters">
+                        <div class="submenu">
+                            <a href="{% url 'users' %}" class="sidebar-link">
+                                <svg viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 13H4V11H12V4L20 12L12 20V13Z" />
+                                </svg>
+                                <span class="sidebar-label">User Master</span>
+                            </a>
+                            <a href="#" class="sidebar-link">
+                                <svg viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 13H4V11H12V4L20 12L12 20V13Z" />
+                                </svg>
+                                <span class="sidebar-label">Role Master</span>
+                            </a>
+                            <a href="{% url 'district_master' %}" class="sidebar-link">
+                                <svg viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 13H4V11H12V4L20 12L12 20V13Z" />
+                                </svg>
+                                <span class="sidebar-label">District Master</span>
+                            </a>
+                            <a href="{% url 'ulbs' %}" class="sidebar-link">
+                                <svg viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 13H4V11H12V4L20 12L12 20V13Z" />
+                                </svg>
+                                <span class="sidebar-label">ULB Master</span>
+                            </a>
+                            <a href="{% url 'zones' %}" class="sidebar-link">
+                                <svg viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 13H4V11H12V4L20 12L12 20V13Z" />
+                                </svg>
+                                <span class="sidebar-label">Zone Master</span>
+                            </a>
+                            <a href="{% url 'wards' %}" class="sidebar-link">
+                                <svg viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 13H4V11H12V4L20 12L12 20V13Z" />
+                                </svg>
+                                <span class="sidebar-label">Ward Master</span>
+                            </a>
+                            <a href="#" class="sidebar-link">
+                                <svg viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 13H4V11H12V4L20 12L12 20V13Z" />
+                                </svg>
+                                <span class="sidebar-label">Trade Category Master</span>
+                            </a>
+                            <a href="#" class="sidebar-link">
+                                <svg viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 13H4V11H12V4L20 12L12 20V13Z" />
+                                </svg>
+                                <span class="sidebar-label">Sub-Category Master</span>
+                            </a>
+                            <a href="#" class="sidebar-link">
+                                <svg viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 13H4V11H12V4L20 12L12 20V13Z" />
+                                </svg>
+                                <span class="sidebar-label">Document Master</span>
+                            </a>
+                        </div>
+                    </div>
 
                     <a href="{% url 'ulbs' %}" class="sidebar-link">
                         <svg viewBox="0 0 24 24" fill="currentColor">
                             <path
                                 d="M21 21H3C2.44772 21 2 20.5523 2 20V12.4868C2 12.1978 2.12501 11.9229 2.34282 11.733L6 8.54435V4C6 3.44772 6.44772 3 7 3H21C21.5523 3 22 3.44772 22 4V20C22 20.5523 21.5523 21 21 21ZM9 19H12V12.9416L8 9.45402L4 12.9416V19H7V15H9V19ZM14 19H20V5H8V7.12729C8.23444 7.12729 8.46888 7.20938 8.65718 7.37355L13.6572 11.733C13.875 11.9229 14 12.1978 14 12.4868V19ZM16 11H18V13H16V11ZM16 15H18V17H16V15ZM16 7H18V9H16V7ZM12 7H14V9H12V7Z" />
                         </svg>
+                        
                         <span class="sidebar-label">ULBs</span>
                     </a>
 

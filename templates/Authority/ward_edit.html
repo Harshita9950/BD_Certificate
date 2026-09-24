@@ -1,0 +1,270 @@
+{% extends 'Authority/base.html' %}
+{% load static %}
+
+{% block title %}TLMS Panel{% endblock %}
+
+{% block content %}
+<main class="content">
+    <section class="page-inner d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-3">
+        <div class="page-heading">
+            <h1 class="page-title">Edit Ward</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}">Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'wards' %}">Ward Master</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        Edit Ward
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </section>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-header">
+            <h4 class="card-title mb-0">Edit Ward</h4>
+        </div>
+
+        <div class="card-body">
+            <form id="wardEditForm">
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label for="wardCode" class="form-label">
+                            Ward Code
+                        </label>
+
+                        <input
+                            type="text"
+                            id="wardCode"
+                            class="form-control"
+                            required
+                        >
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="wardName" class="form-label">
+                            Ward Name
+                        </label>
+
+                        <input
+                            type="text"
+                            id="wardName"
+                            class="form-control"
+                            required
+                        >
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="zone" class="form-label">
+                            Zone
+                        </label>
+
+                        <select
+                            id="zone"
+                            class="form-select"
+                            required
+                        >
+                            <option value="">Select Zone</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label d-block">
+                            Status
+                        </label>
+
+                        <div class="form-check form-check-inline">
+                            <input
+                                class="form-check-input"
+                                type="radio"
+                                name="status"
+                                id="statusActive"
+                                value="true"
+                            >
+
+                            <label
+                                class="form-check-label"
+                                for="statusActive"
+                            >
+                                Active
+                            </label>
+                        </div>
+
+                        <div class="form-check form-check-inline">
+                            <input
+                                class="form-check-input"
+                                type="radio"
+                                name="status"
+                                id="statusInactive"
+                                value="false"
+                            >
+
+                            <label
+                                class="form-check-label"
+                                for="statusInactive"
+                            >
+                                Inactive
+                            </label>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="mt-4">
+                    <button
+                        type="submit"
+                        id="saveBtn"
+                        class="btn btn-primary"
+                    >
+                        Update
+                    </button>
+
+                    <a
+                        href="{% url 'wards' %}"
+                        class="btn btn-secondary ms-2"
+                    >
+                        Cancel
+                    </a>
+                </div>
+
+                <div
+                    id="errorMessage"
+                    class="alert alert-danger mt-3 d-none"
+                ></div>
+            </form>
+        </div>
+    </div>
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script type="module">
+    import api from "{% static 'js/api.js' %}";
+
+    document.addEventListener("DOMContentLoaded", async () => {
+        const pathParts =
+            window.location.pathname
+                .split("/")
+                .filter(Boolean);
+
+        const wardId =
+            pathParts[pathParts.length - 1];
+
+        const zoneSelect =
+            document.getElementById("zone");
+
+        const errorMessage =
+            document.getElementById("errorMessage");
+
+        const saveBtn =
+            document.getElementById("saveBtn");
+
+        async function loadZones() {
+            const response =
+                await api.get("/api/geography/zones/");
+
+            zoneSelect.innerHTML =
+                '<option value="">Select Zone</option>';
+
+            response.results.forEach(zone => {
+                const option =
+                    document.createElement("option");
+
+                option.value = zone.id;
+                option.textContent =
+                    `${zone.code} - ${zone.name}`;
+
+                zoneSelect.appendChild(option);
+            });
+        }
+
+        try {
+            const [ward] =
+                await Promise.all([
+                    api.get(
+                        `/api/geography/wards/${wardId}/`
+                    ),
+                    loadZones()
+                ]);
+
+            document.getElementById("wardCode").value =
+                ward.code || "";
+
+            document.getElementById("wardName").value =
+                ward.name || "";
+
+            zoneSelect.value =
+                ward.zone || "";
+
+            document.getElementById("statusActive").checked =
+                Boolean(ward.is_active);
+
+            document.getElementById("statusInactive").checked =
+                !ward.is_active;
+
+        } catch (error) {
+            errorMessage.textContent =
+                error.detail ||
+                "Unable to load ward details.";
+
+            errorMessage.classList.remove("d-none");
+        }
+
+        document
+            .getElementById("wardEditForm")
+            .addEventListener("submit", async (event) => {
+                event.preventDefault();
+
+                errorMessage.classList.add("d-none");
+                saveBtn.disabled = true;
+
+                const payload = {
+                    code:
+                        document
+                            .getElementById("wardCode")
+                            .value
+                            .trim(),
+
+                    name:
+                        document
+                            .getElementById("wardName")
+                            .value
+                            .trim(),
+
+                    zone:
+                        Number(zoneSelect.value),
+
+                    is_active:
+                        document
+                            .querySelector(
+                                'input[name="status"]:checked'
+                            )
+                            .value === "true"
+                };
+
+                try {
+                    await api.patch(
+                        `/api/geography/wards/${wardId}/`,
+                        payload
+                    );
+
+                    window.location.href =
+                        "{% url 'wards' %}";
+
+                } catch (error) {
+                    errorMessage.textContent =
+                        error.detail ||
+                        "Unable to update ward.";
+
+                    errorMessage.classList.remove("d-none");
+                    saveBtn.disabled = false;
+                }
+            });
+    });
+</script>
+{% endblock %}

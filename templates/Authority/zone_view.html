@@ -1,0 +1,184 @@
+{% extends 'Authority/base.html' %}
+{% load static %}
+
+{% block title %}TLMS Panel{% endblock %}
+
+{% block content %}
+<main class="content">
+    <section class="page-inner d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-3">
+        <div class="page-heading">
+            <h1 class="page-title">View Zone</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}">Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'zones' %}">Zone Master</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        View Zone
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </section>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-header">
+            <h4 class="card-title mb-0">Zone Details</h4>
+        </div>
+
+        <div class="card-body">
+            <form id="zoneViewForm">
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label for="zoneCode" class="form-label">
+                            Zone Code
+                        </label>
+
+                        <input
+                            type="text"
+                            id="zoneCode"
+                            class="form-control"
+                            readonly
+                        >
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="zoneName" class="form-label">
+                            Zone Name
+                        </label>
+
+                        <input
+                            type="text"
+                            id="zoneName"
+                            class="form-control"
+                            readonly
+                        >
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="ulb" class="form-label">
+                            ULB
+                        </label>
+
+                        <input
+                            type="text"
+                            id="ulb"
+                            class="form-control"
+                            readonly
+                        >
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label d-block">
+                            Status
+                        </label>
+
+                        <div class="form-check form-check-inline">
+                            <input
+                                class="form-check-input"
+                                type="radio"
+                                id="statusActive"
+                                disabled
+                            >
+
+                            <label
+                                class="form-check-label"
+                                for="statusActive"
+                            >
+                                Active
+                            </label>
+                        </div>
+
+                        <div class="form-check form-check-inline">
+                            <input
+                                class="form-check-input"
+                                type="radio"
+                                id="statusInactive"
+                                disabled
+                            >
+
+                            <label
+                                class="form-check-label"
+                                for="statusInactive"
+                            >
+                                Inactive
+                            </label>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="mt-4">
+                    <a
+                        href="{% url 'zones' %}"
+                        class="btn btn-secondary"
+                    >
+                        Back
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script type="module">
+    import api from "{% static 'js/api.js' %}";
+
+    document.addEventListener("DOMContentLoaded", async () => {
+        const pathParts =
+            window.location.pathname
+                .split("/")
+                .filter(Boolean);
+
+        const zoneId =
+            pathParts[pathParts.length - 1];
+
+        try {
+            const zone =
+                await api.get(
+                    `/api/geography/zones/${zoneId}/`
+                );
+
+            document.getElementById("zoneCode").value =
+                zone.code || "";
+
+            document.getElementById("zoneName").value =
+                zone.name || "";
+
+            document.getElementById("ulb").value =
+                zone.ulb_name || "";
+
+            document.getElementById("statusActive").checked =
+                Boolean(zone.is_active);
+
+            document.getElementById("statusInactive").checked =
+                !zone.is_active;
+
+        } catch (error) {
+            const message =
+                document.createElement("div");
+
+            message.className =
+                "alert alert-danger mt-3";
+
+            message.textContent =
+                error.detail ||
+                "Unable to load zone details.";
+
+            const form =
+                document.getElementById("zoneViewForm");
+
+            form.parentElement.insertBefore(
+                message,
+                form
+            );
+        }
+    });
+</script>
+{% endblock %}

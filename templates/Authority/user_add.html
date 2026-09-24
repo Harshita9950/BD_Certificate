@@ -1,0 +1,708 @@
+{% extends 'Authority/base.html' %}
+{% load static %}
+
+{% block title %}TLMS Panel{% endblock %}
+
+{% block content %}
+<main class="content">
+    <section class="page-inner d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-3">
+        <div class="page-heading">
+            <h1 class="page-title">Add User</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}">Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'users' %}">User Master</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        Add User
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </section>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-header">
+            <h4 class="card-title mb-0">User Details</h4>
+        </div>
+
+        <div class="card-body">
+            <form id="userAddForm">
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label for="username" class="form-label">
+                            Login ID / Username
+                        </label>
+
+                        <input
+                            type="text"
+                            id="username"
+                            class="form-control"
+                            required
+                        >
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="role" class="form-label">
+                            Role
+                        </label>
+
+                        <select
+                            id="role"
+                            class="form-select"
+                            required
+                        >
+                            <option value="">Select Role</option>
+                            <option value="DA">DA</option>
+                            <option value="HEALTH_OFFICER">Health Officer</option>
+                            <option value="CHO">CHO</option>
+                            <option value="ACCOUNTANT">Accountant</option>
+                            <option value="RI">RI</option>
+                            <option value="ZONE_OFFICER">Zone Officer</option>
+                            <option value="OFFICER">Officer</option>
+                            <option value="COMMISSIONER">Commissioner</option>
+                            <option value="AUDITOR">Auditor</option>
+                            <option value="ADMIN">Admin</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="firstName" class="form-label">
+                            First Name
+                        </label>
+
+                        <input
+                            type="text"
+                            id="firstName"
+                            class="form-control"
+                            required
+                        >
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="lastName" class="form-label">
+                            Last Name
+                        </label>
+
+                        <input
+                            type="text"
+                            id="lastName"
+                            class="form-control"
+                            required
+                        >
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="email" class="form-label">
+                            Email
+                        </label>
+
+                        <input
+                            type="email"
+                            id="email"
+                            class="form-control"
+                            required
+                        >
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="mobile" class="form-label">
+                            Mobile
+                        </label>
+
+                        <input
+                            type="text"
+                            id="mobile"
+                            class="form-control"
+                        >
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="district" class="form-label">
+                            District
+                        </label>
+
+                        <select
+                            id="district"
+                            class="form-select"
+                            required
+                        >
+                            <option value="">Select District</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="ulb" class="form-label">
+                            ULB
+                        </label>
+
+                        <select
+                            id="ulb"
+                            class="form-select"
+                            required
+                            disabled
+                        >
+                            <option value="">Select ULB</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="zone" class="form-label">
+                            Zone
+                        </label>
+
+                        <select
+                            id="zone"
+                            class="form-select"
+                            required
+                            disabled
+                        >
+                            <option value="">Select Zone</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="ward" class="form-label">
+                            Ward
+                        </label>
+
+                        <select
+                            id="ward"
+                            class="form-select"
+                            required
+                            disabled
+                        >
+                            <option value="">Select Ward</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="password" class="form-label">
+                            Password
+                        </label>
+
+                        <input
+                            type="password"
+                            id="password"
+                            class="form-control"
+                            required
+                        >
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="password2" class="form-label">
+                            Confirm Password
+                        </label>
+
+                        <input
+                            type="password"
+                            id="password2"
+                            class="form-control"
+                            required
+                        >
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label d-block">
+                            Status
+                        </label>
+
+                        <div class="form-check form-check-inline">
+                            <input
+                                class="form-check-input"
+                                type="radio"
+                                name="status"
+                                id="statusActive"
+                                value="true"
+                                checked
+                            >
+
+                            <label
+                                class="form-check-label"
+                                for="statusActive"
+                            >
+                                Active
+                            </label>
+                        </div>
+
+                        <div class="form-check form-check-inline">
+                            <input
+                                class="form-check-input"
+                                type="radio"
+                                name="status"
+                                id="statusInactive"
+                                value="false"
+                            >
+
+                            <label
+                                class="form-check-label"
+                                for="statusInactive"
+                            >
+                                Inactive
+                            </label>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="mt-4">
+                    <a
+                        href="{% url 'users' %}"
+                        class="btn btn-secondary"
+                    >
+                        Back
+                    </a>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+                        Save
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script type="module">
+    import api from "{% static 'js/api.js' %}";
+
+    document.addEventListener("DOMContentLoaded", async () => {
+
+        const districtSelect =
+            document.getElementById("district");
+
+        const ulbSelect =
+            document.getElementById("ulb");
+
+        const zoneSelect =
+            document.getElementById("zone");
+
+        const wardSelect =
+            document.getElementById("ward");
+
+        let districts = [];
+        let ulbs = [];
+        let zones = [];
+        let wards = [];
+
+
+        function resetSelect(select, placeholder) {
+            select.innerHTML =
+                `<option value="">${placeholder}</option>`;
+
+            select.value = "";
+            select.disabled = true;
+        }
+
+
+        function populateSelect(
+            select,
+            items,
+            placeholder
+        ) {
+            select.innerHTML =
+                `<option value="">${placeholder}</option>`;
+
+            items.forEach(item => {
+
+                const option =
+                    document.createElement("option");
+
+                option.value = item.id;
+
+                option.textContent =
+                    `${item.code} - ${item.name}`;
+
+                select.appendChild(option);
+            });
+
+            select.disabled =
+                items.length === 0;
+        }
+
+
+        async function loadGeography() {
+
+            try {
+
+                const [
+                    districtResponse,
+                    ulbResponse,
+                    zoneResponse,
+                    wardResponse
+                ] = await Promise.all([
+
+                    api.get(
+                        "/api/geography/districts/?is_active=true"
+                    ),
+
+                    api.get(
+                        "/api/geography/ulbs/?is_active=true"
+                    ),
+
+                    api.get(
+                        "/api/geography/zones/?is_active=true"
+                    ),
+
+                    api.get(
+                        "/api/geography/wards/?is_active=true"
+                    )
+                ]);
+
+
+                districts =
+                    districtResponse.results ||
+                    districtResponse;
+
+                ulbs =
+                    ulbResponse.results ||
+                    ulbResponse;
+
+                zones =
+                    zoneResponse.results ||
+                    zoneResponse;
+
+                wards =
+                    wardResponse.results ||
+                    wardResponse;
+
+
+                populateSelect(
+                    districtSelect,
+                    districts,
+                    "Select District"
+                );
+
+
+                resetSelect(
+                    ulbSelect,
+                    "Select ULB"
+                );
+
+                resetSelect(
+                    zoneSelect,
+                    "Select Zone"
+                );
+
+                resetSelect(
+                    wardSelect,
+                    "Select Ward"
+                );
+
+
+                console.log(
+                    "Districts:",
+                    districts
+                );
+
+                console.log(
+                    "ULBs:",
+                    ulbs
+                );
+
+                console.log(
+                    "Zones:",
+                    zones
+                );
+
+                console.log(
+                    "Wards:",
+                    wards
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "Unable to load geography:",
+                    error
+                );
+            }
+        }
+
+
+        districtSelect.addEventListener(
+            "change",
+            () => {
+
+                const districtId =
+                    Number(
+                        districtSelect.value
+                    );
+
+
+                resetSelect(
+                    ulbSelect,
+                    "Select ULB"
+                );
+
+                resetSelect(
+                    zoneSelect,
+                    "Select Zone"
+                );
+
+                resetSelect(
+                    wardSelect,
+                    "Select Ward"
+                );
+
+
+                if (!districtId) {
+                    return;
+                }
+
+
+                const districtUlbs =
+                    ulbs.filter(
+                        ulb =>
+                            Number(ulb.district) ===
+                            districtId
+                    );
+
+
+                console.log(
+                    "Selected District:",
+                    districtId
+                );
+
+                console.log(
+                    "ULBs for District:",
+                    districtUlbs
+                );
+
+
+                populateSelect(
+                    ulbSelect,
+                    districtUlbs,
+                    "Select ULB"
+                );
+            }
+        );
+
+
+        ulbSelect.addEventListener(
+            "change",
+            () => {
+
+                const ulbId =
+                    Number(
+                        ulbSelect.value
+                    );
+
+
+                resetSelect(
+                    zoneSelect,
+                    "Select Zone"
+                );
+
+                resetSelect(
+                    wardSelect,
+                    "Select Ward"
+                );
+
+
+                if (!ulbId) {
+                    return;
+                }
+
+
+                const ulbZones =
+                    zones.filter(
+                        zone =>
+                            Number(zone.ulb) ===
+                            ulbId
+                    );
+
+
+                console.log(
+                    "Selected ULB:",
+                    ulbId
+                );
+
+                console.log(
+                    "Zones for ULB:",
+                    ulbZones
+                );
+
+
+                populateSelect(
+                    zoneSelect,
+                    ulbZones,
+                    "Select Zone"
+                );
+            }
+        );
+
+
+        zoneSelect.addEventListener(
+            "change",
+            () => {
+
+                const zoneId =
+                    Number(
+                        zoneSelect.value
+                    );
+
+
+                resetSelect(
+                    wardSelect,
+                    "Select Ward"
+                );
+
+
+                if (!zoneId) {
+                    return;
+                }
+
+
+                const zoneWards =
+                    wards.filter(
+                        ward =>
+                            Number(ward.zone) ===
+                            zoneId
+                    );
+
+
+                console.log(
+                    "Selected Zone:",
+                    zoneId
+                );
+
+                console.log(
+                    "Wards for Zone:",
+                    zoneWards
+                );
+
+
+                populateSelect(
+                    wardSelect,
+                    zoneWards,
+                    "Select Ward"
+                );
+            }
+        );
+
+
+       const userAddForm =
+    document.getElementById("userAddForm");
+
+userAddForm.addEventListener(
+    "submit",
+    async event => {
+
+        event.preventDefault();
+
+        const saveButton =
+            userAddForm.querySelector(
+                'button[type="submit"]'
+            );
+
+        saveButton.disabled = true;
+        saveButton.textContent = "Saving...";
+
+        const payload = {
+            username:
+                document.getElementById("username").value.trim(),
+
+            first_name:
+                document.getElementById("firstName").value.trim(),
+
+            last_name:
+                document.getElementById("lastName").value.trim(),
+
+            email:
+                document.getElementById("email").value.trim(),
+
+            mobile:
+                document.getElementById("mobile").value.trim(),
+
+            role:
+                document.getElementById("role").value,
+
+            ulb_fk:
+                document.getElementById("ulb").value,
+
+            zone_fk:
+                document.getElementById("zone").value,
+
+            ward_fk:
+                document.getElementById("ward").value,
+
+            password:
+                document.getElementById("password").value,
+
+            password2:
+                document.getElementById("password2").value,
+
+            is_active:
+                document.getElementById("statusActive").checked
+        };
+
+
+        try {
+
+            await api.post(
+                "/api/users/management/",
+                payload
+            );
+
+
+            alert(
+                "User created successfully."
+            );
+
+            window.location.href =
+                "{% url 'users' %}";
+
+
+        } catch (error) {
+
+            console.error(
+                "User creation failed:",
+                error
+            );
+
+
+            let message =
+                error.detail ||
+                "Unable to create user.";
+
+
+            if (
+                typeof message === "object"
+            ) {
+                message =
+                    Object.entries(message)
+                        .map(
+                            ([field, errors]) =>
+                                `${field}: ${
+                                    Array.isArray(errors)
+                                        ? errors.join(", ")
+                                        : errors
+                                }`
+                        )
+                        .join("\n");
+            }
+
+
+            alert(message);
+
+            saveButton.disabled = false;
+            saveButton.textContent = "Save";
+        }
+    }
+);
+
+        await loadGeography();
+    });
+</script>
+{% endblock %}

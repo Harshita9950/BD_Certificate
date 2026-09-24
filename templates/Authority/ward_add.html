@@ -1,0 +1,138 @@
+{% extends "Authority/base.html" %}
+{% load static %}
+
+{% block title %}Add Ward{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="mb-1">Add Ward</h4>
+            <p class="text-muted mb-0">Create a new ward</p>
+        </div>
+
+        <a href="{% url 'wards' %}" class="btn btn-light">
+            Back
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+
+            <form id="wardForm">
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label class="form-label">Ward Code</label>
+                        <input
+                            type="text"
+                            id="code"
+                            class="form-control"
+                            required
+                        >
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Ward Name</label>
+                        <input
+                            type="text"
+                            id="name"
+                            class="form-control"
+                            required
+                        >
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Zone</label>
+                        <select id="zone" class="form-select" required>
+                            <option value="">Select Zone</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Status</label>
+                        <select id="is_active" class="form-select">
+                            <option value="true">Active</option>
+                            <option value="false">Inactive</option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" id="saveBtn" class="btn btn-primary">
+                        Save Ward
+                    </button>
+
+                    <a href="{% url 'wards' %}" class="btn btn-light ms-2">
+                        Cancel
+                    </a>
+                </div>
+
+                <div id="errorMessage" class="alert alert-danger mt-3 d-none"></div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script type="module">
+import api from "{% static 'js/api.js' %}";
+
+const zoneSelect = document.getElementById("zone");
+const form = document.getElementById("wardForm");
+const saveBtn = document.getElementById("saveBtn");
+const errorMessage = document.getElementById("errorMessage");
+
+async function loadZones() {
+    try {
+        const response = await api.get("/api/geography/zones/");
+
+        zoneSelect.innerHTML = '<option value="">Select Zone</option>';
+
+        response.results.forEach(zone => {
+            if (zone.is_active) {
+                const option = document.createElement("option");
+                option.value = zone.id;
+                option.textContent = `${zone.code} - ${zone.name}`;
+                zoneSelect.appendChild(option);
+            }
+        });
+    } catch (error) {
+        errorMessage.textContent = error.detail || "Failed to load zones.";
+        errorMessage.classList.remove("d-none");
+    }
+}
+
+form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    errorMessage.classList.add("d-none");
+    saveBtn.disabled = true;
+
+    const payload = {
+        code: document.getElementById("code").value.trim(),
+        name: document.getElementById("name").value.trim(),
+        zone: Number(zoneSelect.value),
+        is_active: document.getElementById("is_active").value === "true"
+    };
+
+    try {
+        await api.post("/api/geography/wards/", payload);
+        window.location.href = "{% url 'wards' %}";
+    } catch (error) {
+        errorMessage.textContent = error.detail || "Failed to create ward.";
+        errorMessage.classList.remove("d-none");
+        saveBtn.disabled = false;
+    }
+});
+
+loadZones();
+</script>
+{% endblock %}

@@ -1,0 +1,853 @@
+{% extends 'Authority/base.html' %}
+{% load static %}
+
+{% block title %}TLMS Panel{% endblock %}
+
+{% block content %}
+<main class="content">
+
+    <section class="page-inner d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-3">
+        <div class="page-heading">
+            <h1 class="page-title">Edit User</h1>
+
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}">
+                            Dashboard
+                        </a>
+                    </li>
+
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'users' %}">
+                            User Master
+                        </a>
+                    </li>
+
+                    <li class="breadcrumb-item">
+                        Edit User
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </section>
+
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header">
+            <h4 class="card-title mb-0">
+                Edit User Details
+            </h4>
+        </div>
+
+
+        <div class="card-body">
+
+            <form id="userEditForm">
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label
+                            for="username"
+                            class="form-label"
+                        >
+                            Login ID
+                        </label>
+
+                        <input
+                            type="text"
+                            id="username"
+                            class="form-control"
+                            readonly
+                        >
+                    </div>
+
+
+                    <div class="col-md-6">
+                        <label
+                            for="role"
+                            class="form-label"
+                        >
+                            Role
+                        </label>
+
+                        <select
+                            id="role"
+                            class="form-select"
+                            required
+                        >
+                            <option value="">
+                                Select Role
+                            </option>
+
+                            <option value="CITIZEN">
+                                Citizen
+                            </option>
+
+                            <option value="DA">
+                                DA
+                            </option>
+
+                            <option value="HEALTH_OFFICER">
+                                Health Officer
+                            </option>
+
+                            <option value="CHO">
+                                CHO
+                            </option>
+
+                            <option value="ACCOUNTANT">
+                                Accountant
+                            </option>
+
+                            <option value="RI">
+                                RI
+                            </option>
+
+                            <option value="ZONE_OFFICER">
+                                Zone Officer
+                            </option>
+
+                            <option value="OFFICER">
+                                Officer
+                            </option>
+
+                            <option value="COMMISSIONER">
+                                Commissioner
+                            </option>
+
+                            <option value="AUDITOR">
+                                Auditor
+                            </option>
+
+                            <option value="ADMIN">
+                                Admin
+                            </option>
+                        </select>
+                    </div>
+
+
+                    <div class="col-md-6">
+                        <label
+                            for="firstName"
+                            class="form-label"
+                        >
+                            First Name
+                        </label>
+
+                        <input
+                            type="text"
+                            id="firstName"
+                            class="form-control"
+                            required
+                        >
+                    </div>
+
+
+                    <div class="col-md-6">
+                        <label
+                            for="lastName"
+                            class="form-label"
+                        >
+                            Last Name
+                        </label>
+
+                        <input
+                            type="text"
+                            id="lastName"
+                            class="form-control"
+                        >
+                    </div>
+
+
+                    <div class="col-md-6">
+                        <label
+                            for="email"
+                            class="form-label"
+                        >
+                            Email
+                        </label>
+
+                        <input
+                            type="email"
+                            id="email"
+                            class="form-control"
+                            required
+                        >
+                    </div>
+
+
+                    <div class="col-md-6">
+                        <label
+                            for="mobile"
+                            class="form-label"
+                        >
+                            Mobile
+                        </label>
+
+                        <input
+                            type="text"
+                            id="mobile"
+                            class="form-control"
+                        >
+                    </div>
+
+
+                    <div class="col-md-6">
+                        <label
+                            for="district"
+                            class="form-label"
+                        >
+                            District
+                        </label>
+
+                        <select
+                            id="district"
+                            class="form-select"
+                            required
+                        >
+                            <option value="">
+                                Select District
+                            </option>
+                        </select>
+                    </div>
+
+
+                    <div class="col-md-6">
+                        <label
+                            for="ulb"
+                            class="form-label"
+                        >
+                            ULB
+                        </label>
+
+                        <select
+                            id="ulb"
+                            class="form-select"
+                            required
+                            disabled
+                        >
+                            <option value="">
+                                Select ULB
+                            </option>
+                        </select>
+                    </div>
+
+
+                    <div class="col-md-6">
+                        <label
+                            for="zone"
+                            class="form-label"
+                        >
+                            Zone
+                        </label>
+
+                        <select
+                            id="zone"
+                            class="form-select"
+                            required
+                            disabled
+                        >
+                            <option value="">
+                                Select Zone
+                            </option>
+                        </select>
+                    </div>
+
+
+                    <div class="col-md-6">
+                        <label
+                            for="ward"
+                            class="form-label"
+                        >
+                            Ward
+                        </label>
+
+                        <select
+                            id="ward"
+                            class="form-select"
+                            required
+                            disabled
+                        >
+                            <option value="">
+                                Select Ward
+                            </option>
+                        </select>
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label class="form-label d-block">
+                            Status
+                        </label>
+
+                        <div class="form-check form-check-inline">
+
+                            <input
+                                class="form-check-input"
+                                type="radio"
+                                name="status"
+                                id="statusActive"
+                                value="true"
+                            >
+
+                            <label
+                                class="form-check-label"
+                                for="statusActive"
+                            >
+                                Active
+                            </label>
+
+                        </div>
+
+
+                        <div class="form-check form-check-inline">
+
+                            <input
+                                class="form-check-input"
+                                type="radio"
+                                name="status"
+                                id="statusInactive"
+                                value="false"
+                            >
+
+                            <label
+                                class="form-check-label"
+                                for="statusInactive"
+                            >
+                                Inactive
+                            </label>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="mt-4">
+
+                    <a
+                        href="{% url 'users' %}"
+                        class="btn btn-secondary"
+                    >
+                        Back
+                    </a>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary ms-2"
+                        id="saveButton"
+                    >
+                        SAVE
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</main>
+{% endblock %}
+
+
+{% block extra_js %}
+<script type="module">
+    import api from "{% static 'js/api.js' %}";
+
+    document.addEventListener("DOMContentLoaded", async () => {
+
+        const districtSelect =
+            document.getElementById("district");
+
+        const ulbSelect =
+            document.getElementById("ulb");
+
+        const zoneSelect =
+            document.getElementById("zone");
+
+        const wardSelect =
+            document.getElementById("ward");
+
+        const roleSelect =
+            document.getElementById("role");
+
+        const form =
+            document.getElementById("userEditForm");
+
+        const saveButton =
+            document.getElementById("saveButton");
+
+        const pathParts =
+            window.location.pathname
+                .split("/")
+                .filter(Boolean);
+
+        const userId =
+            pathParts[pathParts.length - 1];
+
+
+        let districts = [];
+        let ulbs = [];
+        let zones = [];
+        let wards = [];
+
+
+        function resetSelect(
+            select,
+            placeholder
+        ) {
+            select.innerHTML =
+                `<option value="">${placeholder}</option>`;
+
+            select.value = "";
+            select.disabled = true;
+        }
+
+
+        function populateSelect(
+            select,
+            items,
+            placeholder
+        ) {
+            select.innerHTML =
+                `<option value="">${placeholder}</option>`;
+
+            items.forEach(item => {
+
+                const option =
+                    document.createElement("option");
+
+                option.value = item.id;
+
+                option.textContent =
+                    `${item.code} - ${item.name}`;
+
+                select.appendChild(option);
+            });
+
+            select.disabled =
+                items.length === 0;
+        }
+
+
+        async function loadGeography() {
+
+            const [
+                districtResponse,
+                ulbResponse,
+                zoneResponse,
+                wardResponse
+            ] = await Promise.all([
+
+                api.get(
+                    "/api/geography/districts/?is_active=true"
+                ),
+
+                api.get(
+                    "/api/geography/ulbs/?is_active=true"
+                ),
+
+                api.get(
+                    "/api/geography/zones/?is_active=true"
+                ),
+
+                api.get(
+                    "/api/geography/wards/?is_active=true"
+                )
+            ]);
+
+
+            districts =
+                districtResponse.results ||
+                districtResponse;
+
+            ulbs =
+                ulbResponse.results ||
+                ulbResponse;
+
+            zones =
+                zoneResponse.results ||
+                zoneResponse;
+
+            wards =
+                wardResponse.results ||
+                wardResponse;
+
+
+            populateSelect(
+                districtSelect,
+                districts,
+                "Select District"
+            );
+        }
+
+
+        function loadUlbs(
+            districtId,
+            selectedUlbId = null
+        ) {
+
+            const districtUlbs =
+                ulbs.filter(
+                    ulb =>
+                        Number(ulb.district) ===
+                        Number(districtId)
+                );
+
+            populateSelect(
+                ulbSelect,
+                districtUlbs,
+                "Select ULB"
+            );
+
+            if (selectedUlbId) {
+                ulbSelect.value =
+                    String(selectedUlbId);
+            }
+        }
+
+
+        function loadZones(
+            ulbId,
+            selectedZoneId = null
+        ) {
+
+            const ulbZones =
+                zones.filter(
+                    zone =>
+                        Number(zone.ulb) ===
+                        Number(ulbId)
+                );
+
+            populateSelect(
+                zoneSelect,
+                ulbZones,
+                "Select Zone"
+            );
+
+            if (selectedZoneId) {
+                zoneSelect.value =
+                    String(selectedZoneId);
+            }
+        }
+
+
+        function loadWards(
+            zoneId,
+            selectedWardId = null
+        ) {
+
+            const zoneWards =
+                wards.filter(
+                    ward =>
+                        Number(ward.zone) ===
+                        Number(zoneId)
+                );
+
+            populateSelect(
+                wardSelect,
+                zoneWards,
+                "Select Ward"
+            );
+
+            if (selectedWardId) {
+                wardSelect.value =
+                    String(selectedWardId);
+            }
+        }
+
+
+        async function loadUser() {
+
+            const user =
+                await api.get(
+                    `/api/users/management/${userId}/`
+                );
+
+
+            document.getElementById(
+                "username"
+            ).value =
+                user.username || "";
+
+
+            document.getElementById(
+                "firstName"
+            ).value =
+                user.first_name || "";
+
+
+            document.getElementById(
+                "lastName"
+            ).value =
+                user.last_name || "";
+
+
+            document.getElementById(
+                "email"
+            ).value =
+                user.email || "";
+
+
+            document.getElementById(
+                "mobile"
+            ).value =
+                user.mobile || "";
+
+
+            roleSelect.value =
+                user.role || "";
+
+
+            districtSelect.value =
+                String(user.district || "");
+
+
+            loadUlbs(
+                user.district,
+                user.ulb_fk
+            );
+
+
+            loadZones(
+                user.ulb_fk,
+                user.zone_fk
+            );
+
+
+            loadWards(
+                user.zone_fk,
+                user.ward_fk
+            );
+
+
+            document.getElementById(
+                "statusActive"
+            ).checked =
+                Boolean(user.is_active);
+
+            document.getElementById(
+                "statusInactive"
+            ).checked =
+                !user.is_active;
+        }
+
+
+        districtSelect.addEventListener(
+            "change",
+            event => {
+
+                resetSelect(
+                    ulbSelect,
+                    "Select ULB"
+                );
+
+                resetSelect(
+                    zoneSelect,
+                    "Select Zone"
+                );
+
+                resetSelect(
+                    wardSelect,
+                    "Select Ward"
+                );
+
+                if (!event.target.value) {
+                    return;
+                }
+
+                loadUlbs(
+                    event.target.value
+                );
+            }
+        );
+
+
+        ulbSelect.addEventListener(
+            "change",
+            event => {
+
+                resetSelect(
+                    zoneSelect,
+                    "Select Zone"
+                );
+
+                resetSelect(
+                    wardSelect,
+                    "Select Ward"
+                );
+
+                if (!event.target.value) {
+                    return;
+                }
+
+                loadZones(
+                    event.target.value
+                );
+            }
+        );
+
+
+        zoneSelect.addEventListener(
+            "change",
+            event => {
+
+                resetSelect(
+                    wardSelect,
+                    "Select Ward"
+                );
+
+                if (!event.target.value) {
+                    return;
+                }
+
+                loadWards(
+                    event.target.value
+                );
+            }
+        );
+
+
+        form.addEventListener(
+            "submit",
+            async event => {
+
+                event.preventDefault();
+
+                saveButton.disabled = true;
+                saveButton.textContent =
+                    "Saving...";
+
+
+                const payload = {
+
+                    first_name:
+                        document
+                            .getElementById("firstName")
+                            .value
+                            .trim(),
+
+                    last_name:
+                        document
+                            .getElementById("lastName")
+                            .value
+                            .trim(),
+
+                    email:
+                        document
+                            .getElementById("email")
+                            .value
+                            .trim(),
+
+                    mobile:
+                        document
+                            .getElementById("mobile")
+                            .value
+                            .trim(),
+
+                    role:
+                        roleSelect.value,
+
+                    ulb_fk:
+                        ulbSelect.value,
+
+                    zone_fk:
+                        zoneSelect.value,
+
+                    ward_fk:
+                        wardSelect.value,
+
+                    is_active:
+                        document
+                            .getElementById("statusActive")
+                            .checked
+                };
+
+
+                try {
+
+                    await api.put(
+                        `/api/users/management/${userId}/update/`,
+                        payload
+                    );
+
+
+                    alert(
+                        "User updated successfully."
+                    );
+
+
+                    window.location.href =
+                        "{% url 'users' %}";
+
+
+                } catch (error) {
+
+                    console.error(
+                        "User update failed:",
+                        error
+                    );
+
+
+                    let message =
+                        error.detail ||
+                        "Unable to update user.";
+
+
+                    if (
+                        typeof message === "object"
+                    ) {
+
+                        message =
+                            Object.entries(message)
+                                .map(
+                                    ([field, errors]) =>
+                                        `${field}: ${
+                                            Array.isArray(errors)
+                                                ? errors.join(", ")
+                                                : errors
+                                        }`
+                                )
+                                .join("\n");
+                    }
+
+
+                    alert(message);
+
+                    saveButton.disabled = false;
+
+                    saveButton.textContent =
+                        "SAVE";
+                }
+            }
+        );
+
+
+        try {
+
+            await loadGeography();
+            await loadUser();
+
+        } catch (error) {
+
+            console.error(
+                "Unable to load user:",
+                error
+            );
+
+            alert(
+                error.detail ||
+                "Unable to load user details."
+            );
+        }
+
+    });
+</script>
+{% endblock %}

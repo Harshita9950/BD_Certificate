@@ -1,0 +1,179 @@
+{% extends 'Authority/base.html' %}
+{% load static %}
+
+{% block title %}View District{% endblock %}
+
+{% block content %}
+<main class="content">
+
+    <section class="page-inner d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-3">
+        <div class="page-heading">
+            <h1 class="page-title">View District</h1>
+
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}">Dashboard</a>
+                    </li>
+
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'district_master' %}">
+                            District Master
+                        </a>
+                    </li>
+
+                    <li class="breadcrumb-item active">
+                        View District
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </section>
+
+    <section class="mb-4">
+        <div class="card">
+            <div class="card-body p-4">
+
+                <div class="section-heading">
+                    <p>District details</p>
+                </div>
+
+                <form id="districtViewForm">
+
+                    <div class="row g-4">
+
+                        <div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+                            <label for="districtCode" class="form-label">
+                                District Code
+                            </label>
+
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="districtCode"
+                                readonly
+                            >
+                        </div>
+
+                        <div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+                            <label for="districtName" class="form-label">
+                                District Name
+                            </label>
+
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="districtName"
+                                readonly
+                            >
+                        </div>
+
+                        <div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+                            <label class="form-label">
+                                Status
+                            </label>
+
+                            <br>
+
+                            <div class="selectgroup selectgroup-primary selectgroup-pills">
+
+                                <label class="selectgroup-item mb-2">
+                                    <input
+                                        type="radio"
+                                        name="status"
+                                        value="active"
+                                        class="selectgroup-input"
+                                        id="statusActive"
+                                        disabled
+                                    >
+
+                                    <span class="selectgroup-button">
+                                        Active
+                                    </span>
+                                </label>
+
+                                <label class="selectgroup-item mb-2">
+                                    <input
+                                        type="radio"
+                                        name="status"
+                                        value="inactive"
+                                        class="selectgroup-input"
+                                        id="statusInactive"
+                                        disabled
+                                    >
+
+                                    <span class="selectgroup-button">
+                                        Inactive
+                                    </span>
+                                </label>
+
+                            </div>
+                        </div>
+
+                        <div class="col-12 d-print-none">
+                            <p class="text-center pt-2">
+
+                                <a
+                                    href="{% url 'district_master' %}"
+                                    class="btn btn-secondary btn-sm"
+                                >
+                                    Back
+                                </a>
+
+                            </p>
+                        </div>
+
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+    </section>
+
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script type="module">
+    import api from "{% static 'js/api.js' %}";
+
+    document.addEventListener("DOMContentLoaded", async () => {
+        const districtId =
+            window.location.pathname
+                .split("/")
+                .filter(Boolean)
+                .pop();
+
+        try {
+            const district =
+                await api.get(
+                    `/api/geography/districts/${districtId}/`
+                );
+
+            document.getElementById(
+                "districtCode"
+            ).value = district.code || "";
+
+            document.getElementById(
+                "districtName"
+            ).value = district.name || "";
+
+            document.getElementById(
+                district.is_active
+                    ? "statusActive"
+                    : "statusInactive"
+            ).checked = true;
+
+        } catch (error) {
+            alert(
+                error.detail ||
+                "Unable to load district details."
+            );
+
+            window.location.href =
+                "{% url 'district_master' %}";
+        }
+    });
+</script>
+{% endblock %}

@@ -36,7 +36,13 @@ from rest_framework.views import APIView
 
 from core.authentication.exceptions import InvalidSSOResponseError
 from .models import User
-from .serializers import UserRegistrationSerializer, UserProfileSerializer
+from .serializers import (
+     UserRegistrationSerializer, 
+     UserProfileSerializer,  
+     UserManagementSerializer, 
+     UserCreateSerializer,
+     UserUpdateSerializer,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -322,3 +328,34 @@ class ProfileView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user
+
+class UserManagementListView(generics.ListAPIView):
+    queryset = User.objects.all().select_related(
+        'ulb_fk',
+        'ulb_fk__district',
+        'zone_fk',
+        'ward_fk',
+    )
+    serializer_class = UserManagementSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+class UserManagementDetailView(generics.RetrieveAPIView):
+    queryset = User.objects.all().select_related(
+        'ulb_fk',
+        'ulb_fk__district',
+        'zone_fk',
+        'ward_fk',
+    )
+    serializer_class = UserManagementSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+class UserManagementUpdateView(generics.UpdateAPIView):
+    queryset = User.objects.all().select_related(
+        'ulb_fk',
+        'ulb_fk__district',
+        'zone_fk',
+        'ward_fk',
+    )
+    serializer_class = UserUpdateSerializer
+    permission_classes = [permissions.IsAuthenticated]

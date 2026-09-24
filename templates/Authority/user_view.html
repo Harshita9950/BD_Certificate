@@ -1,0 +1,477 @@
+{% extends 'Authority/base.html' %}
+{% load static %}
+
+{% block title %}TLMS Panel{% endblock %}
+
+{% block content %}
+<main class="content">
+
+    <section class="page-inner d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-3">
+
+        <div class="page-heading">
+
+            <h1 class="page-title">
+                View User
+            </h1>
+
+            <nav aria-label="breadcrumb">
+
+                <ol class="breadcrumb">
+
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}">
+                            Dashboard
+                        </a>
+                    </li>
+
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'users' %}">
+                            User Master
+                        </a>
+                    </li>
+
+                    <li class="breadcrumb-item">
+                        View User
+                    </li>
+
+                </ol>
+
+            </nav>
+
+        </div>
+
+    </section>
+
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header">
+
+            <h4 class="card-title mb-0">
+                User Details
+            </h4>
+
+        </div>
+
+
+        <div class="card-body">
+
+            <form id="userViewForm">
+
+                <div class="row g-3">
+
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="username"
+                            class="form-label"
+                        >
+                            Login ID
+                        </label>
+
+                        <input
+                            type="text"
+                            id="username"
+                            class="form-control"
+                            readonly
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="role"
+                            class="form-label"
+                        >
+                            Role
+                        </label>
+
+                        <input
+                            type="text"
+                            id="role"
+                            class="form-control"
+                            readonly
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="firstName"
+                            class="form-label"
+                        >
+                            First Name
+                        </label>
+
+                        <input
+                            type="text"
+                            id="firstName"
+                            class="form-control"
+                            readonly
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="lastName"
+                            class="form-label"
+                        >
+                            Last Name
+                        </label>
+
+                        <input
+                            type="text"
+                            id="lastName"
+                            class="form-control"
+                            readonly
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="email"
+                            class="form-label"
+                        >
+                            Email
+                        </label>
+
+                        <input
+                            type="text"
+                            id="email"
+                            class="form-control"
+                            readonly
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="mobile"
+                            class="form-label"
+                        >
+                            Mobile
+                        </label>
+
+                        <input
+                            type="text"
+                            id="mobile"
+                            class="form-control"
+                            readonly
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="district"
+                            class="form-label"
+                        >
+                            District
+                        </label>
+
+                        <input
+                            type="text"
+                            id="district"
+                            class="form-control"
+                            readonly
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="ulb"
+                            class="form-label"
+                        >
+                            ULB
+                        </label>
+
+                        <input
+                            type="text"
+                            id="ulb"
+                            class="form-control"
+                            readonly
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="zone"
+                            class="form-label"
+                        >
+                            Zone
+                        </label>
+
+                        <input
+                            type="text"
+                            id="zone"
+                            class="form-control"
+                            readonly
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="ward"
+                            class="form-label"
+                        >
+                            Ward
+                        </label>
+
+                        <input
+                            type="text"
+                            id="ward"
+                            class="form-control"
+                            readonly
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label class="form-label d-block">
+                            Status
+                        </label>
+
+                        <div class="form-check form-check-inline">
+
+                            <input
+                                class="form-check-input"
+                                type="radio"
+                                id="statusActive"
+                                disabled
+                            >
+
+                            <label
+                                class="form-check-label"
+                                for="statusActive"
+                            >
+                                Active
+                            </label>
+
+                        </div>
+
+
+                        <div class="form-check form-check-inline">
+
+                            <input
+                                class="form-check-input"
+                                type="radio"
+                                id="statusInactive"
+                                disabled
+                            >
+
+                            <label
+                                class="form-check-label"
+                                for="statusInactive"
+                            >
+                                Inactive
+                            </label>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="mt-4">
+
+                    <a
+                        href="{% url 'users' %}"
+                        class="btn btn-secondary"
+                    >
+                        Back
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</main>
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script type="module">
+
+    import api from "{% static 'js/api.js' %}";
+
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        async () => {
+
+            const pathParts =
+                window.location.pathname
+                    .split("/")
+                    .filter(Boolean);
+
+
+            const userId =
+                pathParts[pathParts.length - 1];
+
+
+            try {
+
+                const user =
+                    await api.get(
+                        `/api/users/management/${userId}/`
+                    );
+
+
+                document.getElementById(
+                    "username"
+                ).value =
+                    user.username || "";
+
+
+                document.getElementById(
+                    "role"
+                ).value =
+                    getRoleName(user.role);
+
+
+                document.getElementById(
+                    "firstName"
+                ).value =
+                    user.first_name || "";
+
+
+                document.getElementById(
+                    "lastName"
+                ).value =
+                    user.last_name || "";
+
+
+                document.getElementById(
+                    "email"
+                ).value =
+                    user.email || "";
+
+
+                document.getElementById(
+                    "mobile"
+                ).value =
+                    user.mobile || "";
+
+
+                document.getElementById(
+                    "district"
+                ).value =
+                    user.district_name || "";
+
+
+                document.getElementById(
+                    "ulb"
+                ).value =
+                    user.ulb_name || "";
+
+
+                document.getElementById(
+                    "zone"
+                ).value =
+                    user.zone_name || "";
+
+
+                document.getElementById(
+                    "ward"
+                ).value =
+                    user.ward_name || "";
+
+
+                document.getElementById(
+                    "statusActive"
+                ).checked =
+                    Boolean(user.is_active);
+
+
+                document.getElementById(
+                    "statusInactive"
+                ).checked =
+                    !user.is_active;
+
+            } catch (error) {
+
+                const message =
+                    document.createElement("div");
+
+                message.className =
+                    "alert alert-danger mt-3";
+
+                message.textContent =
+                    error.detail ||
+                    "Unable to load user details.";
+
+
+                const form =
+                    document.getElementById(
+                        "userViewForm"
+                    );
+
+
+                form.parentElement.insertBefore(
+                    message,
+                    form
+                );
+
+            }
+
+        }
+    );
+
+
+    function getRoleName(role) {
+
+        const roles = {
+
+            CITIZEN: "Citizen",
+            DA: "DA",
+            HEALTH_OFFICER: "Health Officer",
+            CHO: "CHO",
+            ACCOUNTANT: "Accountant",
+            RI: "RI",
+            ZONE_OFFICER: "Zone Officer",
+            OFFICER: "Officer",
+            COMMISSIONER: "Commissioner",
+            AUDITOR: "Auditor",
+            ADMIN: "Admin"
+
+        };
+
+        return roles[role] || role || "";
+
+    }
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,217 @@
+{% extends 'Authority/base.html' %}
+{% load static %}
+
+{% block title %}Add District{% endblock %}
+
+{% block content %}
+<main class="content">
+
+    <section class="page-inner d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-3">
+        <div class="page-heading">
+            <h1 class="page-title">Add District</h1>
+
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}">Dashboard</a>
+                    </li>
+
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'district_master' %}">District Master</a>
+                    </li>
+
+                    <li class="breadcrumb-item active">
+                        Add District
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </section>
+
+    <section class="mb-4">
+        <div class="card">
+            <div class="card-body p-4">
+
+                <div class="section-heading">
+                    <p>
+                        Fields marked with
+                        <span class="star-required">*</span>
+                        are required.
+                    </p>
+                </div>
+
+                <form id="districtForm" class="needs-validation" novalidate>
+
+                    <div class="row g-4">
+
+                        <div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+                            <label for="districtCode" class="form-label">
+                                District Code
+                                <span class="star-required">*</span>
+                            </label>
+
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="districtCode"
+                                name="code"
+                                placeholder="Enter district code"
+                                required
+                            >
+                        </div>
+
+                        <div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+                            <label for="districtName" class="form-label">
+                                District Name
+                                <span class="star-required">*</span>
+                            </label>
+
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="districtName"
+                                name="name"
+                                placeholder="Enter district name"
+                                required
+                            >
+                        </div>
+
+                        <div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+                            <label class="form-label">
+                                Status
+                                <span class="star-required">*</span>
+                            </label>
+
+                            <br>
+
+                            <div class="selectgroup selectgroup-primary selectgroup-pills">
+
+                                <label class="selectgroup-item mb-2">
+                                    <input
+                                        type="radio"
+                                        name="status"
+                                        value="active"
+                                        class="selectgroup-input"
+                                        id="statusActive"
+                                        checked
+                                        required
+                                    >
+                                    <span class="selectgroup-button">
+                                        Active
+                                    </span>
+                                </label>
+
+                                <label class="selectgroup-item mb-2">
+                                    <input
+                                        type="radio"
+                                        name="status"
+                                        value="inactive"
+                                        class="selectgroup-input"
+                                        id="statusInactive"
+                                    >
+                                    <span class="selectgroup-button">
+                                        Inactive
+                                    </span>
+                                </label>
+
+                            </div>
+                        </div>
+
+                        <div class="col-12 d-print-none">
+                            <p class="text-center pt-2">
+
+                                <button
+                                    type="submit"
+                                    class="btn btn-primary btn-sm"
+                                >
+                                    Submit
+                                </button>
+
+                                <a
+                                    href="{% url 'district_master' %}"
+                                    class="btn btn-secondary btn-sm"
+                                >
+                                    Back
+                                </a>
+
+                            </p>
+                        </div>
+
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+    </section>
+
+</main>
+{% block extra_js %}
+<script type="module">
+    import api from "{% static 'js/api.js' %}";
+
+    const form = document.getElementById("districtForm");
+    const submitButton = form.querySelector('button[type="submit"]');
+
+    form.addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        if (!form.checkValidity()) {
+            form.classList.add("was-validated");
+            return;
+        }
+
+        if (submitButton.disabled) {
+            return;
+        }
+
+        submitButton.disabled = true;
+        submitButton.textContent = "Saving...";
+
+        const payload = {
+            code: document.getElementById("districtCode").value.trim(),
+            name: document.getElementById("districtName").value.trim(),
+            is_active: document.getElementById("statusActive").checked
+        };
+
+        const oldMessage = form.parentElement.querySelector(".alert");
+        if (oldMessage) {
+            oldMessage.remove();
+        }
+
+        try {
+            await api.post(
+                "/api/geography/districts/",
+                payload
+            );
+
+            const message = document.createElement("div");
+            message.className = "alert alert-success mt-3";
+            message.textContent = "District saved successfully.";
+
+            form.parentElement.insertBefore(message, form);
+
+            setTimeout(() => {
+                window.location.href = "{% url 'district_master' %}";
+            }, 1000);
+
+        } catch (error) {
+            const message = document.createElement("div");
+            message.className = "alert alert-danger mt-3";
+
+            if (error.data?.code?.[0]) {
+                message.textContent = error.data.code[0];
+            } else {
+                message.textContent =
+                    error.detail || "Unable to save district.";
+            }
+
+            form.parentElement.insertBefore(message, form);
+
+            submitButton.disabled = false;
+            submitButton.textContent = "Submit";
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %}

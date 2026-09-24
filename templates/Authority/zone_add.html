@@ -1,0 +1,292 @@
+{% extends 'Authority/base.html' %}
+{% load static %}
+
+{% block title %}TLMS Panel{% endblock %}
+
+{% block content %}
+<main class="content">
+    <section class="page-inner d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-3">
+        <div class="page-heading">
+            <h1 class="page-title">Add Zone</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}">Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'zones' %}">Zone Master</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        Add Zone
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </section>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-header">
+            <h4 class="card-title mb-0">Add Zone</h4>
+        </div>
+
+        <div class="card-body">
+            <form id="zoneForm" novalidate>
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label for="zoneCode" class="form-label">
+                            Zone Code <span class="text-danger">*</span>
+                        </label>
+
+                        <input
+                            type="text"
+                            id="zoneCode"
+                            class="form-control"
+                            required
+                            maxlength="50"
+                        >
+
+                        <div class="invalid-feedback">
+                            Please enter zone code.
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="zoneName" class="form-label">
+                            Zone Name <span class="text-danger">*</span>
+                        </label>
+
+                        <input
+                            type="text"
+                            id="zoneName"
+                            class="form-control"
+                            required
+                            maxlength="255"
+                        >
+
+                        <div class="invalid-feedback">
+                            Please enter zone name.
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="ulb" class="form-label">
+                            ULB <span class="text-danger">*</span>
+                        </label>
+
+                        <select
+                            id="ulb"
+                            class="form-select"
+                            required
+                        >
+                            <option value="">
+                                Loading ULBs...
+                            </option>
+                        </select>
+
+                        <div class="invalid-feedback">
+                            Please select ULB.
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label d-block">
+                            Status <span class="text-danger">*</span>
+                        </label>
+
+                        <div class="form-check form-check-inline">
+                            <input
+                                class="form-check-input"
+                                type="radio"
+                                name="status"
+                                id="statusActive"
+                                value="true"
+                                checked
+                            >
+
+                            <label
+                                class="form-check-label"
+                                for="statusActive"
+                            >
+                                Active
+                            </label>
+                        </div>
+
+                        <div class="form-check form-check-inline">
+                            <input
+                                class="form-check-input"
+                                type="radio"
+                                name="status"
+                                id="statusInactive"
+                                value="false"
+                            >
+
+                            <label
+                                class="form-check-label"
+                                for="statusInactive"
+                            >
+                                Inactive
+                            </label>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="mt-4">
+                    <button
+                        type="submit"
+                        class="btn btn-primary app-open-btn"
+                    >
+                        Submit
+                    </button>
+
+                    <a
+                        href="{% url 'zones' %}"
+                        class="btn btn-secondary ms-2"
+                    >
+                        Back
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script type="module">
+    import api from "{% static 'js/api.js' %}";
+
+    const form = document.getElementById("zoneForm");
+    const submitButton =
+        form.querySelector('button[type="submit"]');
+
+    const ulbSelect =
+        document.getElementById("ulb");
+
+    async function loadUlbs() {
+        try {
+            const data =
+                await api.get("/api/geography/ulbs/");
+
+            const ulbs =
+                data.results || data;
+
+            ulbSelect.innerHTML =
+                '<option value="">Select ULB</option>';
+
+            ulbs.forEach(ulb => {
+                const option =
+                    document.createElement("option");
+
+                option.value =
+                    ulb.id;
+
+                option.textContent =
+                    `${ulb.code} - ${ulb.name}`;
+
+                ulbSelect.appendChild(option);
+            });
+        } catch (error) {
+            ulbSelect.innerHTML =
+                '<option value="">Unable to load ULBs</option>';
+        }
+    }
+
+    form.addEventListener(
+        "submit",
+        async function (event) {
+            event.preventDefault();
+
+            if (!form.checkValidity()) {
+                form.classList.add("was-validated");
+                return;
+            }
+
+            if (submitButton.disabled) {
+                return;
+            }
+
+            submitButton.disabled = true;
+            submitButton.textContent = "Saving...";
+
+            const payload = {
+                code:
+                    document.getElementById(
+                        "zoneCode"
+                    ).value.trim(),
+
+                name:
+                    document.getElementById(
+                        "zoneName"
+                    ).value.trim(),
+
+                ulb:
+                    Number(ulbSelect.value),
+
+                is_active:
+                    document.getElementById(
+                        "statusActive"
+                    ).checked
+            };
+
+            const oldMessage =
+                form.parentElement.querySelector(
+                    ".alert"
+                );
+
+            if (oldMessage) {
+                oldMessage.remove();
+            }
+
+            try {
+                await api.post(
+                    "/api/geography/zones/",
+                    payload
+                );
+
+                const message =
+                    document.createElement("div");
+
+                message.className =
+                    "alert alert-success mt-3";
+
+                message.textContent =
+                    "Zone saved successfully.";
+
+                form.parentElement.insertBefore(
+                    message,
+                    form
+                );
+
+                setTimeout(() => {
+                    window.location.href =
+                        "{% url 'zones' %}";
+                }, 1000);
+
+            } catch (error) {
+                const message =
+                    document.createElement("div");
+
+                message.className =
+                    "alert alert-danger mt-3";
+
+                message.textContent =
+                    error.data?.code?.[0] ||
+                    error.detail ||
+                    "Unable to save zone.";
+
+                form.parentElement.insertBefore(
+                    message,
+                    form
+                );
+
+                submitButton.disabled = false;
+                submitButton.textContent = "Submit";
+            }
+        }
+    );
+
+    loadUlbs();
+</script>
+{% endblock %}

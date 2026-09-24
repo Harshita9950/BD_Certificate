@@ -1,0 +1,273 @@
+{% extends 'Authority/base.html' %}
+{% load static %}
+
+{% block title %}TLMS Panel{% endblock %}
+
+{% block content %}
+<main class="content">
+    <section class="page-inner d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-3">
+        <div class="page-heading">
+            <h1 class="page-title">Add ULB</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}">Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'ulbs' %}">ULB Master</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        Add ULB
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </section>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-header">
+            <h4 class="card-title mb-0">Add ULB</h4>
+        </div>
+
+        <div class="card-body">
+            <form id="ulbForm" novalidate>
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label for="ulbCode" class="form-label">
+                            ULB Code <span class="text-danger">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            id="ulbCode"
+                            class="form-control"
+                            required
+                            maxlength="50"
+                        >
+                        <div class="invalid-feedback">
+                            Please enter ULB code.
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="ulbName" class="form-label">
+                            ULB Name <span class="text-danger">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            id="ulbName"
+                            class="form-control"
+                            required
+                            maxlength="255"
+                        >
+                        <div class="invalid-feedback">
+                            Please enter ULB name.
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="ulbType" class="form-label">
+                            ULB Type <span class="text-danger">*</span>
+                        </label>
+
+                        <select id="ulbType" class="form-select" required>
+                            <option value="">Select ULB Type</option>
+                            <option value="NAGAR_NIGAM">Nagar Nigam</option>
+                            <option value="NAGAR_PARISHAD">Nagar Parishad</option>
+                            <option value="NAGAR_PALIKA">Nagar Palika</option>
+                            <option value="OTHER">Other</option>
+                        </select>
+
+                        <div class="invalid-feedback">
+                            Please select ULB type.
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="district" class="form-label">
+                            District <span class="text-danger">*</span>
+                        </label>
+
+                        <select id="district" class="form-select" required>
+                            <option value="">Loading districts...</option>
+                        </select>
+
+                        <div class="invalid-feedback">
+                            Please select district.
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label d-block">
+                            Status <span class="text-danger">*</span>
+                        </label>
+
+                        <div class="form-check form-check-inline">
+                            <input
+                                class="form-check-input"
+                                type="radio"
+                                name="status"
+                                id="statusActive"
+                                value="true"
+                                checked
+                            >
+                            <label
+                                class="form-check-label"
+                                for="statusActive"
+                            >
+                                Active
+                            </label>
+                        </div>
+
+                        <div class="form-check form-check-inline">
+                            <input
+                                class="form-check-input"
+                                type="radio"
+                                name="status"
+                                id="statusInactive"
+                                value="false"
+                            >
+                            <label
+                                class="form-check-label"
+                                for="statusInactive"
+                            >
+                                Inactive
+                            </label>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="mt-4">
+                    <button
+                        type="submit"
+                        class="btn btn-primary app-open-btn"
+                    >
+                        Submit
+                    </button>
+
+                    <a
+                        href="{% url 'ulbs' %}"
+                        class="btn btn-secondary ms-2"
+                    >
+                        Back
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script type="module">
+    import api from "{% static 'js/api.js' %}";
+
+    const form = document.getElementById("ulbForm");
+    const submitButton = form.querySelector('button[type="submit"]');
+    const districtSelect = document.getElementById("district");
+
+    async function loadDistricts() {
+        try {
+            const data = await api.get("/api/geography/districts/");
+            const districts = data.results || data;
+
+            districtSelect.innerHTML =
+                '<option value="">Select District</option>';
+
+            districts.forEach(district => {
+                const option = document.createElement("option");
+
+                option.value = district.id;
+                option.textContent =
+                    `${district.code} - ${district.name}`;
+
+                districtSelect.appendChild(option);
+            });
+        } catch (error) {
+            districtSelect.innerHTML =
+                '<option value="">Unable to load districts</option>';
+        }
+    }
+
+    form.addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        if (!form.checkValidity()) {
+            form.classList.add("was-validated");
+            return;
+        }
+
+        if (submitButton.disabled) {
+            return;
+        }
+
+        submitButton.disabled = true;
+        submitButton.textContent = "Saving...";
+
+        const payload = {
+            code: document.getElementById("ulbCode").value.trim(),
+            name: document.getElementById("ulbName").value.trim(),
+            ulb_type: document.getElementById("ulbType").value,
+            district: Number(districtSelect.value),
+            is_active:
+                document.getElementById("statusActive").checked
+        };
+
+        const oldMessage =
+            form.parentElement.querySelector(".alert");
+
+        if (oldMessage) {
+            oldMessage.remove();
+        }
+
+        try {
+            await api.post(
+                "/api/geography/ulbs/",
+                payload
+            );
+
+            const message =
+                document.createElement("div");
+
+            message.className =
+                "alert alert-success mt-3";
+
+            message.textContent =
+                "ULB saved successfully.";
+
+            form.parentElement.insertBefore(
+                message,
+                form
+            );
+
+            setTimeout(() => {
+                window.location.href =
+                    "{% url 'ulbs' %}";
+            }, 1000);
+
+        } catch (error) {
+            const message =
+                document.createElement("div");
+
+            message.className =
+                "alert alert-danger mt-3";
+
+            message.textContent =
+                error.data?.code?.[0] ||
+                error.detail ||
+                "Unable to save ULB.";
+
+            form.parentElement.insertBefore(
+                message,
+                form
+            );
+
+            submitButton.disabled = false;
+            submitButton.textContent = "Submit";
+        }
+    });
+
+    loadDistricts();
+</script>
+{% endblock %}

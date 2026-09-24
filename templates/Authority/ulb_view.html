@@ -1,0 +1,192 @@
+{% extends 'Authority/base.html' %}
+{% load static %}
+
+{% block title %}TLMS Panel{% endblock %}
+
+{% block content %}
+<main class="content">
+    <section class="page-inner d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-3">
+        <div class="page-heading">
+            <h1 class="page-title">View ULB</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}">Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'ulbs' %}">ULB Master</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        View ULB
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </section>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-header">
+            <h4 class="card-title mb-0">ULB Details</h4>
+        </div>
+
+        <div class="card-body">
+            <form id="ulbViewForm">
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label for="ulbCode" class="form-label">
+                            ULB Code
+                        </label>
+                        <input
+                            type="text"
+                            id="ulbCode"
+                            class="form-control"
+                            readonly
+                        >
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="ulbName" class="form-label">
+                            ULB Name
+                        </label>
+                        <input
+                            type="text"
+                            id="ulbName"
+                            class="form-control"
+                            readonly
+                        >
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="ulbType" class="form-label">
+                            ULB Type
+                        </label>
+                        <input
+                            type="text"
+                            id="ulbType"
+                            class="form-control"
+                            readonly
+                        >
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="district" class="form-label">
+                            District
+                        </label>
+                        <input
+                            type="text"
+                            id="district"
+                            class="form-control"
+                            readonly
+                        >
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label d-block">
+                            Status
+                        </label>
+
+                        <div class="form-check form-check-inline">
+                            <input
+                                class="form-check-input"
+                                type="radio"
+                                id="statusActive"
+                                disabled
+                            >
+                            <label
+                                class="form-check-label"
+                                for="statusActive"
+                            >
+                                Active
+                            </label>
+                        </div>
+
+                        <div class="form-check form-check-inline">
+                            <input
+                                class="form-check-input"
+                                type="radio"
+                                id="statusInactive"
+                                disabled
+                            >
+                            <label
+                                class="form-check-label"
+                                for="statusInactive"
+                            >
+                                Inactive
+                            </label>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="mt-4">
+                    <a
+                        href="{% url 'ulbs' %}"
+                        class="btn btn-secondary"
+                    >
+                        Back
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script type="module">
+    import api from "{% static 'js/api.js' %}";
+
+    document.addEventListener("DOMContentLoaded", async () => {
+        const pathParts =
+            window.location.pathname
+                .split("/")
+                .filter(Boolean);
+
+        const ulbId =
+            pathParts[pathParts.length - 1];
+
+        try {
+            const ulb = await api.get(
+                `/api/geography/ulbs/${ulbId}/`
+            );
+
+            document.getElementById("ulbCode").value =
+                ulb.code || "";
+
+            document.getElementById("ulbName").value =
+                ulb.name || "";
+
+            document.getElementById("ulbType").value =
+                ulb.ulb_type || "";
+
+            document.getElementById("district").value =
+                ulb.district_name || "";
+
+            document.getElementById("statusActive").checked =
+                Boolean(ulb.is_active);
+
+            document.getElementById("statusInactive").checked =
+                !ulb.is_active;
+
+        } catch (error) {
+            const message =
+                document.createElement("div");
+
+            message.className =
+                "alert alert-danger mt-3";
+
+            message.textContent =
+                error.detail || "Unable to load ULB details.";
+
+            document
+                .getElementById("ulbViewForm")
+                .parentElement
+                .insertBefore(
+                    message,
+                    document.getElementById("ulbViewForm")
+                );
+        }
+    });
+</script>
+{% endblock %}
