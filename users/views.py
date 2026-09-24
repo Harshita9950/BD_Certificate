@@ -30,6 +30,8 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 from django.views import View
 
+from .models import Permission, Role
+
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -42,6 +44,10 @@ from .serializers import (
      UserManagementSerializer, 
      UserCreateSerializer,
      UserUpdateSerializer,
+     RoleManagementSerializer,
+     RoleCreateSerializer,
+     RoleUpdateSerializer,
+     PermissionSerializer,
 )
 
 logger = logging.getLogger(__name__)
@@ -358,4 +364,23 @@ class UserManagementUpdateView(generics.UpdateAPIView):
         'ward_fk',
     )
     serializer_class = UserUpdateSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+class RoleManagementListView(generics.ListCreateAPIView):
+    queryset = Role.objects.all().prefetch_related('permissions')
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return RoleCreateSerializer
+        return RoleManagementSerializer
+
+class PermissionListView(generics.ListAPIView):
+    queryset = Permission.objects.all()
+    serializer_class = PermissionSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+class RoleManagementUpdateView(generics.UpdateAPIView):
+    queryset = Role.objects.all().prefetch_related('permissions')
+    serializer_class = RoleUpdateSerializer
     permission_classes = [permissions.IsAuthenticated]

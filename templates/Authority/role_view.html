@@ -1,0 +1,315 @@
+{% extends 'Authority/base.html' %}
+{% load static %}
+
+{% block title %}TLMS Panel{% endblock %}
+
+{% block content %}
+<main class="content">
+
+    <section class="page-inner d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-3">
+        <div class="page-heading">
+
+            <h1 class="page-title">View Role</h1>
+
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}">Dashboard</a>
+                    </li>
+
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'roles' %}">Role Master</a>
+                    </li>
+
+                    <li class="breadcrumb-item">
+                        View Role
+                    </li>
+
+                </ol>
+            </nav>
+
+        </div>
+    </section>
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header">
+            <h5 class="mb-0">Role Details</h5>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row g-3">
+
+                <div class="col-md-6">
+                    <label class="form-label text-secondary">
+                        Role Name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="roleName"
+                        class="form-control"
+                        readonly
+                    >
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label text-secondary">
+                        Role Code
+                    </label>
+
+                    <input
+                        type="text"
+                        id="roleCode"
+                        class="form-control"
+                        readonly
+                    >
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label text-secondary">
+                        Description
+                    </label>
+
+                    <textarea
+                        id="description"
+                        class="form-control"
+                        rows="3"
+                        readonly
+                    ></textarea>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label text-secondary">
+                        ULB Code
+                    </label>
+
+                    <input
+                        type="text"
+                        id="ulbCode"
+                        class="form-control"
+                        readonly
+                    >
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label text-secondary">
+                        Status
+                    </label>
+
+                    <input
+                        type="text"
+                        id="status"
+                        class="form-control"
+                        readonly
+                    >
+                </div>
+
+                <div class="col-12">
+
+                    <label class="form-label text-secondary">
+                        Permissions
+                    </label>
+
+                    <div
+                        id="permissionsContainer"
+                        class="border rounded p-3"
+                    >
+                        Loading permissions...
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="mt-4">
+
+                <a
+                    href="{% url 'roles' %}"
+                    class="btn btn-secondary"
+                >
+                    BACK
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script type="module">
+
+    import api from "{% static 'js/api.js' %}";
+
+    document.addEventListener("DOMContentLoaded", async () => {
+
+        const pathParts =
+            window.location.pathname
+                .split("/")
+                .filter(Boolean);
+
+        const roleId =
+            pathParts[pathParts.length - 1];
+
+        const roleName =
+            document.getElementById("roleName");
+
+        const roleCode =
+            document.getElementById("roleCode");
+
+        const description =
+            document.getElementById("description");
+
+        const ulbCode =
+            document.getElementById("ulbCode");
+
+        const status =
+            document.getElementById("status");
+
+        const permissionsContainer =
+            document.getElementById(
+                "permissionsContainer"
+            );
+
+        try {
+
+            const roles =
+                await api.get(
+                    "/api/users/roles/"
+                );
+
+            const roleList =
+                roles.results || roles;
+
+            const role =
+                roleList.find(
+                    item =>
+                        Number(item.id) ===
+                        Number(roleId)
+                );
+
+            if (!role) {
+
+                throw new Error(
+                    "Role not found."
+                );
+            }
+
+            roleName.value =
+                role.name || "";
+
+            roleCode.value =
+                role.code || "";
+
+            description.value =
+                role.description || "";
+
+            ulbCode.value =
+                role.ulb_code ||
+                "System Wide";
+
+            status.value =
+                role.is_active
+                    ? "Active"
+                    : "Inactive";
+
+            const permissionIds =
+                role.permissions || [];
+
+            if (!permissionIds.length) {
+
+                permissionsContainer.innerHTML =
+                    '<span class="text-secondary">No permissions assigned.</span>';
+
+                return;
+            }
+
+            const permissionData =
+                await api.get(
+                    "/api/users/permissions/"
+                );
+
+            const permissions =
+                permissionData.results ||
+                permissionData;
+
+            const selected =
+                permissions.filter(
+                    permission =>
+                        permissionIds.includes(
+                            permission.id
+                        )
+                );
+
+            if (!selected.length) {
+
+                permissionsContainer.innerHTML =
+                    '<span class="text-secondary">No permissions assigned.</span>';
+
+                return;
+            }
+
+            permissionsContainer.innerHTML = "";
+
+            selected.forEach(permission => {
+
+                const item =
+                    document.createElement("div");
+
+                item.className =
+                    "mb-2";
+
+                item.innerHTML = `
+                    <span class="fw-semibold">
+                        ${escapeHtml(permission.code)}
+                    </span>
+
+                    ${
+                        permission.description
+                            ? `<span class="text-secondary ms-2">
+                                ${escapeHtml(permission.description)}
+                               </span>`
+                            : ""
+                    }
+                `;
+
+                permissionsContainer.appendChild(
+                    item
+                );
+            });
+
+        } catch (error) {
+
+            permissionsContainer.innerHTML = `
+                <span class="text-danger">
+                    ${escapeHtml(
+                        error.detail ||
+                        error.message ||
+                        "Unable to load role details."
+                    )}
+                </span>
+            `;
+
+        }
+
+        function escapeHtml(value) {
+
+            const div =
+                document.createElement("div");
+
+            div.textContent =
+                value ?? "";
+
+            return div.innerHTML;
+        }
+
+    });
+
+</script>
+{% endblock %}

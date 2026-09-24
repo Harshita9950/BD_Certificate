@@ -6,6 +6,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
+from .models import Permission, Role
+
 User = get_user_model()
 
 
@@ -214,3 +216,59 @@ class UserUpdateSerializer(serializers.ModelSerializer):
             })
 
         return attrs
+
+class RoleManagementSerializer(serializers.ModelSerializer):
+    permission_count = serializers.IntegerField(
+        source='permissions.count',
+        read_only=True
+    )
+
+    class Meta:
+        model = Role
+        fields = (
+            'id',
+            'name',
+            'code',
+            'description',
+            'permissions',
+            'permission_count',
+            'ulb_code',
+            'is_active',
+        )
+        read_only_fields = ('id', 'permission_count')
+
+
+class RoleCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Role
+        fields = (
+            'name',
+            'code',
+            'description',
+            'permissions',
+            'ulb_code',
+            'is_active',
+        )
+
+
+class RoleUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Role
+        fields = (
+            'name',
+            'code',
+            'description',
+            'permissions',
+            'ulb_code',
+            'is_active',
+        )
+
+class PermissionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Permission
+        fields = (
+            'id',
+            'code',
+            'description',
+            'module',
+        )

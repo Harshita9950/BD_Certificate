@@ -1,0 +1,276 @@
+{% extends 'Authority/base.html' %}
+{% load static %}
+
+{% block title %}TLMS Panel{% endblock %}
+
+{% block content %}
+<main class="content">
+
+    <section class="page-inner d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-3">
+        <div class="page-heading">
+            <h1 class="page-title">Edit Trade Category</h1>
+
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}">Dashboard</a>
+                    </li>
+
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'trade_categories' %}">
+                            Trade Category Master
+                        </a>
+                    </li>
+
+                    <li class="breadcrumb-item">
+                        Edit Trade Category
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </section>
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header">
+            <h5 class="mb-0">Edit Trade Category</h5>
+        </div>
+
+        <div class="card-body">
+
+            <form id="tradeCategoryForm">
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label for="name" class="form-label">
+                            Category Name <span class="text-danger">*</span>
+                        </label>
+
+                        <input
+                            type="text"
+                            id="name"
+                            class="form-control"
+                            maxlength="150"
+                            required
+                        >
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="code" class="form-label">
+                            Category Code <span class="text-danger">*</span>
+                        </label>
+
+                        <input
+                            type="text"
+                            id="code"
+                            class="form-control"
+                            maxlength="20"
+                            required
+                        >
+                    </div>
+
+                    <div class="col-12">
+                        <label for="description" class="form-label">
+                            Description
+                        </label>
+
+                        <textarea
+                            id="description"
+                            class="form-control"
+                            rows="4"
+                        ></textarea>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="is_active" class="form-label">
+                            Status
+                        </label>
+
+                        <select
+                            id="is_active"
+                            class="form-select"
+                        >
+                            <option value="true">Active</option>
+                            <option value="false">Inactive</option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <div
+                    id="formError"
+                    class="alert alert-danger d-none mt-3"
+                ></div>
+
+                <div class="mt-4">
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+                        UPDATE
+                    </button>
+
+                    <a
+                        href="{% url 'trade_categories' %}"
+                        class="btn btn-secondary"
+                    >
+                        CANCEL
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script type="module">
+    import api from "{% static 'js/api.js' %}";
+
+    const categoryId = "{{ view.kwargs.pk }}";
+
+    const form =
+        document.getElementById("tradeCategoryForm");
+
+    const formError =
+        document.getElementById("formError");
+
+
+    async function loadCategory() {
+
+        try {
+
+            const category =
+                await api.get(
+                    `/api/trade-master/categories/${categoryId}/`
+                );
+
+            document.getElementById("name").value =
+                category.name || "";
+
+            document.getElementById("code").value =
+                category.code || "";
+
+            document.getElementById("description").value =
+                category.description || "";
+
+            document.getElementById("is_active").value =
+                category.is_active ? "true" : "false";
+
+        } catch (error) {
+
+            console.error(error);
+
+            formError.textContent =
+                error.detail ||
+                "Unable to load trade category.";
+
+            formError.classList.remove("d-none");
+        }
+    }
+
+
+    form.addEventListener(
+        "submit",
+        async (event) => {
+
+            event.preventDefault();
+
+            formError.classList.add("d-none");
+            formError.textContent = "";
+
+
+            const payload = {
+                name:
+                    document.getElementById("name")
+                        .value
+                        .trim(),
+
+                code:
+                    document.getElementById("code")
+                        .value
+                        .trim(),
+
+                description:
+                    document.getElementById("description")
+                        .value
+                        .trim(),
+
+                is_active:
+                    document.getElementById("is_active")
+                        .value === "true"
+            };
+
+
+            try {
+
+                await api.put(
+                    `/api/trade-master/categories/${categoryId}/`,
+                    payload
+                );
+
+                alert(
+                    "Trade category updated successfully."
+                );
+
+                window.location.href =
+                    "{% url 'trade_categories' %}";
+
+            } catch (error) {
+
+                console.error(error);
+
+                let message =
+                    "Failed to update trade category.";
+
+
+                if (error.data) {
+
+                    if (
+                        typeof error.data === "object"
+                    ) {
+
+                        message =
+                            Object.entries(
+                                error.data
+                            )
+                            .map(
+                                ([field, value]) => {
+
+                                    const text =
+                                        Array.isArray(value)
+                                            ? value.join(", ")
+                                            : String(value);
+
+                                    return `${field}: ${text}`;
+                                }
+                            )
+                            .join("\n");
+                    }
+
+                } else if (error.detail) {
+
+                    message = error.detail;
+                }
+
+
+                formError.textContent =
+                    message;
+
+                formError.classList.remove(
+                    "d-none"
+                );
+            }
+        }
+    );
+
+
+    loadCategory();
+</script>
+{% endblock %}

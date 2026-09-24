@@ -1,4 +1,4 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, mixins
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
 
@@ -9,8 +9,14 @@ from .serializers import (
 )
 
 
-class TradeCategoryViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset         = TradeCategory.objects.filter(is_active=True)
+class TradeCategoryViewSet(
+    viewsets.GenericViewSet,
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+):
+    queryset         = TradeCategory.objects.all()
     serializer_class = TradeCategorySerializer
     filter_backends  = [DjangoFilterBackend, SearchFilter]
     filterset_fields = ['is_active']

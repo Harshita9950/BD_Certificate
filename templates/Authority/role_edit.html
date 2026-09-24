@@ -1,0 +1,528 @@
+{% extends 'Authority/base.html' %}
+{% load static %}
+
+{% block title %}TLMS Panel{% endblock %}
+
+{% block content %}
+<main class="content">
+
+    <section class="page-inner d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-3">
+        <div class="page-heading">
+
+            <h1 class="page-title">Edit Role</h1>
+
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}">Dashboard</a>
+                    </li>
+
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'roles' %}">Role Master</a>
+                    </li>
+
+                    <li class="breadcrumb-item">
+                        Edit Role
+                    </li>
+
+                </ol>
+            </nav>
+
+        </div>
+    </section>
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header">
+            <h5 class="mb-0">Role Details</h5>
+        </div>
+
+        <div class="card-body">
+
+            <form id="roleForm">
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Role Name <span class="text-danger">*</span>
+                        </label>
+
+                        <input
+                            type="text"
+                            id="roleName"
+                            class="form-control"
+                            required
+                        >
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Role Code <span class="text-danger">*</span>
+                        </label>
+
+                        <select
+                            id="roleCode"
+                            class="form-select"
+                            required
+                        >
+                            <option value="">Select Role Code</option>
+                            <option value="CITIZEN">Citizen / Applicant</option>
+                            <option value="DA">Dealing Assistant</option>
+                            <option value="HEALTH_OFFICER">Health Officer</option>
+                            <option value="CHO">Chief Health Officer</option>
+                            <option value="ACCOUNTANT">Accountant</option>
+                            <option value="RI">Revenue Inspector</option>
+                            <option value="ZONE_OFFICER">Zone Officer</option>
+                            <option value="OFFICER">Licensing Officer</option>
+                            <option value="COMMISSIONER">Municipal Commissioner</option>
+                            <option value="AUDITOR">Auditor</option>
+                            <option value="ADMIN">System Administrator</option>
+                        </select>
+
+                    </div>
+
+                    <div class="col-12">
+
+                        <label class="form-label">
+                            Description
+                        </label>
+
+                        <textarea
+                            id="description"
+                            class="form-control"
+                            rows="3"
+                        ></textarea>
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            ULB Code
+                        </label>
+
+                        <input
+                            type="text"
+                            id="ulbCode"
+                            class="form-control"
+                            placeholder="Leave blank for system-wide role"
+                        >
+
+                        <small class="text-secondary">
+                            Leave blank for a system-wide role.
+                        </small>
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <label class="form-label d-block">
+                            Status
+                        </label>
+
+                        <div class="form-check form-check-inline">
+
+                            <input
+                                class="form-check-input"
+                                type="radio"
+                                name="status"
+                                id="statusActive"
+                                value="true"
+                            >
+
+                            <label
+                                class="form-check-label"
+                                for="statusActive"
+                            >
+                                Active
+                            </label>
+
+                        </div>
+
+                        <div class="form-check form-check-inline">
+
+                            <input
+                                class="form-check-input"
+                                type="radio"
+                                name="status"
+                                id="statusInactive"
+                                value="false"
+                            >
+
+                            <label
+                                class="form-check-label"
+                                for="statusInactive"
+                            >
+                                Inactive
+                            </label>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-12">
+
+                        <label class="form-label">
+                            Permissions
+                        </label>
+
+                        <div
+                            id="permissionsContainer"
+                            class="border rounded p-3"
+                        >
+                            Loading permissions...
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="mt-4 d-flex gap-2">
+
+                    <a
+                        href="{% url 'roles' %}"
+                        class="btn btn-secondary"
+                    >
+                        BACK
+                    </a>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+                        UPDATE
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script type="module">
+
+    import api from "{% static 'js/api.js' %}";
+
+    document.addEventListener("DOMContentLoaded", async () => {
+
+        const pathParts =
+            window.location.pathname
+                .split("/")
+                .filter(Boolean);
+
+        const roleId =
+            pathParts[pathParts.length - 1];
+
+        const form =
+            document.getElementById("roleForm");
+
+        const roleName =
+            document.getElementById("roleName");
+
+        const roleCode =
+            document.getElementById("roleCode");
+
+        const description =
+            document.getElementById("description");
+
+        const ulbCode =
+            document.getElementById("ulbCode");
+
+        const statusActive =
+            document.getElementById("statusActive");
+
+        const statusInactive =
+            document.getElementById("statusInactive");
+
+        const permissionsContainer =
+            document.getElementById(
+                "permissionsContainer"
+            );
+
+        let currentRole = null;
+
+        async function loadRole() {
+
+            const roleData =
+                await api.get(
+                    "/api/users/roles/"
+                );
+
+            const roles =
+                roleData.results ||
+                roleData;
+
+            currentRole =
+                roles.find(
+                    role =>
+                        Number(role.id) ===
+                        Number(roleId)
+                );
+
+            if (!currentRole) {
+                throw new Error(
+                    "Role not found."
+                );
+            }
+
+            roleName.value =
+                currentRole.name || "";
+
+            roleCode.value =
+                currentRole.code || "";
+
+            description.value =
+                currentRole.description || "";
+
+            ulbCode.value =
+                currentRole.ulb_code || "";
+
+            if (currentRole.is_active) {
+                statusActive.checked = true;
+            } else {
+                statusInactive.checked = true;
+            }
+        }
+
+        async function loadPermissions() {
+
+            const data =
+                await api.get(
+                    "/api/users/permissions/"
+                );
+
+            const permissions =
+                data.results ||
+                data;
+
+            const selectedIds =
+                (currentRole.permissions || [])
+                    .map(Number);
+
+            permissionsContainer.innerHTML = "";
+
+            if (!permissions.length) {
+
+                permissionsContainer.innerHTML = `
+                    <div class="text-secondary">
+                        No permissions available.
+                    </div>
+                `;
+
+                return;
+            }
+
+            const grouped = {};
+
+            permissions.forEach(permission => {
+
+                const module =
+                    permission.module || "Other";
+
+                if (!grouped[module]) {
+                    grouped[module] = [];
+                }
+
+                grouped[module].push(permission);
+            });
+
+            Object.keys(grouped)
+                .sort()
+                .forEach(module => {
+
+                    const moduleWrapper =
+                        document.createElement("div");
+
+                    moduleWrapper.className =
+                        "mb-3";
+
+                    moduleWrapper.innerHTML = `
+                        <div class="fw-semibold mb-2">
+                            ${escapeHtml(module)}
+                        </div>
+                    `;
+
+                    grouped[module].forEach(
+                        permission => {
+
+                            const wrapper =
+                                document.createElement("div");
+
+                            wrapper.className =
+                                "form-check mb-1";
+
+                            const checked =
+                                selectedIds.includes(
+                                    Number(permission.id)
+                                );
+
+                            wrapper.innerHTML = `
+                                <input
+                                    class="form-check-input permission-checkbox"
+                                    type="checkbox"
+                                    value="${permission.id}"
+                                    id="permission_${permission.id}"
+                                    ${checked ? "checked" : ""}
+                                >
+
+                                <label
+                                    class="form-check-label"
+                                    for="permission_${permission.id}"
+                                >
+                                    ${escapeHtml(permission.code)}
+
+                                    ${
+                                        permission.description
+                                            ? `<span class="text-secondary ms-1">
+                                                - ${escapeHtml(permission.description)}
+                                               </span>`
+                                            : ""
+                                    }
+                                </label>
+                            `;
+
+                            moduleWrapper.appendChild(
+                                wrapper
+                            );
+                        }
+                    );
+
+                    permissionsContainer.appendChild(
+                        moduleWrapper
+                    );
+                });
+        }
+
+        form.addEventListener(
+            "submit",
+            async event => {
+
+                event.preventDefault();
+
+                const selectedPermissions =
+                    Array.from(
+                        document.querySelectorAll(
+                            ".permission-checkbox:checked"
+                        )
+                    ).map(
+                        checkbox =>
+                            Number(checkbox.value)
+                    );
+
+                const payload = {
+
+                    name:
+                        roleName.value.trim(),
+
+                    code:
+                        roleCode.value,
+
+                    description:
+                        description.value.trim(),
+
+                    permissions:
+                        selectedPermissions,
+
+                    ulb_code:
+                        ulbCode.value.trim(),
+
+                    is_active:
+                        document.querySelector(
+                            'input[name="status"]:checked'
+                        ).value === "true"
+                };
+
+                try {
+
+                    await api.put(
+                        `/api/users/roles/${roleId}/update/`,
+                        payload
+                    );
+
+                    alert(
+                        "Role updated successfully."
+                    );
+
+                    window.location.href =
+                        "{% url 'roles' %}";
+
+                } catch (error) {
+
+                    let message =
+                        error.detail ||
+                        "Unable to update role.";
+
+                    if (
+                        error.data &&
+                        typeof error.data === "object"
+                    ) {
+
+                        const errors = [];
+
+                        Object.entries(
+                            error.data
+                        ).forEach(
+                            ([field, value]) => {
+
+                                errors.push(
+                                    `${field}: ${
+                                        Array.isArray(value)
+                                            ? value.join(", ")
+                                            : value
+                                    }`
+                                );
+                            }
+                        );
+
+                        if (errors.length) {
+                            message =
+                                errors.join("\n");
+                        }
+                    }
+
+                    alert(message);
+                }
+            }
+        );
+
+        function escapeHtml(value) {
+
+            const div =
+                document.createElement("div");
+
+            div.textContent =
+                value ?? "";
+
+            return div.innerHTML;
+        }
+
+        try {
+
+            await loadRole();
+            await loadPermissions();
+
+        } catch (error) {
+
+            alert(
+                error.detail ||
+                error.message ||
+                "Unable to load role."
+            );
+
+        }
+
+    });
+
+</script>
+{% endblock %}

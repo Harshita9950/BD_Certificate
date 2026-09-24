@@ -90,6 +90,38 @@ class UserEditView(LoginRequiredMixin, TemplateView):
     template_name = 'Authority/user_edit.html'
     login_url = '/login/'
 
+class RoleMasterView(LoginRequiredMixin, TemplateView):
+    template_name = 'Authority/role_master.html'
+    login_url = '/login/'
+
+class RoleAddView(LoginRequiredMixin, TemplateView):
+    template_name = 'Authority/role_add.html'
+    login_url = '/login/'
+
+class RoleView(LoginRequiredMixin, TemplateView):
+    template_name = 'Authority/role_view.html'
+    login_url = '/login/'
+
+class RoleEditView(LoginRequiredMixin, TemplateView):
+    template_name = 'Authority/role_edit.html'
+    login_url = '/login/'
+
+class TradeCategoryMasterView(LoginRequiredMixin, TemplateView):
+    template_name = 'Authority/trade_category_master.html'
+    login_url = '/login/'
+
+class TradeCategoryAddView(LoginRequiredMixin, TemplateView):
+    template_name = 'Authority/trade_category_add.html'
+    login_url = '/login/'
+
+class TradeCategoryView(LoginRequiredMixin, TemplateView):
+    template_name = 'Authority/trade_category_view.html'
+    login_url = '/login/'
+
+class TradeCategoryEditView(LoginRequiredMixin, TemplateView):
+    template_name = 'Authority/trade_category_edit.html'
+    login_url = '/login/'
+
 urlpatterns = [
     path('', LoginPageView.as_view(), name='login_page'),
     path('login/', LoginPageView.as_view(), name='login_page'),
@@ -120,6 +152,16 @@ urlpatterns = [
     path('users/view/<int:pk>/', UserView.as_view(), name='user_view'),
     path('users/edit/<int:pk>/', UserEditView.as_view(), name='user_edit'),
 
+    path('roles/', RoleMasterView.as_view(), name='roles'),
+    path('roles/add/', RoleAddView.as_view(), name='role_add'),
+    path('roles/view/<int:pk>/', RoleView.as_view(), name='role_view'),
+    path('roles/edit/<int:pk>/', RoleEditView.as_view(), name='role_edit'),
+
+    path('trade-categories/', TradeCategoryMasterView.as_view(), name='trade_categories'),
+    path('trade-categories/add/', TradeCategoryAddView.as_view(), name='trade_category_add'),
+    path('trade-categories/view/<int:pk>/', TradeCategoryView.as_view(), name='trade_category_view'),
+    path('trade-categories/edit/<int:pk>/', TradeCategoryEditView.as_view(), name='trade_category_edit'),
+    
     path('admin/', admin.site.urls),
 
     path('api/auth/', include('users.urls.auth', namespace='auth')),

@@ -12,6 +12,9 @@ from users.views import (
     UserManagementListView,
     UserManagementDetailView,
     UserManagementUpdateView,
+    RoleManagementListView,
+    PermissionListView,
+    RoleManagementUpdateView,
 )
 
 app_name = 'users'
@@ -45,5 +48,23 @@ urlpatterns = [
         'management/<int:pk>/update/',
         UserManagementUpdateView.as_view(),
         name='management-update'
+    ),
+
+    path(
+        'roles/',
+        RoleManagementListView.as_view(),
+        name='role-management',
+    ),
+
+    path(
+        'permissions/',
+        PermissionListView.as_view(),
+        name='permission-list',
+    ),
+
+    path(
+        'roles/<int:pk>/update/',
+        RoleManagementUpdateView.as_view(),
+        name='role-management-update',
     ),
 ]
