@@ -1,0 +1,212 @@
+{% extends 'Authority/base.html' %}
+{% load static %}
+
+{% block title %}TLMS Panel{% endblock %}
+
+{% block content %}
+<main class="content">
+
+    <section class="page-inner d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-3">
+        <div class="page-heading">
+            <h1 class="page-title">View Workflow Step</h1>
+
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}">Dashboard</a>
+                    </li>
+
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'workflows' %}">Workflow Master</a>
+                    </li>
+
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'workflow_steps' %}">Workflow Step Master</a>
+                    </li>
+
+                    <li class="breadcrumb-item">
+                        View Workflow Step
+                    </li>
+
+                </ol>
+            </nav>
+        </div>
+    </section>
+
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header">
+            <h4 class="card-title mb-0">
+                Workflow Step Details
+            </h4>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row g-3">
+
+                <div class="col-md-6">
+                    <label class="form-label">Workflow</label>
+                    <input
+                        type="text"
+                        id="workflow"
+                        class="form-control"
+                        readonly
+                    >
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Step Number</label>
+                    <input
+                        type="text"
+                        id="step_number"
+                        class="form-control"
+                        readonly
+                    >
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Step Code</label>
+                    <input
+                        type="text"
+                        id="code"
+                        class="form-control"
+                        readonly
+                    >
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Step Name</label>
+                    <input
+                        type="text"
+                        id="name"
+                        class="form-control"
+                        readonly
+                    >
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Role</label>
+                    <input
+                        type="text"
+                        id="role"
+                        class="form-control"
+                        readonly
+                    >
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Status</label>
+                    <input
+                        type="text"
+                        id="status"
+                        class="form-control"
+                        readonly
+                    >
+                </div>
+
+                <div class="col-md-12">
+                    <label class="form-label">Description</label>
+                    <textarea
+                        id="description"
+                        class="form-control"
+                        rows="4"
+                        readonly
+                    ></textarea>
+                </div>
+
+            </div>
+
+            <div class="mt-4">
+
+                <a
+                    href="{% url 'workflow_steps' %}"
+                    class="btn btn-secondary"
+                >
+                    Back
+                </a>
+
+                <a
+                    id="editButton"
+                    href="#"
+                    class="btn btn-primary ms-2"
+                >
+                    Edit
+                </a>
+
+            </div>
+
+        </div>
+    </div>
+
+</main>
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script type="module">
+
+    import api from "{% static 'js/api.js' %}";
+
+    const stepId = "{{ view.kwargs.pk }}";
+
+
+    async function loadWorkflowStep() {
+
+        try {
+
+            const step =
+                await api.get(
+                    `/api/workflow-master/steps/${stepId}/`
+                );
+
+            document.getElementById("workflow").value =
+                step.workflow_name ||
+                step.workflow ||
+                "";
+
+            document.getElementById("step_number").value =
+                step.step_number ?? "";
+
+            document.getElementById("code").value =
+                step.code || "";
+
+            document.getElementById("name").value =
+                step.name || "";
+
+            document.getElementById("role").value =
+                step.role_name ||
+                step.role_code ||
+                "";
+
+            document.getElementById("status").value =
+                step.is_active
+                    ? "Active"
+                    : "Inactive";
+
+            document.getElementById("description").value =
+                step.description || "";
+
+            document.getElementById("editButton").href =
+                `/workflow-steps/edit/${step.id}/`;
+
+        } catch (error) {
+
+            console.error(error);
+
+            alert(
+                error.detail ||
+                "Unable to load workflow step."
+            );
+        }
+    }
+
+
+    loadWorkflowStep();
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,446 @@
+{% extends 'Authority/base.html' %}
+{% load static %}
+
+{% block title %}TLMS Panel{% endblock %}
+
+{% block content %}
+<main class="content">
+
+    <section class="page-inner d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-3">
+        <div class="page-heading">
+
+            <h1 class="page-title">
+                Edit Workflow
+            </h1>
+
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}">
+                            Dashboard
+                        </a>
+                    </li>
+
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'workflows' %}">
+                            Workflow Master
+                        </a>
+                    </li>
+
+                    <li class="breadcrumb-item">
+                        Edit Workflow
+                    </li>
+
+                </ol>
+            </nav>
+
+        </div>
+    </section>
+
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header">
+            <h4 class="card-title mb-0">
+                Workflow Details
+            </h4>
+        </div>
+
+
+        <div class="card-body">
+
+            <form id="workflowEditForm">
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="applicationType"
+                            class="form-label"
+                        >
+                            Application Type
+                        </label>
+
+                        <select
+                            id="applicationType"
+                            class="form-select"
+                            required
+                        >
+                            <option value="TRADE_LICENSE">
+                                Trade Licence
+                            </option>
+
+                            <option value="UD_TAX">
+                                UD Tax
+                            </option>
+
+                            <option value="ADVERTISEMENT_TAX">
+                                Advertisement Tax
+                            </option>
+
+                            <option value="HRMS">
+                                HRMS
+                            </option>
+                        </select>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="ulb"
+                            class="form-label"
+                        >
+                            ULB
+                        </label>
+
+                        <select
+                            id="ulb"
+                            class="form-select"
+                            required
+                        >
+                            <option value="">
+                                Loading ULBs...
+                            </option>
+                        </select>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="code"
+                            class="form-label"
+                        >
+                            Workflow Code
+                        </label>
+
+                        <input
+                            type="text"
+                            id="code"
+                            class="form-control"
+                            maxlength="50"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="name"
+                            class="form-label"
+                        >
+                            Workflow Name
+                        </label>
+
+                        <input
+                            type="text"
+                            id="name"
+                            class="form-control"
+                            maxlength="150"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="col-12">
+
+                        <label
+                            for="description"
+                            class="form-label"
+                        >
+                            Description
+                        </label>
+
+                        <textarea
+                            id="description"
+                            class="form-control"
+                            rows="4"
+                        ></textarea>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="isActive"
+                            class="form-label"
+                        >
+                            Status
+                        </label>
+
+                        <select
+                            id="isActive"
+                            class="form-select"
+                        >
+                            <option value="true">
+                                Active
+                            </option>
+
+                            <option value="false">
+                                Inactive
+                            </option>
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <div class="mt-4">
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                        id="updateWorkflow"
+                    >
+                        Update
+                    </button>
+
+                    <a
+                        href="{% url 'workflows' %}"
+                        class="btn btn-secondary ms-2"
+                    >
+                        Cancel
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</main>
+{% endblock %}
+
+
+{% block extra_js %}
+<script type="module">
+
+    import api from "{% static 'js/api.js' %}";
+
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        async () => {
+
+            const workflowId =
+                "{{ view.kwargs.pk }}";
+
+            const form =
+                document.getElementById(
+                    "workflowEditForm"
+                );
+
+            const ulbSelect =
+                document.getElementById(
+                    "ulb"
+                );
+
+            const updateButton =
+                document.getElementById(
+                    "updateWorkflow"
+                );
+
+
+            async function loadUlbs() {
+
+                const response =
+                    await api.get(
+                        "/api/geography/ulbs/?is_active=true"
+                    );
+
+                const ulbs =
+                    response.results || response;
+
+                ulbSelect.innerHTML = `
+                    <option value="">
+                        Select ULB
+                    </option>
+                `;
+
+
+                ulbs.forEach(ulb => {
+
+                    const option =
+                        document.createElement(
+                            "option"
+                        );
+
+                    option.value =
+                        ulb.id;
+
+                    option.textContent =
+                        `${ulb.code} - ${ulb.name}`;
+
+                    ulbSelect.appendChild(
+                        option
+                    );
+                });
+            }
+
+
+            try {
+
+                await loadUlbs();
+
+
+                const workflow =
+                    await api.get(
+                        `/api/workflow-master/workflows/${workflowId}/`
+                    );
+
+
+                document.getElementById(
+                    "applicationType"
+                ).value =
+                    workflow.application_type;
+
+
+                document.getElementById(
+                    "ulb"
+                ).value =
+                    workflow.ulb;
+
+
+                document.getElementById(
+                    "code"
+                ).value =
+                    workflow.code || "";
+
+
+                document.getElementById(
+                    "name"
+                ).value =
+                    workflow.name || "";
+
+
+                document.getElementById(
+                    "description"
+                ).value =
+                    workflow.description || "";
+
+
+                document.getElementById(
+                    "isActive"
+                ).value =
+                    workflow.is_active
+                        ? "true"
+                        : "false";
+
+
+            } catch (error) {
+
+                alert(
+                    error.detail ||
+                    "Unable to load workflow."
+                );
+
+                window.location.href =
+                    "{% url 'workflows' %}";
+
+                return;
+            }
+
+
+            form.addEventListener(
+                "submit",
+                async event => {
+
+                    event.preventDefault();
+
+
+                    updateButton.disabled =
+                        true;
+
+                    updateButton.textContent =
+                        "Updating...";
+
+
+                    const payload = {
+
+                        application_type:
+                            document.getElementById(
+                                "applicationType"
+                            ).value,
+
+                        ulb:
+                            document.getElementById(
+                                "ulb"
+                            ).value,
+
+                        code:
+                            document.getElementById(
+                                "code"
+                            ).value
+                                .trim()
+                                .toUpperCase(),
+
+                        name:
+                            document.getElementById(
+                                "name"
+                            ).value
+                                .trim(),
+
+                        description:
+                            document.getElementById(
+                                "description"
+                            ).value
+                                .trim(),
+
+                        is_active:
+                            document.getElementById(
+                                "isActive"
+                            ).value === "true"
+                    };
+
+
+                    try {
+
+                        await api.put(
+                            `/api/workflow-master/workflows/${workflowId}/`,
+                            payload
+                        );
+
+
+                        alert(
+                            "Workflow updated successfully."
+                        );
+
+
+                        window.location.href =
+                            "{% url 'workflows' %}";
+
+
+                    } catch (error) {
+
+                        alert(
+                            error.detail ||
+                            "Unable to update workflow."
+                        );
+
+                        updateButton.disabled =
+                            false;
+
+                        updateButton.textContent =
+                            "Update";
+                    }
+
+                }
+            );
+
+        }
+    );
+
+</script>
+{% endblock %}

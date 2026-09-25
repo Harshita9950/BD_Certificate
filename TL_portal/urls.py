@@ -5,6 +5,8 @@ from django.conf.urls.static import static
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 
+from trade_master.views import new_application
+
 from users.views import LoginPageView, DashboardView
 
 
@@ -122,10 +124,48 @@ class TradeCategoryEditView(LoginRequiredMixin, TemplateView):
     template_name = 'Authority/trade_category_edit.html'
     login_url = '/login/'
 
+class WorkflowMasterView(LoginRequiredMixin, TemplateView):
+    template_name = 'Authority/workflow_master.html'
+    login_url = '/login/'
+
+class WorkflowAddView(LoginRequiredMixin, TemplateView):
+    template_name = 'Authority/workflow_add.html'
+    login_url = '/login/'
+
+class WorkflowView(LoginRequiredMixin, TemplateView):
+    template_name = 'Authority/workflow_view.html'
+    login_url = '/login/'
+
+
+class WorkflowEditView(LoginRequiredMixin, TemplateView):
+    template_name = 'Authority/workflow_edit.html'
+    login_url = '/login/'
+
+class WorkflowStepMasterView(LoginRequiredMixin, TemplateView):
+    template_name = 'Authority/workflow_step_master.html'
+    login_url = '/login/'
+
+
+class WorkflowStepAddView(LoginRequiredMixin, TemplateView):
+    template_name = 'Authority/workflow_step_add.html'
+    login_url = '/login/'
+
+
+class WorkflowStepView(LoginRequiredMixin, TemplateView):
+    template_name = 'Authority/workflow_step_view.html'
+    login_url = '/login/'
+
+
+class WorkflowStepEditView(LoginRequiredMixin, TemplateView):
+    template_name = 'Authority/workflow_step_edit.html'
+    login_url = '/login/'
+
 urlpatterns = [
     path('', LoginPageView.as_view(), name='login_page'),
     path('login/', LoginPageView.as_view(), name='login_page'),
     path('dashboard/', DashboardView.as_view(), name='dashboard'),
+
+    path('trade-licence/new/', new_application, name='new_application'),
 
     path('districts/', DistrictMasterView.as_view(), name='district_master'),
     path('districts/add/', DistrictAddView.as_view(), name='district_add'),
@@ -161,6 +201,16 @@ urlpatterns = [
     path('trade-categories/add/', TradeCategoryAddView.as_view(), name='trade_category_add'),
     path('trade-categories/view/<int:pk>/', TradeCategoryView.as_view(), name='trade_category_view'),
     path('trade-categories/edit/<int:pk>/', TradeCategoryEditView.as_view(), name='trade_category_edit'),
+
+    path('workflows/', WorkflowMasterView.as_view(), name='workflows'),
+    path('workflows/add/', WorkflowAddView.as_view(), name='workflow_add'),
+    path('workflows/view/<int:pk>/', WorkflowView.as_view(), name='workflow_view'),
+    path('workflows/edit/<int:pk>/', WorkflowEditView.as_view(), name='workflow_edit'),
+
+    path('workflow-steps/', WorkflowStepMasterView.as_view(), name='workflow_steps'),
+    path('workflow-steps/add/', WorkflowStepAddView.as_view(), name='workflow_step_add'),
+    path('workflow-steps/view/<int:pk>/', WorkflowStepView.as_view(), name='workflow_step_view'),
+    path('workflow-steps/edit/<int:pk>/', WorkflowStepEditView.as_view(), name='workflow_step_edit'),
     
     path('admin/', admin.site.urls),
 
@@ -169,6 +219,8 @@ urlpatterns = [
     path('api/geography/', include('geography.urls', namespace='geography')),
     path('api/trade-master/', include('trade_master.urls', namespace='trade_master')),
     path('api/trade-license/', include('trade_license.urls', namespace='trade_license')),
+
+    path('api/workflow-master/', include('workflow_master.urls')),
 ]
 
 if settings.DEBUG:

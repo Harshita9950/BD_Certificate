@@ -1,0 +1,390 @@
+{% extends 'Authority/base.html' %}
+{% load static %}
+
+{% block title %}TLMS Panel{% endblock %}
+
+{% block content %}
+<main class="content">
+
+    <section class="page-inner d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-3">
+        <div class="page-heading">
+            <h1 class="page-title">Add Workflow Step</h1>
+
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}">Dashboard</a>
+                    </li>
+
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'workflows' %}">Workflow Master</a>
+                    </li>
+
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'workflow_steps' %}">Workflow Step Master</a>
+                    </li>
+
+                    <li class="breadcrumb-item">
+                        Add Workflow Step
+                    </li>
+
+                </ol>
+            </nav>
+        </div>
+    </section>
+
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header">
+            <h4 class="card-title mb-0">
+                Add Workflow Step
+            </h4>
+        </div>
+
+
+        <div class="card-body">
+
+            <form id="workflowStepForm">
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Workflow <span class="text-danger">*</span>
+                        </label>
+
+                        <select
+                            id="workflow"
+                            class="form-select"
+                            required
+                        >
+                            <option value="">
+                                Select Workflow
+                            </option>
+                        </select>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Step Number <span class="text-danger">*</span>
+                        </label>
+
+                        <input
+                            type="number"
+                            id="step_number"
+                            class="form-control"
+                            min="1"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Step Code <span class="text-danger">*</span>
+                        </label>
+
+                        <input
+                            type="text"
+                            id="code"
+                            class="form-control"
+                            maxlength="50"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Step Name <span class="text-danger">*</span>
+                        </label>
+
+                        <input
+                            type="text"
+                            id="name"
+                            class="form-control"
+                            maxlength="150"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Role <span class="text-danger">*</span>
+                        </label>
+
+                        <select
+                            id="role_code"
+                            class="form-select"
+                            required
+                        >
+                            <option value="">
+                                Select Role
+                            </option>
+                        </select>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Status
+                        </label>
+
+                        <select
+                            id="is_active"
+                            class="form-select"
+                        >
+                            <option value="true" selected>
+                                Active
+                            </option>
+                            <option value="false">
+                                Inactive
+                            </option>
+                        </select>
+
+                    </div>
+
+
+                    <div class="col-md-12">
+
+                        <label class="form-label">
+                            Description
+                        </label>
+
+                        <textarea
+                            id="description"
+                            class="form-control"
+                            rows="4"
+                        ></textarea>
+
+                    </div>
+
+                </div>
+
+
+                <div class="mt-4">
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                        id="saveButton"
+                    >
+                        Save
+                    </button>
+
+                    <a
+                        href="{% url 'workflow_steps' %}"
+                        class="btn btn-secondary ms-2"
+                    >
+                        Cancel
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</main>
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script type="module">
+
+    import api from "{% static 'js/api.js' %}";
+
+
+    const workflowSelect =
+        document.getElementById("workflow");
+
+    const roleSelect =
+        document.getElementById("role_code");
+
+    const form =
+        document.getElementById("workflowStepForm");
+
+    const saveButton =
+        document.getElementById("saveButton");
+
+
+    async function loadWorkflows() {
+
+        try {
+
+            const data =
+                await api.get(
+                    "/api/workflow-master/workflows/?is_active=true"
+                );
+
+            const workflows =
+                data.results || data;
+
+            workflows.forEach(workflow => {
+
+                const option =
+                    document.createElement("option");
+
+                option.value =
+                    workflow.id;
+
+                option.textContent =
+                    `${workflow.code} - ${workflow.name}`;
+
+                workflowSelect.appendChild(option);
+
+            });
+
+        } catch (error) {
+
+            console.error(error);
+
+            alert(
+                error.detail ||
+                "Unable to load workflows."
+            );
+        }
+    }
+
+
+    async function loadRoles() {
+
+        try {
+
+            const data =
+                await api.get(
+                    "/api/users/roles/?is_active=true"
+                );
+
+            const roles =
+                data.results || data;
+
+            roles.forEach(role => {
+
+                const option =
+                    document.createElement("option");
+
+                option.value =
+                    role.code;
+
+                option.textContent =
+                    `${role.code} - ${role.name}`;
+
+                roleSelect.appendChild(option);
+
+            });
+
+        } catch (error) {
+
+            console.error(error);
+
+            alert(
+                error.detail ||
+                "Unable to load roles."
+            );
+        }
+    }
+
+
+    form.addEventListener(
+        "submit",
+        async event => {
+
+            event.preventDefault();
+
+            saveButton.disabled = true;
+            saveButton.textContent = "Saving...";
+
+
+            const payload = {
+
+                workflow:
+                    Number(workflowSelect.value),
+
+                step_number:
+                    Number(
+                        document.getElementById(
+                            "step_number"
+                        ).value
+                    ),
+
+                code:
+                    document.getElementById(
+                        "code"
+                    ).value.trim(),
+
+                name:
+                    document.getElementById(
+                        "name"
+                    ).value.trim(),
+
+                role_code:
+                    roleSelect.value,
+
+                description:
+                    document.getElementById(
+                        "description"
+                    ).value.trim(),
+
+                is_active:
+                    document.getElementById(
+                        "is_active"
+                    ).value === "true"
+            };
+
+
+            try {
+
+                await api.post(
+                    "/api/workflow-master/steps/",
+                    payload
+                );
+
+                alert(
+                    "Workflow step created successfully."
+                );
+
+                window.location.href =
+                    "{% url 'workflow_steps' %}";
+
+            } catch (error) {
+
+                console.error(error);
+
+                alert(
+                    error.detail ||
+                    "Unable to create workflow step."
+                );
+
+                saveButton.disabled = false;
+                saveButton.textContent = "Save";
+            }
+
+        }
+    );
+
+
+    await loadWorkflows();
+    await loadRoles();
+
+</script>
+
+{% endblock %}

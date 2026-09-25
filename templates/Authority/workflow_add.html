@@ -1,0 +1,408 @@
+{% extends 'Authority/base.html' %}
+{% load static %}
+
+{% block title %}TLMS Panel{% endblock %}
+
+{% block content %}
+<main class="content">
+
+    <section class="page-inner d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-3">
+        <div class="page-heading">
+            <h1 class="page-title">Add Workflow</h1>
+
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}">
+                            Dashboard
+                        </a>
+                    </li>
+
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'workflows' %}">
+                            Workflow Master
+                        </a>
+                    </li>
+
+                    <li class="breadcrumb-item">
+                        Add Workflow
+                    </li>
+
+                </ol>
+            </nav>
+        </div>
+    </section>
+
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header">
+            <h4 class="card-title mb-0">
+                Workflow Details
+            </h4>
+        </div>
+
+
+        <div class="card-body">
+
+            <form id="workflowAddForm">
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="applicationType"
+                            class="form-label"
+                        >
+                            Application Type
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <select
+                            id="applicationType"
+                            class="form-select"
+                            required
+                        >
+                            <option value="">
+                                Select Application Type
+                            </option>
+
+                            <option value="TRADE_LICENSE">
+                                Trade Licence
+                            </option>
+
+                            <option value="UD_TAX">
+                                UD Tax
+                            </option>
+
+                            <option value="ADVERTISEMENT_TAX">
+                                Advertisement Tax
+                            </option>
+
+                            <option value="HRMS">
+                                HRMS
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="ulb"
+                            class="form-label"
+                        >
+                            ULB
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <select
+                            id="ulb"
+                            class="form-select"
+                            required
+                        >
+                            <option value="">
+                                Loading ULBs...
+                            </option>
+                        </select>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="code"
+                            class="form-label"
+                        >
+                            Workflow Code
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <input
+                            type="text"
+                            id="code"
+                            class="form-control"
+                            maxlength="50"
+                            placeholder="Example: TL_DEFAULT"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="name"
+                            class="form-label"
+                        >
+                            Workflow Name
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <input
+                            type="text"
+                            id="name"
+                            class="form-control"
+                            maxlength="150"
+                            placeholder="Example: Trade Licence Standard Workflow"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="col-12">
+
+                        <label
+                            for="description"
+                            class="form-label"
+                        >
+                            Description
+                        </label>
+
+                        <textarea
+                            id="description"
+                            class="form-control"
+                            rows="4"
+                            placeholder="Enter workflow description"
+                        ></textarea>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="isActive"
+                            class="form-label"
+                        >
+                            Status
+                        </label>
+
+                        <select
+                            id="isActive"
+                            class="form-select"
+                        >
+                            <option value="true" selected>
+                                Active
+                            </option>
+
+                            <option value="false">
+                                Inactive
+                            </option>
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <div class="mt-4">
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                        id="saveWorkflow"
+                    >
+                        Save
+                    </button>
+
+                    <a
+                        href="{% url 'workflows' %}"
+                        class="btn btn-secondary ms-2"
+                    >
+                        Cancel
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</main>
+{% endblock %}
+
+
+{% block extra_js %}
+<script type="module">
+
+    import api from "{% static 'js/api.js' %}";
+
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        async () => {
+
+            const ulbSelect =
+                document.getElementById("ulb");
+
+            const form =
+                document.getElementById("workflowAddForm");
+
+            const saveButton =
+                document.getElementById("saveWorkflow");
+
+
+            async function loadUlbs() {
+
+                try {
+
+                    const response =
+                        await api.get(
+                            "/api/geography/ulbs/?is_active=true"
+                        );
+
+                    const ulbs =
+                        response.results || response;
+
+                    ulbSelect.innerHTML = `
+                        <option value="">
+                            Select ULB
+                        </option>
+                    `;
+
+
+                    ulbs.forEach(ulb => {
+
+                        const option =
+                            document.createElement("option");
+
+                        option.value =
+                            ulb.id;
+
+                        option.textContent =
+                            `${ulb.code} - ${ulb.name}`;
+
+                        ulbSelect.appendChild(option);
+
+                    });
+
+
+                } catch (error) {
+
+                    ulbSelect.innerHTML = `
+                        <option value="">
+                            Unable to load ULBs
+                        </option>
+                    `;
+
+                    console.error(
+                        "Unable to load ULBs:",
+                        error
+                    );
+                }
+            }
+
+
+            form.addEventListener(
+                "submit",
+                async event => {
+
+                    event.preventDefault();
+
+
+                    saveButton.disabled = true;
+                    saveButton.textContent = "Saving...";
+
+
+                    const payload = {
+                        application_type:
+                            document.getElementById(
+                                "applicationType"
+                            ).value,
+
+                        ulb:
+                            document.getElementById(
+                                "ulb"
+                            ).value,
+
+                        code:
+                            document.getElementById(
+                                "code"
+                            ).value.trim().toUpperCase(),
+
+                        name:
+                            document.getElementById(
+                                "name"
+                            ).value.trim(),
+
+                        description:
+                            document.getElementById(
+                                "description"
+                            ).value.trim(),
+
+                        is_active:
+                            document.getElementById(
+                                "isActive"
+                            ).value === "true"
+                    };
+
+
+                    if (
+                        !payload.application_type ||
+                        !payload.ulb ||
+                        !payload.code ||
+                        !payload.name
+                    ) {
+
+                        alert(
+                            "Please fill all required fields."
+                        );
+
+                        saveButton.disabled = false;
+                        saveButton.textContent = "Save";
+
+                        return;
+                    }
+
+
+                    try {
+
+                        await api.post(
+                            "/api/workflow-master/workflows/",
+                            payload
+                        );
+
+
+                        alert(
+                            "Workflow created successfully."
+                        );
+
+
+                        window.location.href =
+                            "{% url 'workflows' %}";
+
+
+                    } catch (error) {
+
+                        console.error(error);
+
+                        alert(
+                            error.detail ||
+                            "Unable to create workflow."
+                        );
+
+                        saveButton.disabled = false;
+                        saveButton.textContent = "Save";
+                    }
+
+                }
+            );
+
+
+            await loadUlbs();
+
+        }
+    );
+
+</script>
+{% endblock %}

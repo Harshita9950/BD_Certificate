@@ -50,7 +50,8 @@ LOCAL_APPS = [
     'users',          # Custom User model, roles, permissions
     'geography',      # District, ULB, Zone, Ward master
     'trade_master',   # Trade Category, Trade, SubTrade master
-    'trade_license',  # Trade Licence business domain (Phase 2+)
+    'trade_license',
+    'workflow_master',  # Trade Licence business domain (Phase 2+)
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS

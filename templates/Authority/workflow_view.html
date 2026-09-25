@@ -1,0 +1,304 @@
+{% extends 'Authority/base.html' %}
+{% load static %}
+
+{% block title %}TLMS Panel{% endblock %}
+
+{% block content %}
+<main class="content">
+
+    <section class="page-inner d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-3">
+        <div class="page-heading">
+
+            <h1 class="page-title">
+                View Workflow
+            </h1>
+
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}">
+                            Dashboard
+                        </a>
+                    </li>
+
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'workflows' %}">
+                            Workflow Master
+                        </a>
+                    </li>
+
+                    <li class="breadcrumb-item">
+                        View Workflow
+                    </li>
+
+                </ol>
+            </nav>
+
+        </div>
+    </section>
+
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header">
+            <h4 class="card-title mb-0">
+                Workflow Details
+            </h4>
+        </div>
+
+
+        <div class="card-body">
+
+            <div id="loadingMessage" class="text-secondary">
+                Loading workflow...
+            </div>
+
+
+            <div id="workflowDetails" class="d-none">
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Application Type
+                        </label>
+
+                        <input
+                            type="text"
+                            id="applicationType"
+                            class="form-control"
+                            readonly
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            ULB
+                        </label>
+
+                        <input
+                            type="text"
+                            id="ulb"
+                            class="form-control"
+                            readonly
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Workflow Code
+                        </label>
+
+                        <input
+                            type="text"
+                            id="code"
+                            class="form-control"
+                            readonly
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Workflow Name
+                        </label>
+
+                        <input
+                            type="text"
+                            id="name"
+                            class="form-control"
+                            readonly
+                        >
+
+                    </div>
+
+
+                    <div class="col-12">
+
+                        <label class="form-label">
+                            Description
+                        </label>
+
+                        <textarea
+                            id="description"
+                            class="form-control"
+                            rows="4"
+                            readonly
+                        ></textarea>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Status
+                        </label>
+
+                        <input
+                            type="text"
+                            id="status"
+                            class="form-control"
+                            readonly
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div class="mt-4">
+
+                    <a
+                        href="{% url 'workflows' %}"
+                        class="btn btn-secondary"
+                    >
+                        Back
+                    </a>
+
+                    <a
+                        id="editButton"
+                        href="#"
+                        class="btn btn-primary ms-2"
+                    >
+                        Edit
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</main>
+{% endblock %}
+
+
+{% block extra_js %}
+<script type="module">
+
+    import api from "{% static 'js/api.js' %}";
+
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        async () => {
+
+            const workflowId =
+                "{{ view.kwargs.pk }}";
+
+            const loadingMessage =
+                document.getElementById(
+                    "loadingMessage"
+                );
+
+            const workflowDetails =
+                document.getElementById(
+                    "workflowDetails"
+                );
+
+
+            try {
+
+                const workflow =
+                    await api.get(
+                        `/api/workflow-master/workflows/${workflowId}/`
+                    );
+
+
+                document.getElementById(
+                    "applicationType"
+                ).value =
+                    getApplicationName(
+                        workflow.application_type
+                    );
+
+
+                document.getElementById(
+                    "ulb"
+                ).value =
+                    workflow.ulb_name || "";
+
+
+                document.getElementById(
+                    "code"
+                ).value =
+                    workflow.code || "";
+
+
+                document.getElementById(
+                    "name"
+                ).value =
+                    workflow.name || "";
+
+
+                document.getElementById(
+                    "description"
+                ).value =
+                    workflow.description || "";
+
+
+                document.getElementById(
+                    "status"
+                ).value =
+                    workflow.is_active
+                        ? "Active"
+                        : "Inactive";
+
+
+                document.getElementById(
+                    "editButton"
+                ).href =
+                    `/workflows/edit/${workflow.id}/`;
+
+
+                loadingMessage.classList.add(
+                    "d-none"
+                );
+
+                workflowDetails.classList.remove(
+                    "d-none"
+                );
+
+
+            } catch (error) {
+
+                loadingMessage.textContent =
+                    error.detail ||
+                    "Unable to load workflow.";
+
+                loadingMessage.classList.add(
+                    "text-danger"
+                );
+            }
+
+        }
+    );
+
+
+    function getApplicationName(code) {
+
+        const names = {
+            "TRADE_LICENSE": "Trade Licence",
+            "UD_TAX": "UD Tax",
+            "ADVERTISEMENT_TAX": "Advertisement Tax",
+            "HRMS": "HRMS"
+        };
+
+        return names[code] || code || "";
+    }
+
+</script>
+{% endblock %}
