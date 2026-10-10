@@ -1,0 +1,1180 @@
+{% extends 'Authority/base.html' %}
+{% load static %}
+
+{% block title %}Birth Registration Application{% endblock %}
+
+{% block content %}
+
+<main class="content">
+
+    <!-- ================= BREADCRUMB ================= -->
+    <section class="page-inner d-flex align-items-left align-items-md-center
+                    flex-column flex-md-row pt-2 pb-3">
+
+        <div class="page-heading">
+
+            <h1 class="page-title">Birth Registration</h1>
+
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}">Dashboard</a>
+                    </li>
+
+                    <li class="breadcrumb-item">
+                        Birth Registration
+                    </li>
+
+                    <li class="breadcrumb-item active">
+                        New Application
+                    </li>
+
+                </ol>
+            </nav>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= MAIN CARD ================= -->
+
+    <section class="mb-4">
+
+        <div class="card">
+
+            <div class="card-body p-4">
+
+                <div class="section-heading mb-4">
+
+                    <h4 class="fw-bold">
+                        Birth Registration Application
+                    </h4>
+
+                    <p class="text-muted mb-0">
+                        Fields marked with
+                        <span class="star-required">*</span>
+                        are required.
+                    </p>
+
+                </div>
+
+
+                <form id="birthApplicationForm"
+                      method="POST"
+                      enctype="multipart/form-data"
+                      class="needs-validation"
+                      novalidate>
+
+                    {% csrf_token %}
+
+
+                    <!-- ================================================= -->
+                    <!-- APPLICATION DETAILS -->
+                    <!-- ================================================= -->
+
+                    <div class="form-section">
+
+                        <h5>Application Details</h5>
+
+                        <div class="row g-4">
+
+                            <!-- Service Type -->
+                            <div class="col-xl-4 col-lg-4 col-md-6 col-12">
+
+                                <label class="form-label">
+                                    Service Type
+                                    <span class="star-required">*</span>
+                                </label>
+
+                                <select class="form-select"
+                                        name="service_type"
+                                        required>
+
+                                    <option value="">
+                                        Select Service
+                                    </option>
+
+                                    <option value="BIRTH_REGISTRATION">Birth Registration</option>
+
+                                </select>
+
+                            </div>
+
+
+                            <!-- Registration Type -->
+                            <div class="col-xl-4 col-lg-4 col-md-6 col-12">
+
+                                <label class="form-label">
+                                    Registration Type
+                                    <span class="star-required">*</span>
+                                </label>
+
+                                <select class="form-select"
+                                        name="registration_type"
+                                        required>
+
+                                    <option value="">
+                                        Select Registration Type
+                                    </option>
+
+                                    {% if registration_types %}
+                                        {% for registration_type in registration_types %}
+                                            <option value="{{ registration_type.pk }}">
+                                                {{ registration_type.name }}
+                                            </option>
+                                        {% endfor %}
+                                    {% else %}
+                                        <option value="BIRTH_NORMAL">
+                                            Normal Birth Registration
+                                        </option>
+                                        <option value="BIRTH_DELAYED">
+                                            Delayed Birth Registration
+                                        </option>
+                                    {% endif %}
+
+                                </select>
+
+                            </div>
+
+
+                            <!-- Date of Reporting -->
+                            <div class="col-xl-4 col-lg-4 col-md-6 col-12">
+
+                                <label for="date_of_reporting"
+                                       class="form-label">
+
+                                    Date of Reporting
+                                    <span class="star-required">*</span>
+
+                                </label>
+
+                                <input type="date"
+                                       class="form-control"
+                                       id="date_of_reporting"
+                                       name="date_of_reporting"
+                                       value="{{ application.date_of_reporting|date:'Y-m-d' }}"
+                                       required>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ================================================= -->
+                    <!-- JURISDICTION -->
+                    <!-- ================================================= -->
+
+                    <div class="form-section">
+
+                        <h5>Registration Jurisdiction</h5>
+
+                        <div class="row g-4">
+
+                            <!-- State -->
+                            <div class="col-xl-4 col-lg-4 col-md-6 col-12">
+
+                                <label class="form-label">
+                                    State
+                                    <span class="star-required">*</span>
+                                </label>
+
+                                <select class="form-select"
+                                        name="state_code"
+                                        id="state"
+                                        required>
+
+                                    <option value="">
+                                        Select State
+                                    </option>
+
+                                    <option value="RJ">Rajasthan</option>
+
+                                </select>
+
+                            </div>
+
+
+                            <!-- District -->
+                            <div class="col-xl-4 col-lg-4 col-md-6 col-12">
+
+                                <label class="form-label">
+                                    District
+                                    <span class="star-required">*</span>
+                                </label>
+
+                                <select class="form-select"
+                                        name="district"
+                                        id="district"
+                                        required>
+
+                                    <option value="">
+                                        Select District
+                                    </option>
+
+                                    {% for district in districts %}
+                                        <option value="{{ district.pk }}">
+                                            {{ district.name }}
+                                        </option>
+                                    {% endfor %}
+
+                                </select>
+
+                            </div>
+
+
+                            <!-- ULB -->
+                            <div class="col-xl-4 col-lg-4 col-md-6 col-12">
+
+                                <label class="form-label">
+                                    ULB
+                                    <span class="star-required">*</span>
+                                </label>
+
+                                <select class="form-select"
+                                        name="ulb"
+                                        id="ulb"
+                                        required>
+
+                                    <option value="">
+                                        Select ULB
+                                    </option>
+
+                                    {% for ulb in ulbs %}
+                                        <option value="{{ ulb.pk }}">
+                                            {{ ulb.name }}
+                                        </option>
+                                    {% endfor %}
+
+                                </select>
+
+                            </div>
+
+
+                            <!-- Registration Office -->
+                            <div class="col-xl-4 col-lg-4 col-md-6 col-12">
+
+                                <label class="form-label">
+                                    Registration Office
+                                </label>
+
+                                <select class="form-select"
+                                        name="registration_office"
+                                        id="registration_office">
+
+                                    <option value="">
+                                        Select Registration Office
+                                    </option>
+
+                                    {% for office in registration_offices %}
+                                        <option value="{{ office.pk }}">
+                                            {{ office.name }}
+                                        </option>
+                                    {% endfor %}
+
+                                </select>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ================================================= -->
+                    <!-- CHILD DETAILS -->
+                    <!-- ================================================= -->
+
+                    <div class="form-section">
+
+                        <h5>Child Details</h5>
+
+                        <div class="row g-4">
+
+                            <div class="col-xl-4 col-lg-4 col-md-6 col-12">
+
+                                <label class="form-label">
+                                    First Name
+                                    <span class="star-required">*</span>
+                                </label>
+
+                                <input type="text"
+                                       class="form-control"
+                                       name="child_first_name"
+                                       maxlength="100"
+                                       placeholder="Enter first name">
+
+                            </div>
+
+
+                            <div class="col-xl-4 col-lg-4 col-md-6 col-12">
+
+                                <label class="form-label">
+                                    Middle Name
+                                </label>
+
+                                <input type="text"
+                                       class="form-control"
+                                       name="child_middle_name"
+                                       maxlength="100"
+                                       placeholder="Enter middle name">
+
+                            </div>
+
+
+                            <div class="col-xl-4 col-lg-4 col-md-6 col-12">
+
+                                <label class="form-label">
+                                    Last Name
+                                </label>
+
+                                <input type="text"
+                                       class="form-control"
+                                       name="child_last_name"
+                                       maxlength="100"
+                                       placeholder="Enter last name">
+
+                            </div>
+
+
+                            <!-- Name Recorded -->
+                            <div class="col-xl-4 col-lg-4 col-md-6 col-12">
+
+                                <label class="form-label">
+                                    Name Recorded
+                                    <span class="star-required">*</span>
+                                </label>
+
+                                <div class="selectgroup selectgroup-primary selectgroup-pills">
+
+                                    <label class="selectgroup-item">
+
+                                        <input type="radio"
+                                               name="name_recorded"
+                                               value="true"
+                                               class="selectgroup-input"
+                                               checked>
+
+                                        <span class="selectgroup-button">
+                                            Yes
+                                        </span>
+
+                                    </label>
+
+                                    <label class="selectgroup-item">
+
+                                        <input type="radio"
+                                               name="name_recorded"
+                                               value="false"
+                                               class="selectgroup-input">
+
+                                        <span class="selectgroup-button">
+                                            No
+                                        </span>
+
+                                    </label>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- DOB -->
+                            <div class="col-xl-4 col-lg-4 col-md-6 col-12">
+
+                                <label class="form-label">
+                                    Date of Birth
+                                    <span class="star-required">*</span>
+                                </label>
+
+                                <input type="date"
+                                       class="form-control"
+                                       id="date_of_birth"
+                                       name="date_of_birth"
+                                       required>
+
+                            </div>
+
+
+                            <!-- Time -->
+                            <div class="col-xl-4 col-lg-4 col-md-6 col-12">
+
+                                <label class="form-label">
+                                    Time of Birth
+                                </label>
+
+                                <input type="time"
+                                       class="form-control"
+                                       name="time_of_birth">
+
+                            </div>
+
+
+                            <!-- Sex -->
+                            <div class="col-xl-4 col-lg-4 col-md-6 col-12">
+
+                                <label class="form-label">
+                                    Sex
+                                    <span class="star-required">*</span>
+                                </label>
+
+                                <select class="form-select"
+                                        name="sex"
+                                        required>
+
+                                    <option value="">
+                                        Select Sex
+                                    </option>
+
+                                    <option value="MALE">Male</option>
+                                    <option value="FEMALE">Female</option>
+                                    <option value="OTHER">Other / Intersex</option>
+                                    <option value="UNKNOWN">Unknown / Not Determined</option>
+
+                                </select>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ================================================= -->
+                    <!-- PLACE OF BIRTH -->
+                    <!-- ================================================= -->
+
+                    <div class="form-section">
+
+                        <h5>Place of Birth</h5>
+
+                        <div class="row g-4">
+
+                            <div class="col-xl-4 col-lg-4 col-md-6 col-12">
+
+                                <label class="form-label">
+                                    Event Location Type
+                                </label>
+
+                                <select class="form-select"
+                                        name="event_location_type">
+
+                                    <option value="">
+                                        Select Location Type
+                                    </option>
+
+                                    <option value="HOME">Home</option>
+                                    <option value="HOSPITAL">Hospital</option>
+                                    <option value="OTHER_INSTITUTION">Other Institution</option>
+                                    <option value="OTHER">Other</option>
+
+                                </select>
+
+                            </div>
+
+
+                            <div class="col-xl-4 col-lg-4 col-md-6 col-12">
+
+                                <label class="form-label">
+                                    Institution
+                                </label>
+
+                                <input type="text"
+                                       class="form-control"
+                                       name="institution_name"
+                                       maxlength="250"
+                                       placeholder="Enter hospital/institution name (if applicable)">
+
+                            </div>
+
+
+                            <div class="col-xl-4 col-lg-4 col-md-6 col-12">
+
+                                <label class="form-label">
+                                    Ward
+                                </label>
+
+                                <select class="form-select"
+                                        name="ward">
+
+                                    <option value="">
+                                        Select Ward
+                                    </option>
+
+                                    {% for ward in wards %}
+                                        <option value="{{ ward.pk }}">
+                                            {{ ward.name }}
+                                        </option>
+                                    {% endfor %}
+
+                                </select>
+
+                            </div>
+
+
+                            <div class="col-12">
+
+                                <label class="form-label">
+                                    Place of Birth Address
+                                </label>
+
+                                <textarea class="form-control"
+                                          name="place_of_birth_address"
+                                          maxlength="1000"
+                                          rows="3"
+                                          placeholder="Enter complete place of birth address"></textarea>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ================================================= -->
+                    <!-- MOTHER DETAILS -->
+                    <!-- ================================================= -->
+
+                    <div class="form-section">
+
+                        <h5>Mother's Details</h5>
+
+                        <div class="row g-4">
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Mother's Name
+                                </label>
+
+                                <input type="text"
+                                       class="form-control"
+                                       name="mother_name"
+                                       maxlength="150">
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Mother's Age at Birth
+                                </label>
+
+                                <input type="number"
+                                       class="form-control"
+                                       name="mother_age_at_birth"
+                                       min="0"
+                                       max="120">
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Nationality
+                                </label>
+
+                                <input type="text"
+                                       class="form-control"
+                                       name="mother_nationality"
+                                       maxlength="100"
+                                       value="Indian">
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Education
+                                </label>
+
+                                <input type="text"
+                                       class="form-control"
+                                       name="mother_education"
+                                       maxlength="100">
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Occupation
+                                </label>
+
+                                <input type="text"
+                                       class="form-control"
+                                       name="mother_occupation"
+                                       maxlength="100">
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Mobile
+                                </label>
+
+                                <input type="tel"
+                                       class="form-control"
+                                       name="mother_mobile"
+                                       maxlength="15">
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Aadhaar Number
+                                </label>
+
+                                <input type="text"
+                                       class="form-control"
+                                       name="mother_aadhaar"
+                                       maxlength="12"
+                                       inputmode="numeric">
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ================================================= -->
+                    <!-- FATHER DETAILS -->
+                    <!-- ================================================= -->
+
+                    <div class="form-section">
+
+                        <h5>Father's Details</h5>
+
+                        <div class="row g-4">
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Father's Name
+                                </label>
+
+                                <input type="text"
+                                       class="form-control"
+                                       name="father_name"
+                                       maxlength="150">
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Father's Age at Birth
+                                </label>
+
+                                <input type="number"
+                                       class="form-control"
+                                       name="father_age_at_birth"
+                                       min="0"
+                                       max="120">
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Nationality
+                                </label>
+
+                                <input type="text"
+                                       class="form-control"
+                                       name="father_nationality"
+                                       maxlength="100"
+                                       value="Indian">
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Education
+                                </label>
+
+                                <input type="text"
+                                       class="form-control"
+                                       name="father_education"
+                                       maxlength="100">
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Occupation
+                                </label>
+
+                                <input type="text"
+                                       class="form-control"
+                                       name="father_occupation"
+                                       maxlength="100">
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Mobile
+                                </label>
+
+                                <input type="tel"
+                                       class="form-control"
+                                       name="father_mobile"
+                                       maxlength="15">
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Aadhaar Number
+                                </label>
+
+                                <input type="text"
+                                       class="form-control"
+                                       name="father_aadhaar"
+                                       maxlength="12"
+                                       inputmode="numeric">
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ================================================= -->
+                    <!-- PERMANENT ADDRESS -->
+                    <!-- ================================================= -->
+
+                    <div class="form-section">
+
+                        <h5>Permanent Address</h5>
+
+                        <div class="row g-4">
+
+                            <div class="col-12">
+
+                                <label class="form-label">
+                                    Permanent Address
+                                </label>
+
+                                <textarea class="form-control"
+                                          name="permanent_address"
+                                          maxlength="1000"
+                                          rows="3"
+                                          placeholder="Enter permanent address"></textarea>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ================================================= -->
+                    <!-- INFORMANT -->
+                    <!-- ================================================= -->
+
+                    <div class="form-section">
+
+                        <h5>Informant Details</h5>
+
+                        <div class="row g-4">
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Informant Name
+                                </label>
+
+                                <input type="text"
+                                       class="form-control"
+                                       name="informant_name"
+                                       maxlength="150">
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Informant Relation
+                                </label>
+
+                                <select class="form-select"
+                                        name="informant_relation">
+
+                                    <option value="">
+                                        Select Relation
+                                    </option>
+
+                                    <option value="FATHER">Father</option>
+                                    <option value="MOTHER">Mother</option>
+                                    <option value="SPOUSE">Spouse</option>
+                                    <option value="SON_DAUGHTER">Son / Daughter</option>
+                                    <option value="HEAD_OF_FAMILY">Head of Family</option>
+                                    <option value="MEDICAL_OFFICER">Medical Officer / In-charge</option>
+                                    <option value="INSTITUTION_HEAD">Institution Head</option>
+                                    <option value="RELATIVE">Other Relative</option>
+                                    <option value="NEIGHBOUR">Neighbour</option>
+                                    <option value="OTHER">Other</option>
+
+                                </select>
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Informant Mobile
+                                </label>
+
+                                <input type="tel"
+                                       class="form-control"
+                                       name="informant_mobile"
+                                       maxlength="15">
+
+                            </div>
+
+
+                            <div class="col-12">
+
+                                <label class="form-label">
+                                    Informant Address
+                                </label>
+
+                                <textarea class="form-control"
+                                          name="informant_address"
+                                          maxlength="1000"
+                                          rows="3"></textarea>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ================================================= -->
+                    <!-- DELAY INFORMATION -->
+                    <!-- ================================================= -->
+
+                    <div class="form-section">
+
+                        <h5>Registration Fee & Delay Information</h5>
+
+                        <div class="alert alert-light border">
+
+                            <div class="row g-3">
+
+                                <div class="col-md-4">
+                                    <strong>Delay Category</strong>
+                                    <div id="delayCategory">—</div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <strong>Applicable Fee</strong>
+                                    <div id="applicableFee">—</div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <strong>Authority</strong>
+                                    <div id="delayAuthority">—</div>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ================================================= -->
+                    <!-- DOCUMENTS -->
+                    <!-- ================================================= -->
+
+                    <div class="form-section">
+
+                        <h5>Supporting Documents</h5>
+
+                        <div class="file-upload">
+
+                            <input type="file"
+                                   id="birthDocuments"
+                                   name="documents"
+                                   class="visually-hidden"
+                                   multiple
+                                   accept=".jpg,.jpeg,.png,.pdf">
+
+                            <label for="birthDocuments"
+                                   class="drop-zone"
+                                   tabindex="0">
+
+                                <div class="upload-icon">
+                                    📤
+                                </div>
+
+                                <div class="drop-zone-title">
+                                    Drag & drop files here
+                                </div>
+
+                                <div class="drop-zone-text">
+                                    or click to browse files
+                                    <br>
+                                    PDF, PNG, JPG, JPEG
+                                </div>
+
+                            </label>
+
+                            <div id="birthDocumentPreview"
+                                 class="preview mt-2"></div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ================================================= -->
+                    <!-- REMARKS -->
+                    <!-- ================================================= -->
+
+                    <div class="form-section">
+
+                        <h5>Remarks</h5>
+
+                        <textarea class="form-control"
+                                  name="remarks"
+                                  maxlength="2000"
+                                  rows="3"
+                                  placeholder="Enter remarks if required"></textarea>
+
+                    </div>
+
+
+                    <!-- ================================================= -->
+                    <!-- BUTTONS -->
+                    <!-- ================================================= -->
+
+                    <div class="d-print-none">
+
+                        <p class="text-center pt-4">
+
+                            <button type="button"
+                                    class="btn btn-secondary btn-sm"
+                                    id="saveDraftBtn">
+                                Save Draft
+                            </button>
+
+                            <button type="submit"
+                                    class="btn btn-primary btn-sm">
+                                Submit Application
+                            </button>
+
+                            <button type="button"
+                                    class="btn btn-light btn-sm"
+                                    onclick="history.back()">
+                                Back
+                            </button>
+
+                        </p>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<style>
+
+.form-section {
+    border-bottom: 1px solid #eeeeee;
+    padding-bottom: 24px;
+    margin-bottom: 28px;
+}
+
+.form-section:last-child {
+    border-bottom: none;
+}
+
+.form-section h5 {
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.star-required {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+.drop-zone {
+    border: 2px dashed #d8d8d8;
+    border-radius: 8px;
+    padding: 30px;
+    text-align: center;
+    cursor: pointer;
+    display: block;
+    transition: all .2s ease;
+}
+
+.drop-zone:hover {
+    border-color: #1572e8;
+    background: #f8fbff;
+}
+
+.drop-zone-title {
+    font-weight: 600;
+    margin-top: 8px;
+}
+
+.drop-zone-text {
+    color: #777;
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+.preview-file {
+    padding: 8px 12px;
+    background: #f7f7f7;
+    border-radius: 5px;
+    margin-top: 6px;
+    font-size: 13px;
+}
+
+</style>
+
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    /* -----------------------------------------
+       FILE PREVIEW
+    ----------------------------------------- */
+
+    const fileInput =
+        document.getElementById("birthDocuments");
+
+    const preview =
+        document.getElementById("birthDocumentPreview");
+
+    if (fileInput) {
+
+        fileInput.addEventListener("change", function () {
+
+            preview.innerHTML = "";
+
+            Array.from(this.files).forEach(function (file) {
+
+                const div = document.createElement("div");
+
+                div.className = "preview-file";
+
+                div.innerHTML =
+                    "📎 " +
+                    file.name +
+                    " <small class='text-muted'>(" +
+                    Math.round(file.size / 1024) +
+                    " KB)</small>";
+
+                preview.appendChild(div);
+
+            });
+
+        });
+
+    }
+
+
+    /* -----------------------------------------
+       FRONTEND VALIDATION
+    ----------------------------------------- */
+
+    const form =
+        document.getElementById("birthApplicationForm");
+
+    if (form) {
+
+        form.addEventListener("submit", function (event) {
+
+            if (!form.checkValidity()) {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+            }
+
+            form.classList.add("was-validated");
+
+        });
+
+    }
+
+
+    /* -----------------------------------------
+       DELAY CHECK
+       Backend should be connected here.
+       Do NOT use this JS for final fee calculation.
+    ----------------------------------------- */
+
+    const eventDate =
+        document.getElementById("date_of_birth");
+
+    const reportingDate =
+        document.getElementById("date_of_reporting");
+
+    function requestDelayCheck() {
+
+        if (!eventDate.value || !reportingDate.value) {
+            return;
+        }
+
+        /*
+         * Connect this function to:
+         *
+         * /api/bd-registration/delay-check/
+         *
+         * The backend DelayCalculationService remains
+         * the authoritative source for delay category,
+         * fee and authority.
+         */
+    }
+
+    eventDate.addEventListener("change", requestDelayCheck);
+    reportingDate.addEventListener("change", requestDelayCheck);
+
+});
+
+</script>
+
+{% endblock %}

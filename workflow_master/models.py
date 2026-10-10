@@ -6,7 +6,7 @@ class Workflow(models.Model):
     application_type = models.CharField(
         max_length=50,
         choices=ApplicationCode.choices,
-        default=ApplicationCode.TRADE_LICENSE,
+        default=ApplicationCode.BIRTH_DEATH,
         db_index=True,
     )
     ulb = models.ForeignKey(

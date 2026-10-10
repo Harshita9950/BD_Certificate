@@ -35,6 +35,7 @@ class ApplicationCode(models.TextChoices):
     The Central Portal uses these codes to indicate which application
     a user is being routed to.
     """
+    BIRTH_DEATH       = 'BIRTH_DEATH',       _('Birth & Death Certificate')
     TRADE_LICENSE     = 'TRADE_LICENSE',     _('Trade Licence')
     UD_TAX            = 'UD_TAX',            _('UD Tax')
     ADVERTISEMENT_TAX = 'ADVERTISEMENT_TAX', _('Advertisement Tax')
@@ -267,7 +268,7 @@ class UserApplicationAccess(models.Model):
 
     This is the hook for Central Portal multi-application routing:
     when the Central Portal hands off a user, the system checks this
-    table to confirm the user may enter the Trade Licence application.
+    table to confirm the user may enter this application.
 
     One record per user per application.
     """

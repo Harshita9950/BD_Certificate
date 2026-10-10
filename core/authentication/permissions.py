@@ -1,7 +1,7 @@
 """
 core/authentication/permissions.py
 =====================================
-Reusable DRF permission classes for the TL_portal system.
+Reusable DRF permission classes for the BD_portal system.
 
 Usage in settings.py (global default — already configured):
     REST_FRAMEWORK = {
@@ -16,7 +16,7 @@ Usage on individual views (exceptional cases only):
 
 Authorisation hierarchy enforced here:
   1. Is the user authenticated and active?          → IsAuthenticatedUser
-  2. Does the user have Trade Licence app access?   → ApplicationAccessPermission
+  2. Does the user have application access?         → ApplicationAccessPermission
   3. Does the user hold the required role(s)?       → HasRole
   4. Does the user hold a specific permission code? → HasPermission
   5. Does the request concern the user's own ULB?   → ULBIsolationPermission
@@ -27,6 +27,7 @@ error handling is centralised and consistent across the entire application.
 
 import logging
 
+from django.conf import settings
 from rest_framework.permissions import BasePermission
 
 from .exceptions import (
@@ -40,8 +41,10 @@ from .exceptions import (
 
 logger = logging.getLogger(__name__)
 
-# Application code this portal serves
-_APP_CODE = 'TRADE_LICENSE'
+# Application code this portal serves.
+# Read from settings so a single .env change re-configures the entire
+# permission system without touching this file.
+_APP_CODE = getattr(settings, 'CENTRAL_PORTAL_APPLICATION_CODE', 'BIRTH_DEATH')
 
 
 # ─── 1. Core authentication check ────────────────────────────────────────────
@@ -69,7 +72,7 @@ class IsAuthenticatedUser(BasePermission):
 class ApplicationAccessPermission(BasePermission):
     """
     Verifies the user has an active UserApplicationAccess record for
-    TRADE_LICENSE.
+    the configured application (CENTRAL_PORTAL_APPLICATION_CODE).
 
     When CENTRAL_PORTAL_ENABLED=False, all authenticated users with any
     role are treated as having application access (local mode).

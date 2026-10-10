@@ -17,7 +17,7 @@ Decorators available
   @login_required_api     — 401 JSON response if not authenticated
   @require_role(*roles)   — 403 JSON response if role not in set
   @require_permission(code) — 403 JSON response if permission code absent
-  @require_app_access     — 403 JSON response if no TRADE_LICENSE access
+  @require_app_access     — 403 JSON response if no application access
   @require_ulb_match      — 403 JSON response on cross-ULB object access
 """
 
@@ -146,7 +146,7 @@ def require_permission(permission_code: str):
 def require_app_access(view_func):
     """
     Decorator: enforces that the user has an active UserApplicationAccess
-    record for TRADE_LICENSE.
+    record for the configured application (CENTRAL_PORTAL_APPLICATION_CODE).
 
     Only meaningful when CENTRAL_PORTAL_ENABLED=True.
     In local mode this is a no-op (all authenticated users are allowed).
@@ -162,10 +162,11 @@ def require_app_access(view_func):
         if not request.user or not request.user.is_authenticated:
             return _json_error(NotAuthenticatedError())
         if getattr(settings, 'CENTRAL_PORTAL_ENABLED', False):
-            if not request.user.has_application_access('TRADE_LICENSE'):
+            app_code = getattr(settings, 'CENTRAL_PORTAL_APPLICATION_CODE', 'BIRTH_DEATH')
+            if not request.user.has_application_access(app_code):
                 logger.warning(
-                    'require_app_access: user %s denied TRADE_LICENSE access',
-                    request.user.email,
+                    'require_app_access: user %s denied %s access',
+                    request.user.email, app_code,
                 )
                 return _json_error(ApplicationAccessDeniedError())
         return view_func(request, *args, **kwargs)

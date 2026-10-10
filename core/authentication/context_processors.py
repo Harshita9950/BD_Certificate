@@ -30,7 +30,7 @@ def auth_context(request):
         'auth_is_authenticated': ctx.get('is_authenticated', False),
         'auth_ulb_code':    ctx.get('ulb_code', ''),
         'auth_role':        ctx.get('role', ''),
-        'auth_app_code':    ctx.get('app_code', 'TRADE_LICENSE'),
+        'auth_app_code':    ctx.get('app_code', 'BIRTH_DEATH'),
         'auth_permissions': ctx.get('permissions', set()),
         'central_portal_enabled': getattr(settings, 'CENTRAL_PORTAL_ENABLED', False),
     }

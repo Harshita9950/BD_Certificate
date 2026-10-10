@@ -90,7 +90,7 @@ class CentralPortalClient:
         self._client_secret = getattr(settings, 'CENTRAL_PORTAL_CLIENT_SECRET', '')
         self._redirect_uri  = getattr(settings, 'CENTRAL_PORTAL_REDIRECT_URI', '')
         self._app_code      = getattr(settings, 'CENTRAL_PORTAL_APPLICATION_CODE',
-                                      'TRADE_LICENSE')
+                                      'BIRTH_DEATH')
 
     # ── Authorization URL ─────────────────────────────────────────────────────
 

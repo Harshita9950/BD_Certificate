@@ -1,7 +1,7 @@
 {% extends 'Authority/base.html' %}
 {% load static %}
 
-{% block title %}TLMS Panel{% endblock %}
+{% block title %}BD Portal{% endblock %}
 
 {% block content %}
 <main class="content">
@@ -56,18 +56,15 @@
 
                     <div class="col-md-6">
 
-                        <label
-                            for="applicationType"
-                            class="form-label"
-                        >
+                        <label for="applicationType" class="form-label">
                             Application Type
                         </label>
 
-                        <select
-                            id="applicationType"
-                            class="form-select"
-                            required
-                        >
+                        <select id="applicationType" class="form-select" required>
+                            <option value="BIRTH_DEATH">
+                                Birth &amp; Death Certificate
+                            </option>
+
                             <option value="TRADE_LICENSE">
                                 Trade Licence
                             </option>
@@ -90,18 +87,11 @@
 
                     <div class="col-md-6">
 
-                        <label
-                            for="ulb"
-                            class="form-label"
-                        >
+                        <label for="ulb" class="form-label">
                             ULB
                         </label>
 
-                        <select
-                            id="ulb"
-                            class="form-select"
-                            required
-                        >
+                        <select id="ulb" class="form-select" required>
                             <option value="">
                                 Loading ULBs...
                             </option>
@@ -112,75 +102,44 @@
 
                     <div class="col-md-6">
 
-                        <label
-                            for="code"
-                            class="form-label"
-                        >
+                        <label for="code" class="form-label">
                             Workflow Code
                         </label>
 
-                        <input
-                            type="text"
-                            id="code"
-                            class="form-control"
-                            maxlength="50"
-                            required
-                        >
+                        <input type="text" id="code" class="form-control" maxlength="50" required>
 
                     </div>
 
 
                     <div class="col-md-6">
 
-                        <label
-                            for="name"
-                            class="form-label"
-                        >
+                        <label for="name" class="form-label">
                             Workflow Name
                         </label>
 
-                        <input
-                            type="text"
-                            id="name"
-                            class="form-control"
-                            maxlength="150"
-                            required
-                        >
+                        <input type="text" id="name" class="form-control" maxlength="150" required>
 
                     </div>
 
 
                     <div class="col-12">
 
-                        <label
-                            for="description"
-                            class="form-label"
-                        >
+                        <label for="description" class="form-label">
                             Description
                         </label>
 
-                        <textarea
-                            id="description"
-                            class="form-control"
-                            rows="4"
-                        ></textarea>
+                        <textarea id="description" class="form-control" rows="4"></textarea>
 
                     </div>
 
 
                     <div class="col-md-6">
 
-                        <label
-                            for="isActive"
-                            class="form-label"
-                        >
+                        <label for="isActive" class="form-label">
                             Status
                         </label>
 
-                        <select
-                            id="isActive"
-                            class="form-select"
-                        >
+                        <select id="isActive" class="form-select">
                             <option value="true">
                                 Active
                             </option>
@@ -197,18 +156,11 @@
 
                 <div class="mt-4">
 
-                    <button
-                        type="submit"
-                        class="btn btn-primary"
-                        id="updateWorkflow"
-                    >
+                    <button type="submit" class="btn btn-primary" id="updateWorkflow">
                         Update
                     </button>
 
-                    <a
-                        href="{% url 'workflows' %}"
-                        class="btn btn-secondary ms-2"
-                    >
+                    <a href="{% url 'workflows' %}" class="btn btn-secondary ms-2">
                         Cancel
                     </a>
 

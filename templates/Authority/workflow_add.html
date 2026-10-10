@@ -1,7 +1,7 @@
 {% extends 'Authority/base.html' %}
 {% load static %}
 
-{% block title %}TLMS Panel{% endblock %}
+{% block title %}BD Portal{% endblock %}
 
 {% block content %}
 <main class="content">
@@ -52,21 +52,18 @@
 
                     <div class="col-md-6">
 
-                        <label
-                            for="applicationType"
-                            class="form-label"
-                        >
+                        <label for="applicationType" class="form-label">
                             Application Type
                             <span class="text-danger">*</span>
                         </label>
 
-                        <select
-                            id="applicationType"
-                            class="form-select"
-                            required
-                        >
+                        <select id="applicationType" class="form-select" required>
                             <option value="">
                                 Select Application Type
+                            </option>
+
+                            <option value="BIRTH_DEATH">
+                                Birth &amp; Death Certificate
                             </option>
 
                             <option value="TRADE_LICENSE">
@@ -92,19 +89,12 @@
 
                     <div class="col-md-6">
 
-                        <label
-                            for="ulb"
-                            class="form-label"
-                        >
+                        <label for="ulb" class="form-label">
                             ULB
                             <span class="text-danger">*</span>
                         </label>
 
-                        <select
-                            id="ulb"
-                            class="form-select"
-                            required
-                        >
+                        <select id="ulb" class="form-select" required>
                             <option value="">
                                 Loading ULBs...
                             </option>
@@ -115,80 +105,49 @@
 
                     <div class="col-md-6">
 
-                        <label
-                            for="code"
-                            class="form-label"
-                        >
+                        <label for="code" class="form-label">
                             Workflow Code
                             <span class="text-danger">*</span>
                         </label>
 
-                        <input
-                            type="text"
-                            id="code"
-                            class="form-control"
-                            maxlength="50"
-                            placeholder="Example: TL_DEFAULT"
-                            required
-                        >
+                        <input type="text" id="code" class="form-control" maxlength="50"
+                            placeholder="Example: TL_DEFAULT" required>
 
                     </div>
 
 
                     <div class="col-md-6">
 
-                        <label
-                            for="name"
-                            class="form-label"
-                        >
+                        <label for="name" class="form-label">
                             Workflow Name
                             <span class="text-danger">*</span>
                         </label>
 
-                        <input
-                            type="text"
-                            id="name"
-                            class="form-control"
-                            maxlength="150"
-                            placeholder="Example: Trade Licence Standard Workflow"
-                            required
-                        >
+                        <input type="text" id="name" class="form-control" maxlength="150"
+                            placeholder="Example: Trade Licence Standard Workflow" required>
 
                     </div>
 
 
                     <div class="col-12">
 
-                        <label
-                            for="description"
-                            class="form-label"
-                        >
+                        <label for="description" class="form-label">
                             Description
                         </label>
 
-                        <textarea
-                            id="description"
-                            class="form-control"
-                            rows="4"
-                            placeholder="Enter workflow description"
-                        ></textarea>
+                        <textarea id="description" class="form-control" rows="4"
+                            placeholder="Enter workflow description"></textarea>
 
                     </div>
 
 
                     <div class="col-md-6">
 
-                        <label
-                            for="isActive"
-                            class="form-label"
-                        >
+                        <label for="isActive" class="form-label">
                             Status
                         </label>
 
-                        <select
-                            id="isActive"
-                            class="form-select"
-                        >
+                        <select id="isActive" class="form-select">
                             <option value="true" selected>
                                 Active
                             </option>
@@ -205,18 +164,11 @@
 
                 <div class="mt-4">
 
-                    <button
-                        type="submit"
-                        class="btn btn-primary"
-                        id="saveWorkflow"
-                    >
+                    <button type="submit" class="btn btn-primary" id="saveWorkflow">
                         Save
                     </button>
 
-                    <a
-                        href="{% url 'workflows' %}"
-                        class="btn btn-secondary ms-2"
-                    >
+                    <a href="{% url 'workflows' %}" class="btn btn-secondary ms-2">
                         Cancel
                     </a>
 

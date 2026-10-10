@@ -104,11 +104,11 @@ class InvalidSSOResponseError(AuthenticationError):
 class ApplicationAccessDeniedError(AuthorisationError):
     """
     The authenticated user has no active UserApplicationAccess record
-    for this application (e.g. TRADE_LICENSE).
+    for this application (e.g. BIRTH_DEATH).
     Raised by: ApplicationAccessPermission, AuthenticationMiddleware.
     """
     default_code   = 'application_access_denied'
-    default_detail = 'You are not authorised to access the Trade Licence application.'
+    default_detail = 'You are not authorised to access this application.'
 
 
 class PermissionDeniedError(AuthorisationError):

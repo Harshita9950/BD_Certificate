@@ -1,0 +1,86 @@
+[
+  {
+    "model": "bd_master.authoritytype",
+    "pk": 1,
+    "fields": {
+      "code": "REGISTRAR",
+      "name": "Registrar (ULB)",
+      "description": "The local Registrar appointed by the ULB under the Registration of Births and Deaths Act. Handles normal registrations and delays up to 30 days.",
+      "is_active": true,
+      "created_at": "2025-02-07T00:00:00Z",
+      "updated_at": "2025-02-07T00:00:00Z"
+    }
+  },
+  {
+    "model": "bd_master.authoritytype",
+    "pk": 2,
+    "fields": {
+      "code": "DISTRICT_REGISTRAR",
+      "name": "District Registrar / Block Statistical Officer / Authorized Officer",
+      "description": "For delays >30 days to within 1 year: written permission of the District Registrar OR the Block Statistical Officer OR any other officer authorized by the Chief Registrar (Births and Deaths). Source: Rajasthan RBD (Amendment) Rules, 2025, Rule 5(b)(ii) amending Rule 9(ii) of 2000 Rules.",
+      "is_active": true,
+      "created_at": "2025-02-07T00:00:00Z",
+      "updated_at": "2025-02-07T00:00:00Z"
+    }
+  },
+  {
+    "model": "bd_master.authoritytype",
+    "pk": 3,
+    "fields": {
+      "code": "EXECUTIVE_OFFICER",
+      "name": "Executive Officer (ULB)",
+      "description": "Executive Officer of the Urban Local Body.",
+      "is_active": true,
+      "created_at": "2025-02-07T00:00:00Z",
+      "updated_at": "2025-02-07T00:00:00Z"
+    }
+  },
+  {
+    "model": "bd_master.authoritytype",
+    "pk": 4,
+    "fields": {
+      "code": "CMO",
+      "name": "Chief Medical Officer",
+      "description": "Chief Medical Officer at district level.",
+      "is_active": true,
+      "created_at": "2025-02-07T00:00:00Z",
+      "updated_at": "2025-02-07T00:00:00Z"
+    }
+  },
+  {
+    "model": "bd_master.authoritytype",
+    "pk": 5,
+    "fields": {
+      "code": "SDM",
+      "name": "Sub-Divisional Magistrate / District Magistrate / Executive Magistrate",
+      "description": "For delays >1 year: order of the District Magistrate OR Sub-Divisional Magistrate OR Executive Magistrate authorized by the District Magistrate. Source: Rajasthan RBD (Amendment) Rules, 2025, Rule 5(b)(iii) amending Rule 9(iii) of 2000 Rules.",
+      "is_active": true,
+      "created_at": "2025-02-07T00:00:00Z",
+      "updated_at": "2025-02-07T00:00:00Z"
+    }
+  },
+  {
+    "model": "bd_master.authoritytype",
+    "pk": 6,
+    "fields": {
+      "code": "DM",
+      "name": "District Magistrate / Collector",
+      "description": "District Magistrate or Collector.",
+      "is_active": true,
+      "created_at": "2025-02-07T00:00:00Z",
+      "updated_at": "2025-02-07T00:00:00Z"
+    }
+  },
+  {
+    "model": "bd_master.authoritytype",
+    "pk": 7,
+    "fields": {
+      "code": "PRESCRIBED_AUTHORITY",
+      "name": "Prescribed Authority (as notified by State Government)",
+      "description": "Generic designation for an authority prescribed by the State Government under the RBD Act/Rules.",
+      "is_active": true,
+      "created_at": "2025-02-07T00:00:00Z",
+      "updated_at": "2025-02-07T00:00:00Z"
+    }
+  }
+]

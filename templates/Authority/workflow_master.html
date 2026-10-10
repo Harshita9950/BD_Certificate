@@ -1,7 +1,7 @@
 {% extends 'Authority/base.html' %}
 {% load static %}
 
-{% block title %}TLMS Panel{% endblock %}
+{% block title %}BD Portal{% endblock %}
 
 {% block content %}
 <main class="content">
@@ -29,40 +29,27 @@
         <div class="card-header d-print-none">
             <p class="text-end pt-2">
 
-                <button
-                    type="button"
-                    class="btn btn-xs btn-primary app-open-btn my-1"
-                    data-bs-toggle="tooltip"
-                    data-bs-placement="top"
-                    title="Print"
-                    onclick="printTable('printableArea')"
-                >
+                <button type="button" class="btn btn-xs btn-primary app-open-btn my-1" data-bs-toggle="tooltip"
+                    data-bs-placement="top" title="Print" onclick="printTable('printableArea')">
                     <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M17 2C17.5523 2 18 2.44772 18 3V7H21C21.5523 7 22 7.44772 22 8V18C22 18.5523 21.5523 19 21 19H18V21C18 21.5523 17.5523 22 17 22H7C6.44772 22 6 21.5523 6 21V19H3C2.44772 19 2 18.5523 2 18V8C2 7.44772 2.44772 7 3 7H6V3C6 2.44772 6.44772 2 7 2H17ZM16 17H8V20H16V17ZM20 9H4V17H6V16C6 15.4477 6.44772 15 7 15H17C17.5523 15 18 15.44772 18 16V17H20V9ZM8 10V12H5V10H8ZM16 4H8V7H16V4Z"></path>
+                        <path
+                            d="M17 2C17.5523 2 18 2.44772 18 3V7H21C21.5523 7 22 7.44772 22 8V18C22 18.5523 21.5523 19 21 19H18V21C18 21.5523 17.5523 22 17 22H7C6.44772 22 6 21.5523 6 21V19H3C2.44772 19 2 18.5523 2 18V8C2 7.44772 2.44772 7 3 7H6V3C6 2.44772 6.44772 2 7 2H17ZM16 17H8V20H16V17ZM20 9H4V17H6V16C6 15.4477 6.44772 15 7 15H17C17.5523 15 18 15.44772 18 16V17H20V9ZM8 10V12H5V10H8ZM16 4H8V7H16V4Z">
+                        </path>
                     </svg>
                 </button>
 
-                <button
-                    type="button"
-                    class="btn btn-xs btn-primary app-open-btn my-1 ms-1"
-                    data-bs-toggle="tooltip"
-                    data-bs-placement="top"
-                    title="Download"
-                    id="downloadButton"
-                >
+                <button type="button" class="btn btn-xs btn-primary app-open-btn my-1 ms-1" data-bs-toggle="tooltip"
+                    data-bs-placement="top" title="Download" id="downloadButton">
                     <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M13 10H18L12 16L6 10H11V3H13V10ZM4 19H20V12H22V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V12H4V19Z"></path>
+                        <path
+                            d="M13 10H18L12 16L6 10H11V3H13V10ZM4 19H20V12H22V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V12H4V19Z">
+                        </path>
                     </svg>
                 </button>
 
                 <a href="{% url 'workflow_add' %}">
-                    <button
-                        type="button"
-                        class="btn btn-xs btn-primary app-open-btn my-1 ms-1"
-                        data-bs-toggle="tooltip"
-                        data-bs-placement="top"
-                        title="Add New"
-                    >
+                    <button type="button" class="btn btn-xs btn-primary app-open-btn my-1 ms-1" data-bs-toggle="tooltip"
+                        data-bs-placement="top" title="Add New">
                         <svg viewBox="0 0 24 24" fill="currentColor">
                             <path d="M11 11V5H13V11H19V13H13V19H11V13H5V11H11Z"></path>
                         </svg>
@@ -79,30 +66,17 @@
                 <div class="col-xl-3 col-md-4 col-sm-6 col-12">
                     <div class="d-flex align-items-center gap-2">
 
-                        <label
-                            for="tableSearch"
-                            class="form-label mb-0 fw-medium text-nowrap text-secondary"
-                        >
+                        <label for="tableSearch" class="form-label mb-0 fw-medium text-nowrap text-secondary">
                             Search:
                         </label>
 
                         <div class="input-group">
 
-                            <input
-                                type="search"
-                                id="tableSearch"
-                                class="form-control"
-                                placeholder="Search records..."
-                                autocomplete="off"
-                                style="border-radius: 10px;"
-                            >
+                            <input type="search" id="tableSearch" class="form-control" placeholder="Search records..."
+                                autocomplete="off" style="border-radius: 10px;">
 
-                            <button
-                                type="button"
-                                id="clearSearch"
-                                class="btn btn-outline-primary d-none"
-                                style="border-radius: 50px; margin-left: 2px;"
-                            >
+                            <button type="button" id="clearSearch" class="btn btn-outline-primary d-none"
+                                style="border-radius: 50px; margin-left: 2px;">
                                 Clear
                             </button>
 
@@ -113,19 +87,12 @@
                 <div class="col-xl-9 col-md-8 col-sm-6 col-12">
                     <div class="d-flex align-items-center justify-content-md-end gap-2">
 
-                        <label
-                            for="entriesSelect"
-                            class="form-label mb-0 text-nowrap text-secondary"
-                            style="font-size: 15px; font-weight: 500;"
-                        >
+                        <label for="entriesSelect" class="form-label mb-0 text-nowrap text-secondary"
+                            style="font-size: 15px; font-weight: 500;">
                             Show
                         </label>
 
-                        <select
-                            id="entriesSelect"
-                            class="form-select"
-                            style="width: 80px;"
-                        >
+                        <select id="entriesSelect" class="form-select" style="width: 80px;">
                             <option value="5">5</option>
                             <option value="10" selected>10</option>
                             <option value="25">25</option>
@@ -146,10 +113,7 @@
 
         <div class="table-responsive" id="printableArea">
 
-            <table
-                id="basic-datatables"
-                class="table table-hover table-bordered align-middle mb-0"
-            >
+            <table id="basic-datatables" class="table table-hover table-bordered align-middle mb-0">
                 <thead class="table-primary">
                     <tr>
                         <th class="text-center">#</th>
@@ -174,22 +138,13 @@
             <div class="row align-items-center g-3">
 
                 <div class="col-12 col-md-5">
-                    <div
-                        id="tableInfo"
-                        class="text-secondary small text-center text-md-start"
-                    >
+                    <div id="tableInfo" class="text-secondary small text-center text-md-start">
                     </div>
                 </div>
 
                 <div class="col-12 col-md-7">
-                    <nav
-                        aria-label="Table pagination"
-                        class="d-flex justify-content-center justify-content-md-end"
-                    >
-                        <ul
-                            id="pagination"
-                            class="pagination pagination-sm mb-0"
-                        ></ul>
+                    <nav aria-label="Table pagination" class="d-flex justify-content-center justify-content-md-end">
+                        <ul id="pagination" class="pagination pagination-sm mb-0"></ul>
                     </nav>
                 </div>
 
@@ -371,42 +326,41 @@
 
                     <td>
                         ${escapeHtml(
-                            getApplicationName(
-                                workflow.application_type
-                            )
-                        )}
+                    getApplicationName(
+                        workflow.application_type
+                    )
+                )}
                     </td>
 
                     <td>
                         ${escapeHtml(
-                            workflow.ulb_name || ""
-                        )}
+                    workflow.ulb_name || ""
+                )}
                     </td>
 
                     <td>
                         ${escapeHtml(
-                            workflow.code || ""
-                        )}
+                    workflow.code || ""
+                )}
                     </td>
 
                     <td>
                         ${escapeHtml(
-                            workflow.name || ""
-                        )}
+                    workflow.name || ""
+                )}
                     </td>
 
                     <td>
                         ${escapeHtml(
-                            workflow.description || ""
-                        )}
+                    workflow.description || ""
+                )}
                     </td>
 
                     <td>
-                        ${
-                            workflow.is_active
-                                ? '<span class="badge text-bg-success">Active</span>'
-                                : '<span class="badge text-bg-secondary">Inactive</span>'
-                        }
+                        ${workflow.is_active
+                        ? '<span class="badge text-bg-success">Active</span>'
+                        : '<span class="badge text-bg-secondary">Inactive</span>'
+                    }
                     </td>
 
                     <td>
@@ -640,6 +594,7 @@
         function getApplicationName(code) {
 
             const names = {
+                "BIRTH_DEATH": "Birth & Death Certificate",
                 "TRADE_LICENSE": "Trade Licence",
                 "UD_TAX": "UD Tax",
                 "ADVERTISEMENT_TAX": "Advertisement Tax",
@@ -771,14 +726,14 @@
                         headers,
                         ...rows
                     ]
-                    .map(row =>
-                        row
-                            .map(value =>
-                                `"${String(value).replace(/"/g, '""')}"`
-                            )
-                            .join(",")
-                    )
-                    .join("\n");
+                        .map(row =>
+                            row
+                                .map(value =>
+                                    `"${String(value).replace(/"/g, '""')}"`
+                                )
+                                .join(",")
+                        )
+                        .join("\n");
 
 
                 const blob =

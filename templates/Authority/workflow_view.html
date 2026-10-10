@@ -1,7 +1,7 @@
 {% extends 'Authority/base.html' %}
 {% load static %}
 
-{% block title %}TLMS Panel{% endblock %}
+{% block title %}BD Portal{% endblock %}
 
 {% block content %}
 <main class="content">
@@ -65,12 +65,7 @@
                             Application Type
                         </label>
 
-                        <input
-                            type="text"
-                            id="applicationType"
-                            class="form-control"
-                            readonly
-                        >
+                        <input type="text" id="applicationType" class="form-control" readonly>
 
                     </div>
 
@@ -81,12 +76,7 @@
                             ULB
                         </label>
 
-                        <input
-                            type="text"
-                            id="ulb"
-                            class="form-control"
-                            readonly
-                        >
+                        <input type="text" id="ulb" class="form-control" readonly>
 
                     </div>
 
@@ -97,12 +87,7 @@
                             Workflow Code
                         </label>
 
-                        <input
-                            type="text"
-                            id="code"
-                            class="form-control"
-                            readonly
-                        >
+                        <input type="text" id="code" class="form-control" readonly>
 
                     </div>
 
@@ -113,12 +98,7 @@
                             Workflow Name
                         </label>
 
-                        <input
-                            type="text"
-                            id="name"
-                            class="form-control"
-                            readonly
-                        >
+                        <input type="text" id="name" class="form-control" readonly>
 
                     </div>
 
@@ -129,12 +109,7 @@
                             Description
                         </label>
 
-                        <textarea
-                            id="description"
-                            class="form-control"
-                            rows="4"
-                            readonly
-                        ></textarea>
+                        <textarea id="description" class="form-control" rows="4" readonly></textarea>
 
                     </div>
 
@@ -145,12 +120,7 @@
                             Status
                         </label>
 
-                        <input
-                            type="text"
-                            id="status"
-                            class="form-control"
-                            readonly
-                        >
+                        <input type="text" id="status" class="form-control" readonly>
 
                     </div>
 
@@ -159,18 +129,11 @@
 
                 <div class="mt-4">
 
-                    <a
-                        href="{% url 'workflows' %}"
-                        class="btn btn-secondary"
-                    >
+                    <a href="{% url 'workflows' %}" class="btn btn-secondary">
                         Back
                     </a>
 
-                    <a
-                        id="editButton"
-                        href="#"
-                        class="btn btn-primary ms-2"
-                    >
+                    <a id="editButton" href="#" class="btn btn-primary ms-2">
                         Edit
                     </a>
 
@@ -291,6 +254,7 @@
     function getApplicationName(code) {
 
         const names = {
+            "BIRTH_DEATH": "Birth & Death Certificate",
             "TRADE_LICENSE": "Trade Licence",
             "UD_TAX": "UD Tax",
             "ADVERTISEMENT_TAX": "Advertisement Tax",

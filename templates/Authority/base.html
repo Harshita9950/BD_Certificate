@@ -1,640 +1,1560 @@
 {% load static %}
+
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}TLMS Panel{% endblock %}</title>
-    <link rel="shortcut icon" href="{% static 'images/logo/favicon.png' %}" type="image/png" />
-    <link href="{% static 'fonts/noto-sans-v42-latin-regular.woff2' %}" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="{% static 'remixicon/remixicon.css' %}">
-    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
-    <link rel="stylesheet" href="{% static 'choices/choices.min.css' %}">
+
+    <meta name="viewport"
+
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+
+        {% block title %}BD Portal{% endblock %}
+
+    </title>
+
+    <link rel="shortcut icon"
+
+          href="{% static 'images/logo/favicon.png' %}"
+
+          type="image/png" />
+
+    <link href="{% static 'fonts/noto-sans-v42-latin-regular.woff2' %}"
+
+          as="font"
+
+          type="font/woff2"
+
+          crossorigin>
+
+    <link rel="stylesheet"
+
+          href="{% static 'remixicon/remixicon.css' %}">
+
+    <link rel="stylesheet"
+
+          href="{% static 'css/bootstrap.min.css' %}">
+
+    <link rel="stylesheet"
+
+          href="{% static 'choices/choices.min.css' %}">
+
+    <!-- ================= THEME ================= -->
+
     <script>
+
         (function () {
-            const t = localStorage.getItem("admin-theme");
-            const d = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-            document.documentElement.setAttribute("data-theme", t || (d ? "dark" : "light"));
+
+            const t =
+
+                localStorage.getItem("admin-theme");
+
+            const d =
+
+                window.matchMedia &&
+
+                window.matchMedia(
+
+                    "(prefers-color-scheme: dark)"
+
+                ).matches;
+
+            document.documentElement.setAttribute(
+
+                "data-theme",
+
+                t || (d ? "dark" : "light")
+
+            );
+
         })();
+
     </script>
-    <link rel="stylesheet" href="{% static 'css/admin.css' %}">
+
+    <link rel="stylesheet"
+
+          href="{% static 'css/admin.css' %}">
+
     <style>
+
         body {
+
             font-family: 'Noto Sans', sans-serif;
+
         }
 
         @font-face {
+
             font-family: "remixicon";
-            src: url("{% static 'remixicon/remixicon.woff2' %}") format("woff2");
+
+            src:
+
+                url("{% static 'remixicon/remixicon.woff2' %}")
+
+                format("woff2");
+
             font-display: swap;
+
         }
 
         @font-face {
-            font-display: swap;
+
             font-family: 'Noto Sans';
+
             font-style: normal;
+
             font-weight: 300;
-            src: url("{% static 'fonts/noto-sans-v42-latin-300.woff2' %}") format('woff2');
+
+            src:
+
+                url("{% static 'fonts/noto-sans-v42-latin-300.woff2' %}")
+
+                format('woff2');
+
+            font-display: swap;
+
         }
 
         @font-face {
-            font-display: swap;
+
             font-family: 'Noto Sans';
+
             font-style: normal;
+
             font-weight: 400;
-            src: url("{% static 'fonts/noto-sans-v42-latin-regular.woff2' %}") format('woff2');
+
+            src:
+
+                url("{% static 'fonts/noto-sans-v42-latin-regular.woff2' %}")
+
+                format('woff2');
+
+            font-display: swap;
+
         }
 
         @font-face {
-            font-display: swap;
+
             font-family: 'Noto Sans';
+
             font-style: italic;
+
             font-weight: 400;
-            src: url("{% static 'fonts/noto-sans-v42-latin-italic.woff2' %}") format('woff2');
+
+            src:
+
+                url("{% static 'fonts/noto-sans-v42-latin-italic.woff2' %}")
+
+                format('woff2');
+
+            font-display: swap;
+
         }
 
         @font-face {
-            font-display: swap;
+
             font-family: 'Noto Sans';
+
             font-style: normal;
+
             font-weight: 500;
-            src: url("{% static 'fonts/noto-sans-v42-latin-500.woff2' %}") format('woff2');
+
+            src:
+
+                url("{% static 'fonts/noto-sans-v42-latin-500.woff2' %}")
+
+                format('woff2');
+
+            font-display: swap;
+
         }
 
         @font-face {
-            font-display: swap;
+
             font-family: 'Noto Sans';
+
             font-style: normal;
+
             font-weight: 600;
-            src: url("{% static 'fonts/noto-sans-v42-latin-600.woff2' %}") format('woff2');
+
+            src:
+
+                url("{% static 'fonts/noto-sans-v42-latin-600.woff2' %}")
+
+                format('woff2');
+
+            font-display: swap;
+
         }
 
         @font-face {
-            font-display: swap;
+
             font-family: 'Noto Sans';
+
             font-style: normal;
+
             font-weight: 700;
-            src: url("{% static 'fonts/noto-sans-v42-latin-700.woff2' %}") format('woff2');
+
+            src:
+
+                url("{% static 'fonts/noto-sans-v42-latin-700.woff2' %}")
+
+                format('woff2');
+
+            font-display: swap;
+
         }
 
         @font-face {
-            font-display: swap;
+
             font-family: 'Noto Sans';
+
             font-style: normal;
+
             font-weight: 800;
-            src: url("{% static 'fonts/noto-sans-v42-latin-800.woff2' %}") format('woff2');
+
+            src:
+
+                url("{% static 'fonts/noto-sans-v42-latin-800.woff2' %}")
+
+                format('woff2');
+
+            font-display: swap;
+
         }
+
+        /\* =================================================
+
+           BIRTH / DEATH SIDEBAR
+
+           ================================================= \*/
+
+        .birth-death-submenu .sidebar-link {
+
+            padding-left: 42px;
+
+        }
+
     </style>
+
 </head>
 
 <body class="sidebar-collapsed">
-    <div class="app-wrapper">
 
-        <!-- Sidebar -->
-        <aside class="sidebar" id="sidebar" aria-label="Main navigation">
-            <div class="sidebar-header">
-                <a href="{% url 'dashboard' %}" class="logo">
-                    <div class="brand-icon">
-                        <img src="{% static 'images/logo/logo.png' %}" alt="TLMS" class="navbar-brand" height="40">
-                    </div>
-                    <span class="brand-text">Trade License Management</span>
-                </a>
-                <button type="button" class="icon-btn mobile-sidebar-close" id="mobileSidebarClose"
+<div class="app-wrapper">
+
+    <!-- =====================================================
+
+         SIDEBAR
+
+         ===================================================== -->
+
+    <aside class="sidebar"
+
+           id="sidebar"
+
+           aria-label="Main navigation">
+
+        <!-- ================= SIDEBAR HEADER ================= -->
+
+        <div class="sidebar-header">
+
+            <a href="{% url 'dashboard' %}"
+
+               class="logo">
+
+                <div class="brand-icon">
+
+                    <img src="{% static 'images/logo/logo.png' %}"
+
+                         alt="BD Portal"
+
+                         class="navbar-brand"
+
+                         height="40">
+
+                </div>
+
+                <span class="brand-text">
+
+                    Birth &amp; Death Certificate Management
+
+                </span>
+
+            </a>
+
+            <button type="button"
+
+                    class="icon-btn mobile-sidebar-close"
+
+                    id="mobileSidebarClose"
+
                     aria-label="Close navigation">
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path
-                            d="M21 17.9996V19.9996H3V17.9996H21ZM7 3.5V13.5L2 8.49955L7 3.5ZM21 10.9996V12.9996H12V10.9996H21ZM21 3.99955V5.99955H12V3.99955H21Z" />
+
+                <svg viewBox="0 0 24 24"
+
+                     fill="currentColor">
+
+                    <path
+
+                        d="M21 17.9996V19.9996H3V17.9996H21ZM7 3.5V13.5L2 8.49955L7 3.5ZM21 10.9996V12.9996H12V10.9996H21ZM21 3.99955V5.99955H12V3.99955H21Z" />
+
+                </svg>
+
+            </button>
+
+        </div>
+
+        <!-- =====================================================
+
+             NAVIGATION
+
+             ===================================================== -->
+
+        <nav aria-label="Main navigation">
+            <div class="sidebar-section">
+
+                <!-- Dashboard -->
+                <a href="{% url 'dashboard' %}"
+                   class="sidebar-link"
+                   data-page="Dashboard">
+                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M14 21C13.4477 21 13 20.5523 13 20V12C13 11.4477 13.4477 11 14 11H20C20.5523 11 21 11.4477 21 12V20C21 20.5523 20.5523 21 20 21H14ZM4 13C3.44772 13 3 12.5523 3 12V4C3 3.44772 3.44772 3 4 3H10C10.5523 3 11 3.44772 11 4V12C11 12.5523 10 13 10 13H4ZM9 11V5H5V11H9ZM4 21C3.44772 21 3 20.5523 3 20V16C3 15.4477 3.44772 15 4 15H10C10.5523 15 11 15.4477 11 16V20C11 20.5523 10 21 10 21H4ZM5 19H9V17H5V19ZM15 19H19V13H15V19ZM13 4C13 3.44772 13 3 14 3H20C20.5523 3 21 3.44772 22 4V8C22 8.55228 21.5523 9 20 9H14C13.4477 9 13 8.55228 13 8V4ZM15 5V7H19V5H15Z"/>
+                    </svg>
+                    <span class="sidebar-label">Dashboard</span>
+                </a>
+
+                <!-- Masters -->
+                <button type="button"
+                        class="sidebar-link"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#sidebarMasters"
+                        aria-expanded="false"
+                        aria-controls="sidebarMasters">
+                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M12 2L2 7L12 12L22 7L12 2ZM4 12L12 16L20 12V16L12 20L4 16V12Z"/>
+                    </svg>
+                    <span class="sidebar-label">Masters</span>
+                    <svg class="sidebar-toggle-arrow" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M11.9999 13.1714L16.9497 8.22168L18.3639 9.63589L11.9999 15.9999L5.63599 9.63589L7.0502 8.22168L11.9999 13.1714Z"/>
                     </svg>
                 </button>
-            </div>
 
-            <nav>
-                <div class="sidebar-section">
-                    <div class="sidebar-section-title">Navigation</div>
-
-                    <a href="{% url 'dashboard' %}" class="sidebar-link" data-page="Dashboard">
-                        <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path
-                                d="M14 21C13.4477 21 13 20.5523 13 20V12C13 11.4477 13.4477 11 14 11H20C20.5523 11 21 11.4477 21 12V20C21 20.5523 20.5523 21 20 21H14ZM4 13C3.44772 13 3 12.5523 3 12V4C3 3.44772 3.44772 3 4 3H10C10.5523 3 11 3.44772 11 4V12C11 12.5523 10.5523 13 10 13H4ZM9 11V5H5V11H9ZM4 21C3.44772 21 3 20.5523 3 20V16C3 15.4477 3.44772 15 4 15H10C10.5523 15 11 15.4477 11 16V20C11 20.5523 10.5523 21 10 21H4ZM5 19H9V17H5V19ZM15 19H19V13H15V19ZM13 4C13 3.44772 13.4477 3 14 3H20C20.5523 3 21 3.44772 21 4V8C21 8.55228 20.5523 9 20 9H14C13.4477 9 13 8.55228 13 8V4ZM15 5V7H19V5H15Z" />
-                        </svg>
-                        <span class="sidebar-label">Dashboard</span>
-                    </a>
-                    <button type="button" class="sidebar-link" data-bs-toggle="collapse" data-bs-target="#masters"
-                        aria-expanded="false">
-                        <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path
-                                d="M21 21H3C2.44772 21 2 20.5523 2 20V12.4868C2 12.1978 2.12501 11.9229 2.34282 11.733L6 8.54435V4C6 3.44772 6.44772 3 7 3H21C21.5523 3 22 3.44772 22 4V20C22 20.5523 21.5523 21 21 21ZM9 19H12V12.9416L8 9.45402L4 12.9416V19H7V15H9V19ZM14 19H20V5H8V7.12729C8.23444 7.12729 8.46888 7.20938 8.65718 7.37355L13.6572 11.733C13.875 11.9229 14 12.1978 14 12.4868V19ZM16 11H18V13H16V11ZM16 15H18V17H16V15ZM16 7H18V9H16V7ZM12 7H14V9H12V7Z" />
-                        </svg>
-                        <span class="sidebar-label">Masters</span>
-                        <svg class="sidebar-toggle-arrow" viewBox="0 0 24 24" fill="currentColor">
-                            <path
-                                d="M11.9999 13.1714L16.9497 8.22168L18.3639 9.63589L11.9999 15.9999L5.63599 9.63589L7.0502 8.22168L11.9999 13.1714Z" />
-                        </svg>
-                    </button>
-                    <div class="collapse" id="masters">
-                        <div class="submenu">
-                            <a href="{% url 'users' %}" class="sidebar-link">
-                                <svg viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M12 13H4V11H12V4L20 12L12 20V13Z" />
-                                </svg>
-                                <span class="sidebar-label">User Master</span>
-                            </a>
-                            <a href="{% url 'roles' %}" class="sidebar-link">
-                                <svg viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M12 13H4V11H12V4L20 12L12 20V13Z" />
-                                </svg>
-                                <span class="sidebar-label">Role Master</span>
-                            </a>
-                            <a href="{% url 'district_master' %}" class="sidebar-link">
-                                <svg viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M12 13H4V11H12V4L20 12L12 20V13Z" />
-                                </svg>
-                                <span class="sidebar-label">District Master</span>
-                            </a>
-                            <a href="{% url 'ulbs' %}" class="sidebar-link">
-                                <svg viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M12 13H4V11H12V4L20 12L12 20V13Z" />
-                                </svg>
-                                <span class="sidebar-label">ULB Master</span>
-                            </a>
-                            <a href="{% url 'zones' %}" class="sidebar-link">
-                                <svg viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M12 13H4V11H12V4L20 12L12 20V13Z" />
-                                </svg>
-                                <span class="sidebar-label">Zone Master</span>
-                            </a>
-                            <a href="{% url 'wards' %}" class="sidebar-link">
-                                <svg viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M12 13H4V11H12V4L20 12L12 20V13Z" />
-                                </svg>
-                                <span class="sidebar-label">Ward Master</span>
-                            </a>
-                            <a href="{% url 'trade_categories' %}" class="sidebar-link">
-                                <svg viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M12 13H4V11H12V4L20 12L12 20V13Z" />
-                                </svg>
-                                <span class="sidebar-label">Trade Category Master</span>
-                            </a>
-                            <a href="{% url 'workflows' %}" class="sidebar-link">
-                                <svg viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M12 13H4V11H12V4L20 12L12 20V13Z" />
-                                </svg>
-                                <span class="sidebar-label">Workflow Master</span>
-                            </a>
-                            <a href="{% url 'workflow_steps' %}" class="sidebar-link">
-                                <svg viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M12 13H4V11H12V4L20 12L12 20V13Z" />
-                                </svg>
-                                <span class="sidebar-label">Workflow Step Master</span>
-                            </a>
-                        </div>
-                    </div>
-                    <button type="button" class="sidebar-link" data-bs-toggle="collapse" data-bs-target="#tradelicence"
-                        aria-expanded="false">
-                        <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path
-                                d="M21 21H3C2.44772 21 2 20.5523 2 20V12.4868C2 12.1978 2.12501 11.9229 2.34282 11.733L6 8.54435V4C6 3.44772 6.44772 3 7 3H21C21.5523 3 22 3.44772 22 4V20C22 20.5523 21.5523 21 21 21ZM9 19H12V12.9416L8 9.45402L4 12.9416V19H7V15H9V19ZM14 19H20V5H8V7.12729C8.23444 7.12729 8.46888 7.20938 8.65718 7.37355L13.6572 11.733C13.875 11.9229 14 12.1978 14 12.4868V19ZM16 11H18V13H16V11ZM16 15H18V17H16V15ZM16 7H18V9H16V7ZM12 7H14V9H12V7Z" />
-                        </svg>
-                    <span class="sidebar-label">Trade Licence</span>
-                        <svg class="sidebar-toggle-arrow" viewBox="0 0 24 24" fill="currentColor">
-                            <path
-                                d="M11.9999 13.1714L16.9497 8.22168L18.3639 9.63589L11.9999 15.9999L5.63599 9.63589L7.0502 8.22168L11.9999 13.1714Z" />
-                        </svg>
-                    </button>
-                    <div class="collapse" id="tradelicence">
-                        <div class="submenu">
-                            <a href="{% url 'new_application' %}" class="sidebar-link">
-                                <svg viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M12 13H4V11H12V4L20 12L12 20V13Z" />
-                                </svg>
-                                <span class="sidebar-label">New Application</span>
-                            </a>
-                            <a href="#" class="sidebar-link">
-                                <svg viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M12 13H4V11H12V4L20 12L12 20V13Z" />
-                                </svg>
-                                <span class="sidebar-label">My Application</span>
-                            </a>
-                            <a href="#" class="sidebar-link">
-                                <svg viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M12 13H4V11H12V4L20 12L12 20V13Z" />
-                                </svg>
-                                <span class="sidebar-label">Track Application</span>
-                            </a>
-                            <a href="#" class="sidebar-link">
-                                <svg viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M12 13H4V11H12V4L20 12L12 20V13Z" />
-                                </svg>
-                                <span class="sidebar-label">Appatti Application</span>
-                            </a>
-
-                    <button type="button" class="sidebar-link" data-bs-toggle="collapse" data-bs-target="#reports"
-                        aria-expanded="false">
-                        <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path
-                                d="M11 7H13V17H11V7ZM15 11H17V17H15V11ZM7 13H9V17H7V13ZM15 4H5V20H19V8H15V4ZM3 2.9918C3 2.44405 3.44749 2 3.9985 2H16L20.9997 7L21 20.9925C21 21.5489 20.5551 22 20.0066 22H3.9934C3.44476 22 3 21.5447 3 21.0082V2.9918Z" />
-                        </svg>
-                        <span class="sidebar-label">Reports</span>
-                        <svg class="sidebar-toggle-arrow" viewBox="0 0 24 24" fill="currentColor">
-                            <path
-                                d="M11.9999 13.1714L16.9497 8.22168L18.3639 9.63589L11.9999 15.9999L5.63599 9.63589L7.0502 8.22168L11.9999 13.1714Z" />
-                        </svg>
-                    </button>
-                    <div class="collapse" id="reports">
-                        <div class="submenu">
-                            <a href="#" class="sidebar-link">
-                                <svg viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M12 13H4V11H12V4L20 12L12 20V13Z" />
-                                </svg>
-                                <span class="sidebar-label">Trade Licence Report</span>
-                            </a>
-                            <a href="#" class="sidebar-link">
-                                <svg viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M12 13H4V11H12V4L20 12L12 20V13Z" />
-                                </svg>
-                                <span class="sidebar-label">Transaction Report</span>
-                            </a>
-                        </div>
+                <div class="collapse" id="sidebarMasters">
+                    <div class="submenu">
+                        <a href="{% url 'users' %}" class="sidebar-link">
+                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 12C14.21 12 16 10.21 16 8S14.21 4 12 4 8 5.79 8 8 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z"/></svg>
+                            <span class="sidebar-label">Users</span>
+                        </a>
+                        <a href="{% url 'roles' %}" class="sidebar-link">
+                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 1L3 5V11C3 16.55 6.84 21.74 12 23C17.16 21.74 21 16.55 21 11V5L12 1ZM10 16L6 12L7.41 10.59L10 13.17L16.59 6.58L18 8L10 16Z"/></svg>
+                            <span class="sidebar-label">Roles</span>
+                        </a>
+                        <a href="{% url 'district_master' %}" class="sidebar-link">
+                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22S19 14.25 19 9C19 5.13 15.87 2 12 2ZM12 11.5C10.62 11.5 9.5 10.38 9.5 9S10.62 6.5 12 6.5 14.5 7.62 14.5 9 13.38 11.5 12 11.5Z"/></svg>
+                            <span class="sidebar-label">District</span>
+                        </a>
+                        <a href="{% url 'ulbs' %}" class="sidebar-link">
+                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 21V7L12 3L21 7V21H14V14H10V21H3ZM5 8.3V19H8V12H16V19H19V8.3L12 5.2L5 8.3Z"/></svg>
+                            <span class="sidebar-label">ULB</span>
+                        </a>
+                        <a href="{% url 'zones' %}" class="sidebar-link">
+                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 3H11V11H3V3ZM13 3H21V11H13V3ZM3 13H11V21H3V13ZM13 13H21V21H13V13Z"/></svg>
+                            <span class="sidebar-label">Zone</span>
+                        </a>
+                        <a href="{% url 'wards' %}" class="sidebar-link">
+                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 4H20V20H4V4ZM6 6V18H18V6H6ZM8 8H16V10H8V8ZM8 12H16V14H8V12Z"/></svg>
+                            <span class="sidebar-label">Ward</span>
+                        </a>
+                        <a href="{% url 'workflows' %}" class="sidebar-link">
+                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 4H10V10H4V4ZM14 4H20V10H14V4ZM9 7H15V9H9V7ZM4 14H10V20H4V14ZM14 14H20V20H14V14ZM9 16H15V18H9V16Z"/></svg>
+                            <span class="sidebar-label">Workflow</span>
+                        </a>
+                        <a href="{% url 'workflow_steps' %}" class="sidebar-link">
+                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 5H20V7H4V5ZM4 11H20V13H4V11ZM4 17H20V19H4V17Z"/></svg>
+                            <span class="sidebar-label">Workflow Steps</span>
+                        </a>
                     </div>
                 </div>
-            </nav>
-        </aside>
 
-        <div class="mobile-overlay" id="mobileOverlay" aria-hidden="true"></div>
+                <!-- Birth/Death Registration -->
+                <button type="button"
+                        class="sidebar-link"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#birthDeathRegistration"
+                        aria-expanded="false"
+                        aria-controls="birthDeathRegistration">
+                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M19 2H5C3.895 2 3 2.895 3 4V20C3 21.105 3.895 22 5 22H19C20.105 22 21 21.105 21 20V4C21 2.895 20.105 2 19 2ZM19 20H5V4H19V20ZM7 6H17V8H7V6ZM7 10H17V12H7V10ZM7 14H12V16H7V14Z"/>
+                    </svg>
+                    <span class="sidebar-label">Birth/Death Registration</span>
+                    <svg class="sidebar-toggle-arrow" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M11.9999 13.1714L16.9497 8.22168L18.3639 9.63589L11.9999 15.9999L5.63599 9.63589L7.0502 8.22168L11.9999 13.1714Z"/>
+                    </svg>
+                </button>
 
-        <!-- Main wrapper -->
-        <div class="main-wrapper">
+                <div class="collapse" id="birthDeathRegistration">
+                    <div class="submenu birth-death-submenu">
+                        <a href="{% url 'birth_registration' %}" class="sidebar-link">
+                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 3H14.82C14.4 1.84 13.3 1 12 1C10.7 1 9.6 1.84 9.18 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM12 3C12.55 3 13 3.45 13 4C13 4.55 12.55 5 12 5C11.45 5 11 4.55 11 4C11 3.45 11.45 3 12 3ZM19 19H5V5H7V7H17V5H19V19Z"/></svg>
+                            <span class="sidebar-label">Birth Registration</span>
+                        </a>
+                        <a href="{% url 'death_registration' %}" class="sidebar-link">
+                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C7.03 2 3 6.03 3 11C3 14.31 4.81 17.19 7.5 18.63V22H16.5V18.63C19.19 17.19 21 14.31 21 11C21 6.03 16.97 2 12 2ZM14.5 20H9.5V18H14.5V20ZM11 7H13V10H16V12H13V15H11V12H8V10H11V7Z"/></svg>
+                            <span class="sidebar-label">Death Registration</span>
+                        </a>
+                        <a href="{% url 'still_birth_registration' %}" class="sidebar-link">
+                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C8.69 2 6 4.69 6 8V10H4C2.9 10 2 10.9 2 12V19C2 20.1 2.9 21 4 21H20C21.1 21 22 20.1 22 19V12C22 10.9 21.1 10 20 10H18V8C18 4.69 15.31 2 12 2ZM8 8C8 5.79 9.79 4 12 4C14.21 4 16 5.79 16 8V10H8V8ZM20 19H4V12H20V19Z"/></svg>
+                            <span class="sidebar-label">Still Birth Registration</span>
+                        </a>
+                        <a href="{% url 'adopted_birth_registration' %}" class="sidebar-link">
+                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21C12 21 4 16.5 4 10C4 6.69 6.69 4 10 4C11.54 4 12.94 4.58 14 5.54C15.06 4.58 16.46 4 18 4C21.31 4 24 6.69 24 10C24 16.5 16 21 16 21H12Z"/></svg>
+                            <span class="sidebar-label">Adopted Birth Registration</span>
+                        </a>
+                    </div>
+                </div>
 
-            <!-- Topbar -->
-            <header class="topbar">
-                <div class="topbar-inner">
-                    <button type="button" class="icon-btn" id="sidebarToggle" aria-label="Toggle navigation sidebar"
-                        aria-expanded="true" data-bs-toggle-tooltip="tooltip" title="Navigation">
-                        <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M18 18V20H6V18H18ZM21 11V13H3V11H21ZM18 4V6H6V4H18Z" />
-                        </svg>
+            </div>
+        </nav>
+
+    </aside>
+
+    <!-- =====================================================
+
+         MOBILE OVERLAY
+
+         ===================================================== -->
+
+    <div class="mobile-overlay"
+
+         id="mobileOverlay"
+
+         aria-hidden="true">
+
+    </div>
+
+    <!-- =====================================================
+
+         MAIN WRAPPER
+
+         ===================================================== -->
+
+    <div class="main-wrapper">
+
+        <!-- =================================================
+
+             TOPBAR
+
+             ================================================= -->
+
+        <header class="topbar">
+
+            <div class="topbar-inner">
+
+                <button type="button"
+
+                        class="icon-btn"
+
+                        id="sidebarToggle"
+
+                        aria-label="Toggle navigation sidebar"
+
+                        aria-expanded="true"
+
+                        data-bs-toggle-tooltip="tooltip"
+
+                        title="Navigation">
+
+                    <svg viewBox="0 0 24 24"
+
+                         fill="currentColor">
+
+                        <path
+
+                            d="M18 18V20H6V18H18ZM21 11V13H3V11H21ZM18 4V6H6V4H18Z" />
+
+                    </svg>
+
+                </button>
+
+                <div class="header-actions">
+
+                    <!-- Theme -->
+
+                    <button type="button"
+
+                            class="icon-btn"
+
+                            id="themeToggle"
+
+                            aria-label="Toggle light and dark mode"
+
+                            data-bs-toggle-tooltip="tooltip"
+
+                            data-bs-placement="bottom"
+
+                            title="Theme">
+
+                        <i class="ri-moon-clear-line"
+
+                           id="themeIcon">
+
+                        </i>
+
                     </button>
 
-                    <div class="header-actions">
+                    <!-- User -->
 
-                        <!-- Theme toggle -->
-                        <button type="button" class="icon-btn" id="themeToggle" aria-label="Toggle light and dark mode"
-                            data-bs-toggle-tooltip="tooltip" data-bs-placement="bottom" title="Theme">
-                            <i class="ri-moon-clear-line" id="themeIcon"></i>
-                        </button>
+                    <div class="dropdown"
 
-                        <!-- User menu -->
-                        <div class="dropdown" data-bs-toggle-tooltip="tooltip" data-bs-placement="right" title="User">
-                            <button type="button" class="user-button dropdown-toggle" data-bs-toggle="dropdown"
+                         data-bs-toggle-tooltip="tooltip"
+
+                         data-bs-placement="right"
+
+                         title="User">
+
+                        <button type="button"
+
+                                class="user-button dropdown-toggle"
+
+                                data-bs-toggle="dropdown"
+
                                 aria-expanded="false">
-                                <span class="avatar">{{ auth_user.get_full_name|slice:":2"|upper }}</span>
-                                <span class="userBlock">
-                                    <span class="user-name d-block">{{ auth_user.get_full_name }}</span>
-                                    <span class="user-role d-block">{{ auth_user.get_role_display }}</span>
+
+                            <span class="avatar">
+
+                                {{ auth_user.get_full_name|slice:":2"|upper }}
+
+                            </span>
+
+                            <span class="userBlock">
+
+                                <span class="user-name d-block">
+
+                                    {{ auth_user.get_full_name }}
+
                                 </span>
-                            </button>
 
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li class="ps-1 uName">
-                                    <span class="dropdown-item">
-                                        <span class="user-name d-block">{{ auth_user.get_full_name }}</span>
-                                        <span class="user-role d-block">{{ auth_user.get_role_display }}</span>
-                                    </span>
-                                </li>
-                                <li class="uNameDivider">
-                                    <hr class="dropdown-divider">
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        <svg class="me-1 mb-1" width="16" height="16" viewBox="0 0 24 24"
-                                            fill="currentColor">
-                                            <path
-                                                d="M4 22C4 17.5817 7.58172 14 12 14C16.4183 14 20 17.5817 20 22H18C18 18.6863 15.3137 16 12 16C8.68629 16 6 18.6863 6 22H4ZM12 13C8.685 13 6 10.315 6 7C6 3.685 8.685 1 12 1C15.315 1 18 3.685 18 7C18 10.315 15.315 13 12 13ZM12 11C14.21 11 16 9.21 16 7C16 4.79 14.21 3 12 3C9.79 3 8 4.79 8 7C8 9.21 9.79 11 12 11Z" />
-                                        </svg>
-                                        Profile
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        <svg class="me-1 mb-1" width="16" height="16" viewBox="0 0 24 24"
-                                            fill="currentColor">
-                                            <path
-                                                d="M18 8H20C20.5523 8 21 8.44772 21 9V21C21 21.5523 20.5523 22 20 22H4C3.44772 22 3 21.5523 3 21V9C3 8.44772 3.44772 8 4 8H6V7C6 3.68629 8.68629 1 12 1C15.3137 1 18 3.68629 18 7V8ZM5 10V20H19V10H5ZM11 14H13V16H11V14ZM7 14H9V16H7V14ZM15 14H17V16H15V14ZM16 8V7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7V8H16Z" />
-                                        </svg>
-                                        Change Password
-                                    </a>
-                                </li>
-                                <li>
-                                    <hr class="dropdown-divider">
-                                </li>
-                                <li>
-                                    <button type="button" class="dropdown-item text-danger" id="dropdownLogout">
-                                        <svg class="me-1 mb-1" width="16" height="16" viewBox="0 0 24 24"
-                                            fill="currentColor">
-                                            <path
-                                                d="M5 22C4.44772 22 4 21.5523 4 21V3C4 2.44772 4.44772 2 5 2H19C19.5523 2 20 2.44772 20 3V6H18V4H6V20H18V18H20V21C20 21.5523 19.5523 22 19 22H5ZM18 16V13H11V11H18V8L23 12L18 16Z" />
-                                        </svg>
-                                        Logout
-                                    </button>
-                                </li>
-                            </ul>
-                        </div>
+                                <span class="user-role d-block">
 
-                        <!-- Quick logout button -->
-                        <button type="button" class="icon-btn" id="logoutBtn" aria-label="Logout"
-                            data-bs-toggle-tooltip="tooltip" data-bs-placement="bottom" title="Logout">
-                            <svg viewBox="0 0 24 24" fill="currentColor">
-                                <path
-                                    d="M5 22C4.44772 22 4 21.5523 4 21V3C4 2.44772 4.44772 2 5 2H19C19.5523 2 20 2.44772 20 3V6H18V4H6V20H18V18H20V21C20 21.5523 19.5523 22 19 22H5ZM18 16V13H11V11H18V8L23 12L18 16Z" />
-                            </svg>
+                                    {{ auth_user.get_role_display }}
+
+                                </span>
+
+                            </span>
+
                         </button>
 
+                        <ul class="dropdown-menu dropdown-menu-end">
+
+                            <li class="ps-1 uName">
+
+                                <span class="dropdown-item">
+
+                                    <span class="user-name d-block">
+
+                                        {{ auth_user.get_full_name }}
+
+                                    </span>
+
+                                    <span class="user-role d-block">
+
+                                        {{ auth_user.get_role_display }}
+
+                                    </span>
+
+                                </span>
+
+                            </li>
+
+                            <li class="uNameDivider">
+
+                                <hr class="dropdown-divider">
+
+                            </li>
+
+                            <li>
+
+                                <a class="dropdown-item"
+
+                                   href="#">
+
+                                    Profile
+
+                                </a>
+
+                            </li>
+
+                            <li>
+
+                                <a class="dropdown-item"
+
+                                   href="#">
+
+                                    Change Password
+
+                                </a>
+
+                            </li>
+
+                            <li>
+
+                                <hr class="dropdown-divider">
+
+                            </li>
+
+                            <li>
+
+                                <button type="button"
+
+                                        class="dropdown-item text-danger"
+
+                                        id="dropdownLogout">
+
+                                    Logout
+
+                                </button>
+
+                            </li>
+
+                        </ul>
+
                     </div>
+
+                    <!-- Quick Logout -->
+
+                    <button type="button"
+
+                            class="icon-btn"
+
+                            id="logoutBtn"
+
+                            aria-label="Logout"
+
+                            data-bs-toggle-tooltip="tooltip"
+
+                            data-bs-placement="bottom"
+
+                            title="Logout">
+
+                        <svg viewBox="0 0 24 24"
+
+                             fill="currentColor">
+
+                            <path
+
+                                d="M5 22C4.44772 22 4 21.5523 4 21V3C4 2.44772 4.44772 2 5 2H19C19.5523 2 20 2.44772 20 3V6H18V4H6V20H18V18H20V21C20 21.5523 19.5523 22 19 22H5ZM18 16V13H11V11H18V8L23 12L18 16Z" />
+
+                        </svg>
+
+                    </button>
+
                 </div>
-            </header>
 
-            {% block content %}{% endblock %}
+            </div>
 
-        </div>
+        </header>
+
+        <!-- =================================================
+
+             PAGE CONTENT
+
+             ================================================= -->
+
+        {% block content %}
+
+        {% endblock %}
+
     </div>
 
-    <!-- Toast container -->
-    <div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-0"
-        style="margin-top:20px; margin-right:10px; z-index:1090;"></div>
+</div>
 
-    <script src="{% static 'js/jquery/jquery.min.js' %}"></script>
-    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
-    <script src="{% static 'js/jquery/jquery.scrollbar.min.js' %}"></script>
-    <script src="{% static 'choices/choices.min.js' %}"></script>
-    <script src="{% static 'js/datatables/datatables.min.js' %}"></script>
-    <script src="{% static 'js/sweetalert/sweetalert.min.js' %}"></script>
-    <script src="{% static 'js/admin.js' %}"></script>
-    <script src="{% static 'js/api.js' %}" type="module"></script>
+<!-- =====================================================
 
-    <script>
-        (function () {
-            const CSRF_COOKIE = "tl_csrftoken";
+     TOAST
 
-            function getCsrf() {
-                const row = document.cookie.split("; ").find(r => r.startsWith(CSRF_COOKIE + "="));
-                return row ? row.split("=")[1] : "";
-            }
+     ===================================================== -->
 
-            async function doLogout() {
-                try {
-                    await fetch("/api/auth/logout/", {
-                        method: "POST",
-                        credentials: "include",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "X-CSRFToken": getCsrf(),
-                        },
-                    });
-                } finally {
-                    window.location.href = "/login/";
-                }
-            }
+<div id="toastContainer"
 
-            document.getElementById("logoutBtn")?.addEventListener("click", doLogout);
-            document.getElementById("dropdownLogout")?.addEventListener("click", doLogout);
-        })();
-    </script>
+     class="toast-container position-fixed top-0 end-0 p-0"
 
-    {% block extra_js %}{% endblock %}
+     style="margin-top:20px;
 
-    <!-- Session timeout warning -->
-    <div id="sessionTimeoutModal" class="session-timeout-modal" role="dialog" aria-modal="true"
-        aria-labelledby="sessionTimeoutTitle" style="display:none;">
-        <div class="session-timeout-backdrop"></div>
-        <div class="session-timeout-dialog">
-            <div class="session-timeout-icon">
-                <svg viewBox="0 0 24 24" fill="currentColor" width="32" height="32">
-                    <path
-                        d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM11 7H13V13H11V7ZM11 15H13V17H11V15Z" />
-                </svg>
-            </div>
-            <h2 id="sessionTimeoutTitle" class="session-timeout-heading">Session Expiring Soon</h2>
-            <p class="session-timeout-body">
-                Your session will expire in <strong id="sessionTimeoutCountdown"></strong>.<br>
-                Do you want to stay signed in?
-            </p>
-            <div class="session-timeout-actions">
-                <button type="button" id="sessionTimeoutStay" class="session-timeout-btn-primary">
-                    Stay Signed In
-                </button>
-                <button type="button" id="sessionTimeoutLeave" class="session-timeout-btn-secondary">
-                    Sign Out Now
-                </button>
-            </div>
-        </div>
-    </div>
+            margin-right:10px;
 
-    <style>
-        .session-timeout-modal {
-            position: fixed;
-            inset: 0;
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+            z-index:1090;">
 
-        .session-timeout-backdrop {
-            position: absolute;
-            inset: 0;
-            background: rgba(0, 0, 0, .55);
-        }
+</div>
 
-        .session-timeout-dialog {
-            position: relative;
-            background: var(--card-bg, #fff);
-            color: var(--text-primary, #111);
-            border-radius: 12px;
-            padding: 2rem 2.25rem;
-            width: min(420px, 92vw);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, .25);
-            text-align: center;
-            animation: stm-in .18s ease-out;
-        }
+<!-- =====================================================
 
-        @keyframes stm-in {
-            from {
-                opacity: 0;
-                transform: scale(.95) translateY(-8px);
-            }
+     JS
 
-            to {
-                opacity: 1;
-                transform: scale(1) translateY(0);
-            }
-        }
+     ===================================================== -->
 
-        .session-timeout-icon {
-            color: #f59e0b;
-            margin-bottom: .75rem;
-        }
+<script src="{% static 'js/jquery/jquery.min.js' %}"></script>
 
-        .session-timeout-heading {
-            font-size: 1.125rem;
-            font-weight: 600;
-            margin: 0 0 .5rem;
-        }
+<script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
 
-        .session-timeout-body {
-            font-size: .9rem;
-            color: var(--text-secondary, #555);
-            margin: 0 0 1.5rem;
-            line-height: 1.6;
-        }
+<script src="{% static 'js/jquery/jquery.scrollbar.min.js' %}"></script>
 
-        .session-timeout-actions {
-            display: flex;
-            gap: .75rem;
-            justify-content: center;
-        }
+<script src="{% static 'choices/choices.min.js' %}"></script>
 
-        .session-timeout-btn-primary,
-        .session-timeout-btn-secondary {
-            padding: .5rem 1.25rem;
-            border-radius: 6px;
-            font-size: .875rem;
-            font-weight: 500;
-            cursor: pointer;
-            border: none;
-            transition: opacity .15s;
-        }
+<script src="{% static 'js/datatables/datatables.min.js' %}"></script>
 
-        .session-timeout-btn-primary:hover,
-        .session-timeout-btn-secondary:hover {
-            opacity: .85;
-        }
+<script src="{% static 'js/sweetalert/sweetalert.min.js' %}"></script>
 
-        .session-timeout-btn-primary {
-            background: #2563eb;
-            color: #fff;
-        }
+<script src="{% static 'js/admin.js' %}"></script>
 
-        .session-timeout-btn-secondary {
-            background: transparent;
-            color: var(--text-secondary, #555);
-            border: 1px solid var(--border-color, #ddd);
-        }
-    </style>
+<script src="{% static 'js/api.js' %}"
 
-    <script>
-        (function () {
-            const IDLE_TIMEOUT_MS = 15 * 60 * 1000;  // 15 minutes
-            const WARN_BEFORE_MS = 2 * 60 * 1000;  // warn when 2 minutes remain
-            const CSRF_COOKIE = "tl_csrftoken";
+        type="module">
 
-            function getCsrf() {
-                const row = document.cookie.split("; ").find(r => r.startsWith(CSRF_COOKIE + "="));
-                return row ? row.split("=")[1] : "";
-            }
+</script>
 
-            const modal = document.getElementById("sessionTimeoutModal");
-            const countdown = document.getElementById("sessionTimeoutCountdown");
-            const stayBtn = document.getElementById("sessionTimeoutStay");
-            const leaveBtn = document.getElementById("sessionTimeoutLeave");
+<!-- =====================================================
 
-            let idleTimer = null;
-            let warnTimer = null;
-            let countdownInt = null;
-            let warningShown = false;
+     LOGOUT
 
-            function formatSeconds(s) {
-                const m = Math.floor(s / 60);
-                const sec = s % 60;
-                return m > 0
-                    ? `${m}m ${sec.toString().padStart(2, "0")}s`
-                    : `${sec}s`;
-            }
+     ===================================================== -->
 
-            function showWarning() {
-                if (warningShown) return;
-                warningShown = true;
-                modal.style.display = "flex";
+<script>
 
-                let remaining = Math.floor(WARN_BEFORE_MS / 1000);
-                countdown.textContent = formatSeconds(remaining);
+(function () {
 
-                countdownInt = setInterval(function () {
-                    remaining -= 1;
-                    if (remaining <= 0) {
-                        clearInterval(countdownInt);
-                        countdown.textContent = "0s";
-                        doLogout();
-                        return;
+    const CSRF_COOKIE = "bd_csrftoken";
+
+    function getCsrf() {
+
+        const row =
+
+            document.cookie
+
+                .split("; ")
+
+                .find(
+
+                    r => r.startsWith(
+
+                        CSRF_COOKIE + "="
+
+                    )
+
+                );
+
+        return row
+
+            ? row.split("=")[1]
+
+            : "";
+
+    }
+
+    async function doLogout() {
+
+        try {
+
+            await fetch(
+
+                "/api/auth/logout/",
+
+                {
+
+                    method: "POST",
+
+                    credentials: "include",
+
+                    headers: {
+
+                        "Content-Type":
+
+                            "application/json",
+
+                        "X-CSRFToken":
+
+                            getCsrf()
+
                     }
-                    countdown.textContent = formatSeconds(remaining);
-                }, 1000);
-            }
 
-            function hideWarning() {
-                modal.style.display = "none";
-                warningShown = false;
-                clearInterval(countdownInt);
-            }
-
-            function resetTimers() {
-                clearTimeout(idleTimer);
-                clearTimeout(warnTimer);
-
-                warnTimer = setTimeout(showWarning, IDLE_TIMEOUT_MS - WARN_BEFORE_MS);
-                idleTimer = setTimeout(function () {
-                    if (!warningShown) doLogout();
-                }, IDLE_TIMEOUT_MS);
-            }
-
-            async function doLogout() {
-                hideWarning();
-                try {
-                    await fetch("/api/auth/logout/", {
-                        method: "POST",
-                        credentials: "include",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "X-CSRFToken": getCsrf(),
-                        },
-                    });
-                } finally {
-                    window.location.href = "/login/?next=" + encodeURIComponent(window.location.pathname);
                 }
-            }
 
-            async function keepAlive() {
-                hideWarning();
-                resetTimers();
-                try {
-                    await fetch("/api/auth/status/", {
-                        method: "GET",
-                        credentials: "include",
-                    });
-                } catch (_) { /* non-critical */ }
-            }
+            );
 
-            stayBtn.addEventListener("click", keepAlive);
-            leaveBtn.addEventListener("click", doLogout);
+        } finally {
 
-            const activityEvents = ["mousemove", "keydown", "pointerdown", "scroll", "touchstart"];
-            let activityThrottle = 0;
+            window.location.href = "/login/";
 
-            function onActivity() {
-                if (warningShown) return;
-                const now = Date.now();
-                if (now - activityThrottle < 10000) return;  // throttle to once per 10 s
-                activityThrottle = now;
-                resetTimers();
-            }
+        }
 
-            activityEvents.forEach(function (evt) {
-                document.addEventListener(evt, onActivity, { passive: true });
-            });
+    }
 
-            resetTimers();
-        })();
-    </script>
+    document
+
+        .getElementById("logoutBtn")
+
+        ?.addEventListener(
+
+            "click",
+
+            doLogout
+
+        );
+
+    document
+
+        .getElementById("dropdownLogout")
+
+        ?.addEventListener(
+
+            "click",
+
+            doLogout
+
+        );
+
+})();
+
+</script>
+
+{% block extra_js %}
+
+{% endblock %}
+
+<!-- =====================================================
+
+     SESSION TIMEOUT
+
+     ===================================================== -->
+
+<div id="sessionTimeoutModal"
+
+     class="session-timeout-modal"
+
+     role="dialog"
+
+     aria-modal="true"
+
+     aria-labelledby="sessionTimeoutTitle"
+
+     style="display:none;">
+
+    <div class="session-timeout-backdrop"></div>
+
+    <div class="session-timeout-dialog">
+
+        <div class="session-timeout-icon">
+
+            <svg viewBox="0 0 24 24"
+
+                 fill="currentColor"
+
+                 width="32"
+
+                 height="32">
+
+                <path
+
+                    d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM11 7H13V13H11V7ZM11 15H13V17H11V15Z" />
+
+            </svg>
+
+        </div>
+
+        <h2 id="sessionTimeoutTitle"
+
+            class="session-timeout-heading">
+
+            Session Expiring Soon
+
+        </h2>
+
+        <p class="session-timeout-body">
+
+            Your session will expire in
+
+            <strong id="sessionTimeoutCountdown"></strong>.
+
+            <br>
+
+            Do you want to stay signed in?
+
+        </p>
+
+        <div class="session-timeout-actions">
+
+            <button type="button"
+
+                    id="sessionTimeoutStay"
+
+                    class="session-timeout-btn-primary">
+
+                Stay Signed In
+
+            </button>
+
+            <button type="button"
+
+                    id="sessionTimeoutLeave"
+
+                    class="session-timeout-btn-secondary">
+
+                Sign Out Now
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<style>
+
+.session-timeout-modal {
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 9999;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+}
+
+.session-timeout-backdrop {
+
+    position: absolute;
+
+    inset: 0;
+
+    background:
+
+        rgba(0, 0, 0, .55);
+
+}
+
+.session-timeout-dialog {
+
+    position: relative;
+
+    background:
+
+        var(--card-bg, #fff);
+
+    color:
+
+        var(--text-primary, #111);
+
+    border-radius: 12px;
+
+    padding:
+
+        2rem 2.25rem;
+
+    width:
+
+        min(420px, 92vw);
+
+    box-shadow:
+
+        0 20px 60px
+
+        rgba(0, 0, 0, .25);
+
+    text-align: center;
+
+    animation:
+
+        stm-in .18s ease-out;
+
+}
+
+@keyframes stm-in {
+
+    from {
+
+        opacity: 0;
+
+        transform:
+
+            scale(.95)
+
+            translateY(-8px);
+
+    }
+
+    to {
+
+        opacity: 1;
+
+        transform:
+
+            scale(1)
+
+            translateY(0);
+
+    }
+
+}
+
+.session-timeout-icon {
+
+    color:
+
+        #f59e0b;
+
+    margin-bottom:
+
+        .75rem;
+
+}
+
+.session-timeout-heading {
+
+    font-size:
+
+        1.125rem;
+
+    font-weight:
+
+        600;
+
+    margin:
+
+        0 0 .5rem;
+
+}
+
+.session-timeout-body {
+
+    font-size:
+
+        .9rem;
+
+    color:
+
+        var(--text-secondary, #555);
+
+    margin:
+
+        0 0 1.5rem;
+
+    line-height:
+
+        1.6;
+
+}
+
+.session-timeout-actions {
+
+    display:
+
+        flex;
+
+    gap:
+
+        .75rem;
+
+    justify-content:
+
+        center;
+
+}
+
+.session-timeout-btn-primary,
+
+.session-timeout-btn-secondary {
+
+    padding:
+
+        .5rem 1.25rem;
+
+    border-radius:
+
+        6px;
+
+    font-size:
+
+        .875rem;
+
+    font-weight:
+
+        500;
+
+    cursor:
+
+        pointer;
+
+    border:
+
+        none;
+
+    transition:
+
+        opacity .15s;
+
+}
+
+.session-timeout-btn-primary:hover,
+
+.session-timeout-btn-secondary:hover {
+
+    opacity:
+
+        .85;
+
+}
+
+.session-timeout-btn-primary {
+
+    background:
+
+        #2563eb;
+
+    color:
+
+        #fff;
+
+}
+
+.session-timeout-btn-secondary {
+
+    background:
+
+        transparent;
+
+    color:
+
+        var(--text-secondary, #555);
+
+    border:
+
+        1px solid
+
+        var(--border-color, #ddd);
+
+}
+
+</style>
+
+<script>
+
+(function () {
+
+    const IDLE_TIMEOUT_MS =
+
+        15 \* 60 \* 1000;
+
+    const WARN_BEFORE_MS =
+
+        2 \* 60 \* 1000;
+
+    const CSRF_COOKIE =
+
+        "bd_csrftoken";
+
+    function getCsrf() {
+
+        const row =
+
+            document.cookie
+
+                .split("; ")
+
+                .find(
+
+                    r => r.startsWith(
+
+                        CSRF_COOKIE + "="
+
+                    )
+
+                );
+
+        return row
+
+            ? row.split("=")[1]
+
+            : "";
+
+    }
+
+    const modal =
+
+        document.getElementById(
+
+            "sessionTimeoutModal"
+
+        );
+
+    const countdown =
+
+        document.getElementById(
+
+            "sessionTimeoutCountdown"
+
+        );
+
+    const stayBtn =
+
+        document.getElementById(
+
+            "sessionTimeoutStay"
+
+        );
+
+    const leaveBtn =
+
+        document.getElementById(
+
+            "sessionTimeoutLeave"
+
+        );
+
+    let idleTimer = null;
+
+    let warnTimer = null;
+
+    let countdownInt = null;
+
+    let warningShown = false;
+
+    function formatSeconds(s) {
+
+        const m =
+
+            Math.floor(s / 60);
+
+        const sec =
+
+            s % 60;
+
+        return m > 0
+
+            ? \`${m}m ${sec
+
+                .toString()
+
+                .padStart(2, "0")}s\`
+
+            : \`${sec}s\`;
+
+    }
+
+    function showWarning() {
+
+        if (warningShown)
+
+            return;
+
+        warningShown = true;
+
+        modal.style.display =
+
+            "flex";
+
+        let remaining =
+
+            Math.floor(
+
+                WARN_BEFORE_MS / 1000
+
+            );
+
+        countdown.textContent =
+
+            formatSeconds(remaining);
+
+        countdownInt =
+
+            setInterval(
+
+                function () {
+
+                    remaining -= 1;
+
+                    if (remaining <= 0) {
+
+                        clearInterval(
+
+                            countdownInt
+
+                        );
+
+                        countdown.textContent =
+
+                            "0s";
+
+                        doLogout();
+
+                        return;
+
+                    }
+
+                    countdown.textContent =
+
+                        formatSeconds(
+
+                            remaining
+
+                        );
+
+                },
+
+                1000
+
+            );
+
+    }
+
+    function hideWarning() {
+
+        modal.style.display =
+
+            "none";
+
+        warningShown =
+
+            false;
+
+        clearInterval(
+
+            countdownInt
+
+        );
+
+    }
+
+    function resetTimers() {
+
+        clearTimeout(
+
+            idleTimer
+
+        );
+
+        clearTimeout(
+
+            warnTimer
+
+        );
+
+        warnTimer =
+
+            setTimeout(
+
+                showWarning,
+
+                IDLE_TIMEOUT_MS -
+
+                WARN_BEFORE_MS
+
+            );
+
+        idleTimer =
+
+            setTimeout(
+
+                function () {
+
+                    if (!warningShown)
+
+                        doLogout();
+
+                },
+
+                IDLE_TIMEOUT_MS
+
+            );
+
+    }
+
+    async function doLogout() {
+
+        hideWarning();
+
+        try {
+
+            await fetch(
+
+                "/api/auth/logout/",
+
+                {
+
+                    method:
+
+                        "POST",
+
+                    credentials:
+
+                        "include",
+
+                    headers: {
+
+                        "Content-Type":
+
+                            "application/json",
+
+                        "X-CSRFToken":
+
+                            getCsrf()
+
+                    }
+
+                }
+
+            );
+
+        } finally {
+
+            window.location.href =
+
+                "/login/?next=" +
+
+                encodeURIComponent(
+
+                    window.location.pathname
+
+                );
+
+        }
+
+    }
+
+    async function keepAlive() {
+
+        hideWarning();
+
+        resetTimers();
+
+        try {
+
+            await fetch(
+
+                "/api/auth/status/",
+
+                {
+
+                    method:
+
+                        "GET",
+
+                    credentials:
+
+                        "include"
+
+                }
+
+            );
+
+        } catch (\_) {
+
+            /\* non-critical \*/
+
+        }
+
+    }
+
+    stayBtn.addEventListener(
+
+        "click",
+
+        keepAlive
+
+    );
+
+    leaveBtn.addEventListener(
+
+        "click",
+
+        doLogout
+
+    );
+
+    const activityEvents = [
+
+        "mousemove",
+
+        "keydown",
+
+        "pointerdown",
+
+        "scroll",
+
+        "touchstart"
+
+    ];
+
+    let activityThrottle = 0;
+
+    function onActivity() {
+
+        if (warningShown)
+
+            return;
+
+        const now =
+
+            Date.now();
+
+        if (
+
+            now -
+
+            activityThrottle <
+
+            10000
+
+        )
+
+            return;
+
+        activityThrottle =
+
+            now;
+
+        resetTimers();
+
+    }
+
+    activityEvents.forEach(
+
+        function (evt) {
+
+            document.addEventListener(
+
+                evt,
+
+                onActivity,
+
+                {
+
+                    passive: true
+
+                }
+
+            );
+
+        }
+
+    );
+
+    resetTimers();
+
+})();
+
+</script>
 
 </body>
 

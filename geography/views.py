@@ -1,9 +1,8 @@
 from rest_framework import viewsets, mixins
-
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter
 
 from .models import District, ULB, Zone, Ward
-
 from .serializers import (
     DistrictSerializer,
     ULBSerializer,
@@ -19,7 +18,7 @@ class DistrictViewSet(
 ):
     queryset = District.objects.all()
     serializer_class = DistrictSerializer
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_fields = ['is_active']
     search_fields = ['code', 'name']
 
@@ -31,9 +30,10 @@ class ULBViewSet(
 ):
     queryset = ULB.objects.all().select_related('district')
     serializer_class = ULBSerializer
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_fields = ['district', 'ulb_type', 'is_active']
     search_fields = ['code', 'name']
+
 
 class ZoneViewSet(
     mixins.CreateModelMixin,
@@ -42,7 +42,7 @@ class ZoneViewSet(
 ):
     queryset = Zone.objects.all().select_related('ulb')
     serializer_class = ZoneSerializer
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_fields = ['ulb', 'is_active']
     search_fields = ['code', 'name']
 
@@ -54,6 +54,6 @@ class WardViewSet(
 ):
     queryset = Ward.objects.all().select_related('zone__ulb')
     serializer_class = WardSerializer
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_fields = ['zone', 'is_active']
     search_fields = ['code', 'name']

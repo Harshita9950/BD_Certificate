@@ -1,0 +1,797 @@
+{% extends 'Authority/base.html' %}
+{% load static %}
+
+{% block title %}Death Registration Application{% endblock %}
+
+{% block content %}
+
+<main class="content">
+
+    <section class="page-inner d-flex align-items-left align-items-md-center
+                    flex-column flex-md-row pt-2 pb-3">
+
+        <div class="page-heading">
+
+            <h1 class="page-title">Death Registration</h1>
+
+            <nav aria-label="breadcrumb">
+
+                <ol class="breadcrumb">
+
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}">
+                            Dashboard
+                        </a>
+                    </li>
+
+                    <li class="breadcrumb-item">
+                        Death Registration
+                    </li>
+
+                    <li class="breadcrumb-item active">
+                        New Application
+                    </li>
+
+                </ol>
+
+            </nav>
+
+        </div>
+
+    </section>
+
+
+    <section class="mb-4">
+
+        <div class="card">
+
+            <div class="card-body p-4">
+
+                <div class="section-heading mb-4">
+
+                    <h4 class="fw-bold">
+                        Death Registration Application
+                    </h4>
+
+                    <p class="text-muted mb-0">
+                        Fields marked with
+                        <span class="star-required">*</span>
+                        are required.
+                    </p>
+
+                </div>
+
+
+                <form id="deathApplicationForm"
+                      method="POST"
+                      enctype="multipart/form-data"
+                      class="needs-validation"
+                      novalidate>
+
+                    {% csrf_token %}
+
+
+                    <!-- ================= APPLICATION ================= -->
+
+                    <div class="form-section">
+
+                        <h5>Application Details</h5>
+
+                        <div class="row g-4">
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Service Type
+                                    <span class="star-required">*</span>
+                                </label>
+
+                                <select class="form-select"
+                                        name="service_type"
+                                        required>
+
+                                    <option value="">
+                                        Select Service
+                                    </option>
+
+                                    <option value="DEATH_REGISTRATION">Death Registration</option>
+
+                                </select>
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Registration Type
+                                    <span class="star-required">*</span>
+                                </label>
+
+                                <select class="form-select"
+                                        name="registration_type"
+                                        required>
+
+                                    <option value="">
+                                        Select Registration Type
+                                    </option>
+
+                                    {% for registration_type in registration_types %}
+                                        <option value="{{ registration_type.pk }}">
+                                            {{ registration_type.name }}
+                                        </option>
+                                    {% endfor %}
+
+                                </select>
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Date of Reporting
+                                    <span class="star-required">*</span>
+                                </label>
+
+                                <input type="date"
+                                       class="form-control"
+                                       id="date_of_reporting"
+                                       name="date_of_reporting"
+                                       required>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ================= DECEASED ================= -->
+
+                    <div class="form-section">
+
+                        <h5>Deceased Person Details</h5>
+
+                        <div class="row g-4">
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    First Name
+                                    <span class="star-required">*</span>
+                                </label>
+
+                                <input type="text"
+                                       class="form-control"
+                                       name="deceased_first_name"
+                                       maxlength="100"
+                                       required>
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Middle Name
+                                </label>
+
+                                <input type="text"
+                                       class="form-control"
+                                       name="deceased_middle_name"
+                                       maxlength="100">
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Last Name
+                                </label>
+
+                                <input type="text"
+                                       class="form-control"
+                                       name="deceased_last_name"
+                                       maxlength="100">
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Sex
+                                    <span class="star-required">*</span>
+                                </label>
+
+                                <select class="form-select"
+                                        name="sex"
+                                        required>
+
+                                    <option value="">
+                                        Select Sex
+                                    </option>
+
+                                    <option value="MALE">Male</option>
+                                    <option value="FEMALE">Female</option>
+                                    <option value="OTHER">Other / Intersex</option>
+                                    <option value="UNKNOWN">Unknown / Not Determined</option>
+
+                                </select>
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Date of Birth
+                                </label>
+
+                                <input type="date"
+                                       class="form-control"
+                                       name="date_of_birth_of_deceased">
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Nationality
+                                </label>
+
+                                <input type="text"
+                                       class="form-control"
+                                       name="nationality"
+                                       value="Indian"
+                                       maxlength="100">
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Date of Death
+                                    <span class="star-required">*</span>
+                                </label>
+
+                                <input type="date"
+                                       class="form-control"
+                                       id="date_of_death"
+                                       name="date_of_death"
+                                       required>
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Time of Death
+                                </label>
+
+                                <input type="time"
+                                       class="form-control"
+                                       name="time_of_death">
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ================= AGE ================= -->
+
+                    <div class="form-section">
+
+                        <h5>Age at Death</h5>
+
+                        <div class="row g-4">
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Years
+                                </label>
+
+                                <input type="number"
+                                       class="form-control"
+                                       name="age_at_death_years"
+                                       min="0">
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Months
+                                </label>
+
+                                <input type="number"
+                                       class="form-control"
+                                       name="age_at_death_months"
+                                       min="0"
+                                       max="11">
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Days
+                                </label>
+
+                                <input type="number"
+                                       class="form-control"
+                                       name="age_at_death_days"
+                                       min="0"
+                                       max="30">
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ================= PLACE ================= -->
+
+                    <div class="form-section">
+
+                        <h5>Place of Death</h5>
+
+                        <div class="row g-4">
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Event Location Type
+                                </label>
+
+                                <select class="form-select"
+                                        name="event_location_type">
+
+                                    <option value="">
+                                        Select Location Type
+                                    </option>
+
+                                    <option value="HOME">Home</option>
+                                    <option value="HOSPITAL">Hospital</option>
+                                    <option value="OTHER_INSTITUTION">Other Institution</option>
+                                    <option value="OTHER">Other</option>
+
+                                </select>
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Institution
+                                </label>
+
+                                <input type="text"
+                                       class="form-control"
+                                       name="institution_name"
+                                       maxlength="250"
+                                       placeholder="Enter hospital/institution name (if applicable)">
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Ward
+                                </label>
+
+                                <select class="form-select"
+                                        name="ward">
+
+                                    <option value="">
+                                        Select Ward
+                                    </option>
+
+                                    {% for ward in wards %}
+                                        <option value="{{ ward.pk }}">
+                                            {{ ward.name }}
+                                        </option>
+                                    {% endfor %}
+
+                                </select>
+
+                            </div>
+
+
+                            <div class="col-12">
+
+                                <label class="form-label">
+                                    Place of Death Address
+                                </label>
+
+                                <textarea class="form-control"
+                                          name="place_of_death_address"
+                                          maxlength="1000"
+                                          rows="3"></textarea>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ================= RESIDENCE ================= -->
+
+                    <div class="form-section">
+
+                        <h5>Last Usual Residence</h5>
+
+                        <textarea class="form-control"
+                                  name="last_residence_address"
+                                  maxlength="1000"
+                                  rows="3"
+                                  placeholder="Enter last usual residence address"></textarea>
+
+                    </div>
+
+
+                    <!-- ================= RELATIVES ================= -->
+
+                    <div class="form-section">
+
+                        <h5>Parents / Spouse Details</h5>
+
+                        <div class="row g-4">
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Father's Name
+                                </label>
+
+                                <input type="text"
+                                       class="form-control"
+                                       name="father_name"
+                                       maxlength="150">
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Mother's Name
+                                </label>
+
+                                <input type="text"
+                                       class="form-control"
+                                       name="mother_name"
+                                       maxlength="150">
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Spouse's Name
+                                </label>
+
+                                <input type="text"
+                                       class="form-control"
+                                       name="spouse_name"
+                                       maxlength="150">
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ================= INFORMANT ================= -->
+
+                    <div class="form-section">
+
+                        <h5>Informant Details</h5>
+
+                        <div class="row g-4">
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Informant Name
+                                </label>
+
+                                <input type="text"
+                                       class="form-control"
+                                       name="informant_name"
+                                       maxlength="150">
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Informant Relation
+                                </label>
+
+                                <select class="form-select"
+                                        name="informant_relation">
+
+                                    <option value="">
+                                        Select Relation
+                                    </option>
+
+                                    <option value="FATHER">Father</option>
+                                    <option value="MOTHER">Mother</option>
+                                    <option value="SPOUSE">Spouse</option>
+                                    <option value="SON_DAUGHTER">Son / Daughter</option>
+                                    <option value="HEAD_OF_FAMILY">Head of Family</option>
+                                    <option value="MEDICAL_OFFICER">Medical Officer / In-charge</option>
+                                    <option value="INSTITUTION_HEAD">Institution Head</option>
+                                    <option value="RELATIVE">Other Relative</option>
+                                    <option value="NEIGHBOUR">Neighbour</option>
+                                    <option value="OTHER">Other</option>
+
+                                </select>
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Informant Mobile
+                                </label>
+
+                                <input type="tel"
+                                       class="form-control"
+                                       name="informant_mobile"
+                                       maxlength="15">
+
+                            </div>
+
+
+                            <div class="col-12">
+
+                                <label class="form-label">
+                                    Informant Address
+                                </label>
+
+                                <textarea class="form-control"
+                                          name="informant_address"
+                                          maxlength="1000"
+                                          rows="3"></textarea>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ================= DELAY ================= -->
+
+                    <div class="form-section">
+
+                        <h5>Registration Fee & Delay Information</h5>
+
+                        <div class="alert alert-light border">
+
+                            <div class="row g-3">
+
+                                <div class="col-md-4">
+                                    <strong>Delay Category</strong>
+                                    <div id="delayCategory">—</div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <strong>Applicable Fee</strong>
+                                    <div id="applicableFee">—</div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <strong>Authority</strong>
+                                    <div id="delayAuthority">—</div>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ================= DOCUMENTS ================= -->
+
+                    <div class="form-section">
+
+                        <h5>Supporting Documents</h5>
+
+                        <div class="file-upload">
+
+                            <input type="file"
+                                   id="deathDocuments"
+                                   name="documents"
+                                   class="visually-hidden"
+                                   multiple
+                                   accept=".jpg,.jpeg,.png,.pdf">
+
+                            <label for="deathDocuments"
+                                   class="drop-zone">
+
+                                <div class="upload-icon">
+                                    📤
+                                </div>
+
+                                <div class="drop-zone-title">
+                                    Drag & drop files here
+                                </div>
+
+                                <div class="drop-zone-text">
+                                    or click to browse files
+                                    <br>
+                                    PDF, PNG, JPG, JPEG
+                                </div>
+
+                            </label>
+
+                            <div id="deathDocumentPreview"
+                                 class="preview mt-2"></div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ================= REMARKS ================= -->
+
+                    <div class="form-section">
+
+                        <h5>Remarks</h5>
+
+                        <textarea class="form-control"
+                                  name="remarks"
+                                  maxlength="2000"
+                                  rows="3"></textarea>
+
+                    </div>
+
+
+                    <!-- ================= BUTTONS ================= -->
+
+                    <div class="d-print-none">
+
+                        <p class="text-center pt-4">
+
+                            <button type="button"
+                                    class="btn btn-secondary btn-sm">
+                                Save Draft
+                            </button>
+
+                            <button type="submit"
+                                    class="btn btn-primary btn-sm">
+                                Submit Application
+                            </button>
+
+                            <button type="button"
+                                    class="btn btn-light btn-sm"
+                                    onclick="history.back()">
+                                Back
+                            </button>
+
+                        </p>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<style>
+
+.form-section {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 24px;
+    margin-bottom: 28px;
+}
+
+.form-section h5 {
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.star-required {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+.drop-zone {
+    border: 2px dashed #d8d8d8;
+    border-radius: 8px;
+    padding: 30px;
+    text-align: center;
+    cursor: pointer;
+    display: block;
+}
+
+.drop-zone:hover {
+    border-color: #1572e8;
+    background: #f8fbff;
+}
+
+.drop-zone-title {
+    font-weight: 600;
+    margin-top: 8px;
+}
+
+.drop-zone-text {
+    color: #777;
+    font-size: 13px;
+}
+
+</style>
+
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const fileInput =
+        document.getElementById("deathDocuments");
+
+    const preview =
+        document.getElementById("deathDocumentPreview");
+
+    if (fileInput) {
+
+        fileInput.addEventListener("change", function () {
+
+            preview.innerHTML = "";
+
+            Array.from(this.files).forEach(function (file) {
+
+                const div =
+                    document.createElement("div");
+
+                div.className = "preview-file";
+
+                div.innerHTML =
+                    "📎 " +
+                    file.name +
+                    " (" +
+                    Math.round(file.size / 1024) +
+                    " KB)";
+
+                preview.appendChild(div);
+
+            });
+
+        });
+
+    }
+
+});
+
+</script>
+
+{% endblock %}

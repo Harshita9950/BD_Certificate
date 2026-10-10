@@ -16,7 +16,7 @@ It handles concerns that must be consistent across the entire application:
      - Returns a centralised 401 JSON response for API requests
 
   3. ApplicationAccessMiddleware
-     - When CENTRAL_PORTAL_ENABLED=True, verifies the user has TRADE_LICENSE access
+     - When CENTRAL_PORTAL_ENABLED=True, verifies the user has application access
      - Skips public endpoints (login, CSRF, registration, admin, static)
      - Returns a centralised 403 JSON response for denied access
 
@@ -82,7 +82,7 @@ class TLPortalAuthMiddleware(MiddlewareMixin):
         request.auth_context['is_authenticated']
         request.auth_context['ulb_code']     → str or ''
         request.auth_context['role']         → str role code or ''
-        request.auth_context['app_code']     → 'TRADE_LICENSE'
+        request.auth_context['app_code']     → application code string
         request.auth_context['permissions']  → set of permission code strings
 
     This is the single source of truth for "who is the current user"
@@ -100,7 +100,7 @@ class TLPortalAuthMiddleware(MiddlewareMixin):
             'ulb_code':         getattr(user, 'ulb_code', '') if is_auth else '',
             'role':             getattr(user, 'role', '')     if is_auth else '',
             'app_code':         getattr(settings, 'CENTRAL_PORTAL_APPLICATION_CODE',
-                                        'TRADE_LICENSE'),
+                                        'BIRTH_DEATH'),
             'permissions':      self._load_permissions(user) if is_auth else set(),
         }
 
@@ -172,7 +172,8 @@ class SessionValidationMiddleware(MiddlewareMixin):
 class ApplicationAccessMiddleware(MiddlewareMixin):
     """
     When CENTRAL_PORTAL_ENABLED=True, verifies that every authenticated
-    user has an active UserApplicationAccess record for TRADE_LICENSE.
+    user has an active UserApplicationAccess record for the configured
+    application (CENTRAL_PORTAL_APPLICATION_CODE).
 
     In local mode (CENTRAL_PORTAL_ENABLED=False) this middleware is a no-op.
 
@@ -193,7 +194,7 @@ class ApplicationAccessMiddleware(MiddlewareMixin):
         if user is None or user.is_anonymous:
             return None  # Auth check is handled by permission classes
 
-        app_code = getattr(settings, 'CENTRAL_PORTAL_APPLICATION_CODE', 'TRADE_LICENSE')
+        app_code = getattr(settings, 'CENTRAL_PORTAL_APPLICATION_CODE', 'BIRTH_DEATH')
         if not user.has_application_access(app_code):
             logger.warning(
                 'ApplicationAccessMiddleware: user %s denied %s access',

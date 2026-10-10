@@ -1,0 +1,627 @@
+{% extends 'Authority/base.html' %}
+{% load static %}
+
+{% block title %}Adopted Birth Registration{% endblock %}
+
+{% block content %}
+
+<main class="content">
+
+    <section class="page-inner d-flex align-items-left align-items-md-center
+                    flex-column flex-md-row pt-2 pb-3">
+
+        <div class="page-heading">
+
+            <h1 class="page-title">
+                Adopted Birth Registration
+            </h1>
+
+            <nav aria-label="breadcrumb">
+
+                <ol class="breadcrumb">
+
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}">
+                            Dashboard
+                        </a>
+                    </li>
+
+                    <li class="breadcrumb-item">
+                        Adopted Birth Registration
+                    </li>
+
+                    <li class="breadcrumb-item active">
+                        New Application
+                    </li>
+
+                </ol>
+
+            </nav>
+
+        </div>
+
+    </section>
+
+
+    <section class="mb-4">
+
+        <div class="card">
+
+            <div class="card-body p-4">
+
+                <div class="section-heading mb-4">
+
+                    <h4 class="fw-bold">
+                        Adopted Birth Registration Application
+                    </h4>
+
+                    <p class="text-muted mb-0">
+                        Fields marked with
+                        <span class="star-required">*</span>
+                        are required.
+                    </p>
+
+                </div>
+
+
+                <form id="adoptedBirthApplicationForm"
+                      method="POST"
+                      enctype="multipart/form-data"
+                      class="needs-validation"
+                      novalidate>
+
+                    {% csrf_token %}
+
+
+                    <!-- ================= APPLICATION ================= -->
+
+                    <div class="form-section">
+
+                        <h5>Application Details</h5>
+
+                        <div class="row g-4">
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Service Type
+                                    <span class="star-required">*</span>
+                                </label>
+
+                                <select class="form-select"
+                                        name="service_type"
+                                        required>
+
+                                    <option value="">
+                                        Select Service
+                                    </option>
+
+                                    <option value="ADOPTED_BIRTH_REGISTRATION">Adopted Birth Registration</option>
+
+                                </select>
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Registration Type
+                                    <span class="star-required">*</span>
+                                </label>
+
+                                <select class="form-select"
+                                        name="registration_type"
+                                        required>
+
+                                    <option value="">
+                                        Select Registration Type
+                                    </option>
+
+                                    {% for registration_type in registration_types %}
+                                        <option value="{{ registration_type.pk }}">
+                                            {{ registration_type.name }}
+                                        </option>
+                                    {% endfor %}
+
+                                </select>
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Date of Reporting
+                                    <span class="star-required">*</span>
+                                </label>
+
+                                <input type="date"
+                                       class="form-control"
+                                       name="date_of_reporting"
+                                       required>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ================= CHILD ================= -->
+
+                    <div class="form-section">
+
+                        <h5>Child Details</h5>
+
+                        <div class="row g-4">
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    First Name
+                                </label>
+
+                                <input type="text"
+                                       class="form-control"
+                                       name="child_first_name"
+                                       maxlength="100">
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Middle Name
+                                </label>
+
+                                <input type="text"
+                                       class="form-control"
+                                       name="child_middle_name"
+                                       maxlength="100">
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Last Name
+                                </label>
+
+                                <input type="text"
+                                       class="form-control"
+                                       name="child_last_name"
+                                       maxlength="100">
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Date of Birth
+                                    <span class="star-required">*</span>
+                                </label>
+
+                                <input type="date"
+                                       class="form-control"
+                                       name="date_of_birth"
+                                       required>
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Sex
+                                    <span class="star-required">*</span>
+                                </label>
+
+                                <select class="form-select"
+                                        name="sex"
+                                        required>
+
+                                    <option value="">
+                                        Select Sex
+                                    </option>
+
+                                    <option value="MALE">Male</option>
+                                    <option value="FEMALE">Female</option>
+                                    <option value="OTHER">Other / Intersex</option>
+                                    <option value="UNKNOWN">Unknown / Not Determined</option>
+
+                                </select>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ================= ADOPTIVE PARENTS ================= -->
+
+                    <div class="form-section">
+
+                        <h5>Adoptive Parents Details</h5>
+
+                        <div class="row g-4">
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">
+                                    Adoptive Father's Name
+                                </label>
+
+                                <input type="text"
+                                       class="form-control"
+                                       name="adoptive_father_name"
+                                       maxlength="150">
+
+                            </div>
+
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">
+                                    Adoptive Mother's Name
+                                </label>
+
+                                <input type="text"
+                                       class="form-control"
+                                       name="adoptive_mother_name"
+                                       maxlength="150">
+
+                            </div>
+
+
+                            <div class="col-md-8">
+
+                                <label class="form-label">
+                                    Adoptive Parents Address
+                                </label>
+
+                                <textarea class="form-control"
+                                          name="adoptive_parents_address"
+                                          maxlength="1000"
+                                          rows="3"></textarea>
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Mobile Number
+                                </label>
+
+                                <input type="tel"
+                                       class="form-control"
+                                       name="adoptive_parents_mobile"
+                                       maxlength="15">
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ================= COURT ORDER ================= -->
+
+                    <div class="form-section">
+
+                        <h5>Adoption Order Details</h5>
+
+                        <div class="row g-4">
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Adoption Order Number
+                                </label>
+
+                                <input type="text"
+                                       class="form-control"
+                                       name="adoption_order_number"
+                                       maxlength="100">
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Adoption Order Date
+                                </label>
+
+                                <input type="date"
+                                       class="form-control"
+                                       name="adoption_order_date">
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Adopting Court Name
+                                </label>
+
+                                <input type="text"
+                                       class="form-control"
+                                       name="adopting_court_name"
+                                       maxlength="200">
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ================= ORIGINAL REGISTRATION ================= -->
+
+                    <div class="form-section">
+
+                        <h5>Original Registration Reference</h5>
+
+                        <div class="row g-4">
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">
+                                    Original Registration Number
+                                </label>
+
+                                <input type="text"
+                                       class="form-control"
+                                       name="original_registration_number"
+                                       maxlength="50">
+
+                            </div>
+
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">
+                                    Original Registration District
+                                </label>
+
+                                <input type="text"
+                                       class="form-control"
+                                       name="original_registration_district"
+                                       maxlength="100">
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ================= INFORMANT ================= -->
+
+                    <div class="form-section">
+
+                        <h5>Informant Details</h5>
+
+                        <div class="row g-4">
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Informant Name
+                                </label>
+
+                                <input type="text"
+                                       class="form-control"
+                                       name="informant_name"
+                                       maxlength="150">
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Informant Relation
+                                </label>
+
+                                <select class="form-select"
+                                        name="informant_relation">
+
+                                    <option value="">
+                                        Select Relation
+                                    </option>
+
+                                    <option value="FATHER">Father</option>
+                                    <option value="MOTHER">Mother</option>
+                                    <option value="SPOUSE">Spouse</option>
+                                    <option value="SON_DAUGHTER">Son / Daughter</option>
+                                    <option value="HEAD_OF_FAMILY">Head of Family</option>
+                                    <option value="MEDICAL_OFFICER">Medical Officer / In-charge</option>
+                                    <option value="INSTITUTION_HEAD">Institution Head</option>
+                                    <option value="RELATIVE">Other Relative</option>
+                                    <option value="NEIGHBOUR">Neighbour</option>
+                                    <option value="OTHER">Other</option>
+
+                                </select>
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Informant Mobile
+                                </label>
+
+                                <input type="tel"
+                                       class="form-control"
+                                       name="informant_mobile"
+                                       maxlength="15">
+
+                            </div>
+
+
+                            <div class="col-12">
+
+                                <label class="form-label">
+                                    Informant Address
+                                </label>
+
+                                <textarea class="form-control"
+                                          name="informant_address"
+                                          maxlength="1000"
+                                          rows="3"></textarea>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ================= DOCUMENTS ================= -->
+
+                    <div class="form-section">
+
+                        <h5>Supporting Documents</h5>
+
+                        <div class="file-upload">
+
+                            <input type="file"
+                                   id="adoptedDocuments"
+                                   name="documents"
+                                   class="visually-hidden"
+                                   multiple
+                                   accept=".jpg,.jpeg,.png,.pdf">
+
+                            <label for="adoptedDocuments"
+                                   class="drop-zone">
+
+                                <div class="upload-icon">
+                                    📤
+                                </div>
+
+                                <div class="drop-zone-title">
+                                    Drag & drop files here
+                                </div>
+
+                                <div class="drop-zone-text">
+                                    or click to browse files
+                                    <br>
+                                    PDF, PNG, JPG, JPEG
+                                </div>
+
+                            </label>
+
+                            <div id="adoptedDocumentPreview"
+                                 class="preview mt-2"></div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ================= REMARKS ================= -->
+
+                    <div class="form-section">
+
+                        <h5>Remarks</h5>
+
+                        <textarea class="form-control"
+                                  name="remarks"
+                                  maxlength="2000"
+                                  rows="3"></textarea>
+
+                    </div>
+
+
+                    <!-- ================= BUTTONS ================= -->
+
+                    <div class="d-print-none">
+
+                        <p class="text-center pt-4">
+
+                            <button type="button"
+                                    class="btn btn-secondary btn-sm">
+                                Save Draft
+                            </button>
+
+                            <button type="submit"
+                                    class="btn btn-primary btn-sm">
+                                Submit Application
+                            </button>
+
+                            <button type="button"
+                                    class="btn btn-light btn-sm"
+                                    onclick="history.back()">
+                                Back
+                            </button>
+
+                        </p>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<style>
+
+.form-section {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 24px;
+    margin-bottom: 28px;
+}
+
+.form-section h5 {
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.star-required {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+.drop-zone {
+    border: 2px dashed #d8d8d8;
+    border-radius: 8px;
+    padding: 30px;
+    text-align: center;
+    cursor: pointer;
+    display: block;
+}
+
+.drop-zone:hover {
+    border-color: #1572e8;
+    background: #f8fbff;
+}
+
+.drop-zone-title {
+    font-weight: 600;
+    margin-top: 8px;
+}
+
+.drop-zone-text {
+    color: #777;
+    font-size: 13px;
+}
+
+</style>
+
+{% endblock %}

@@ -1,6 +1,6 @@
 "use strict";
 
-const CSRF_COOKIE = "tl_csrftoken";
+const CSRF_COOKIE = "bd_csrftoken";
 const UNSAFE      = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
 function getCsrf() {

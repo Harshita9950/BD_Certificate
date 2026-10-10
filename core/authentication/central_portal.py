@@ -61,7 +61,7 @@ class CentralPortalService:
 
     def __init__(self):
         self._client   = CentralPortalClient()
-        self._app_code = getattr(settings, 'CENTRAL_PORTAL_APPLICATION_CODE', 'TRADE_LICENSE')
+        self._app_code = getattr(settings, 'CENTRAL_PORTAL_APPLICATION_CODE', 'BIRTH_DEATH')
         self._enabled  = getattr(settings, 'CENTRAL_PORTAL_ENABLED', False)
 
     # ── 1. Initiate SSO flow ──────────────────────────────────────────────────
@@ -216,7 +216,7 @@ class CentralPortalService:
                 extra_data=identity.extra_data,
             )
 
-        # Ensure UserApplicationAccess exists for TRADE_LICENSE
+        # Ensure UserApplicationAccess exists for this application
         UserApplicationAccess.objects.get_or_create(
             user=user,
             application_code=self._app_code,
