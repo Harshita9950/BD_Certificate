@@ -10,826 +10,457 @@
     <!-- ================= BREADCRUMB ================= -->
     <section class="page-inner d-flex align-items-left align-items-md-center
                     flex-column flex-md-row pt-2 pb-3">
-
         <div class="page-heading">
-
             <h1 class="page-title">Birth Registration</h1>
-
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
-
                     <li class="breadcrumb-item">
                         <a href="{% url 'dashboard' %}">Dashboard</a>
                     </li>
-
-                    <li class="breadcrumb-item">
-                        Birth Registration
-                    </li>
-
-                    <li class="breadcrumb-item active">
-                        New Application
-                    </li>
-
+                    <li class="breadcrumb-item">Birth Registration</li>
+                    <li class="breadcrumb-item active">New Application</li>
                 </ol>
             </nav>
-
         </div>
-
     </section>
 
 
+    <!-- ================= ALERT AREA ================= -->
+    <div id="formAlertArea" class="mb-3" style="display:none;"></div>
+
+
     <!-- ================= MAIN CARD ================= -->
-
     <section class="mb-4">
-
         <div class="card">
-
             <div class="card-body p-4">
 
                 <div class="section-heading mb-4">
-
-                    <h4 class="fw-bold">
-                        Birth Registration Application
-                    </h4>
-
+                    <h4 class="fw-bold">Birth Registration Application</h4>
                     <p class="text-muted mb-0">
-                        Fields marked with
-                        <span class="star-required">*</span>
-                        are required.
+                        Fields marked with <span class="star-required">*</span> are required.
                     </p>
-
                 </div>
 
-
                 <form id="birthApplicationForm"
-                      method="POST"
                       enctype="multipart/form-data"
-                      class="needs-validation"
                       novalidate>
 
                     {% csrf_token %}
 
 
                     <!-- ================================================= -->
-                    <!-- APPLICATION DETAILS -->
+                    <!-- APPLICATION DETAILS                                 -->
                     <!-- ================================================= -->
 
                     <div class="form-section">
-
                         <h5>Application Details</h5>
-
                         <div class="row g-4">
 
-                            <!-- Service Type -->
-                            <div class="col-xl-4 col-lg-4 col-md-6 col-12">
-
-                                <label class="form-label">
-                                    Service Type
-                                    <span class="star-required">*</span>
-                                </label>
-
-                                <select class="form-select"
-                                        name="service_type"
-                                        required>
-
-                                    <option value="">
-                                        Select Service
-                                    </option>
-
-                                    <option value="BIRTH_REGISTRATION">Birth Registration</option>
-
-                                </select>
-
-                            </div>
-
+                            <!-- Service Type (hidden — always BIRTH_REGISTRATION) -->
+                            <input type="hidden" name="service_type" value="BIRTH_REGISTRATION">
 
                             <!-- Registration Type -->
                             <div class="col-xl-4 col-lg-4 col-md-6 col-12">
-
                                 <label class="form-label">
-                                    Registration Type
-                                    <span class="star-required">*</span>
+                                    Registration Type <span class="star-required">*</span>
                                 </label>
-
                                 <select class="form-select"
                                         name="registration_type"
+                                        id="registration_type"
                                         required>
-
-                                    <option value="">
-                                        Select Registration Type
-                                    </option>
-
+                                    <option value="">Select Registration Type</option>
                                     {% if registration_types %}
-                                        {% for registration_type in registration_types %}
-                                            <option value="{{ registration_type.pk }}">
-                                                {{ registration_type.name }}
-                                            </option>
+                                        {% for rt in registration_types %}
+                                            <option value="{{ rt.pk }}">{{ rt.name }}</option>
                                         {% endfor %}
                                     {% else %}
-                                        <option value="BIRTH_NORMAL">
-                                            Normal Birth Registration
-                                        </option>
-                                        <option value="BIRTH_DELAYED">
-                                            Delayed Birth Registration
-                                        </option>
+                                        <option value="">No registration types configured</option>
                                     {% endif %}
-
                                 </select>
-
+                                <div class="invalid-feedback">Please select a registration type.</div>
                             </div>
-
 
                             <!-- Date of Reporting -->
                             <div class="col-xl-4 col-lg-4 col-md-6 col-12">
-
-                                <label for="date_of_reporting"
-                                       class="form-label">
-
-                                    Date of Reporting
-                                    <span class="star-required">*</span>
-
+                                <label for="date_of_reporting" class="form-label">
+                                    Date of Reporting <span class="star-required">*</span>
                                 </label>
-
                                 <input type="date"
                                        class="form-control"
                                        id="date_of_reporting"
                                        name="date_of_reporting"
-                                       value="{{ application.date_of_reporting|date:'Y-m-d' }}"
                                        required>
-
+                                <div class="invalid-feedback">Date of reporting is required.</div>
                             </div>
 
                         </div>
-
                     </div>
 
 
                     <!-- ================================================= -->
-                    <!-- JURISDICTION -->
+                    <!-- REGISTRATION JURISDICTION                           -->
                     <!-- ================================================= -->
 
                     <div class="form-section">
-
                         <h5>Registration Jurisdiction</h5>
-
                         <div class="row g-4">
 
-                            <!-- State -->
+                            <!-- State (fixed Rajasthan) -->
                             <div class="col-xl-4 col-lg-4 col-md-6 col-12">
-
                                 <label class="form-label">
-                                    State
-                                    <span class="star-required">*</span>
+                                    State <span class="star-required">*</span>
                                 </label>
-
                                 <select class="form-select"
                                         name="state_code"
-                                        id="state"
+                                        id="state_code"
                                         required>
-
-                                    <option value="">
-                                        Select State
-                                    </option>
-
-                                    <option value="RJ">Rajasthan</option>
-
+                                    <option value="">Select State</option>
+                                    <option value="RJ" selected>Rajasthan</option>
                                 </select>
-
+                                <div class="invalid-feedback">Please select a state.</div>
                             </div>
-
 
                             <!-- District -->
                             <div class="col-xl-4 col-lg-4 col-md-6 col-12">
-
                                 <label class="form-label">
-                                    District
-                                    <span class="star-required">*</span>
+                                    District <span class="star-required">*</span>
                                 </label>
-
                                 <select class="form-select"
                                         name="district"
                                         id="district"
                                         required>
-
-                                    <option value="">
-                                        Select District
-                                    </option>
-
+                                    <option value="">Select District</option>
                                     {% for district in districts %}
-                                        <option value="{{ district.pk }}">
-                                            {{ district.name }}
-                                        </option>
+                                        <option value="{{ district.pk }}">{{ district.name }}</option>
                                     {% endfor %}
-
                                 </select>
-
+                                <div class="invalid-feedback">Please select a district.</div>
                             </div>
 
-
-                            <!-- ULB -->
+                            <!-- ULB (filtered by district via AJAX) -->
                             <div class="col-xl-4 col-lg-4 col-md-6 col-12">
-
                                 <label class="form-label">
-                                    ULB
-                                    <span class="star-required">*</span>
+                                    ULB <span class="star-required">*</span>
                                 </label>
-
                                 <select class="form-select"
                                         name="ulb"
                                         id="ulb"
-                                        required>
-
-                                    <option value="">
-                                        Select ULB
-                                    </option>
-
-                                    {% for ulb in ulbs %}
-                                        <option value="{{ ulb.pk }}">
-                                            {{ ulb.name }}
-                                        </option>
-                                    {% endfor %}
-
+                                        required
+                                        disabled>
+                                    <option value="">Select District first</option>
                                 </select>
-
-                            </div>
-
-
-                            <!-- Registration Office -->
-                            <div class="col-xl-4 col-lg-4 col-md-6 col-12">
-
-                                <label class="form-label">
-                                    Registration Office
-                                </label>
-
-                                <select class="form-select"
-                                        name="registration_office"
-                                        id="registration_office">
-
-                                    <option value="">
-                                        Select Registration Office
-                                    </option>
-
-                                    {% for office in registration_offices %}
-                                        <option value="{{ office.pk }}">
-                                            {{ office.name }}
-                                        </option>
-                                    {% endfor %}
-
-                                </select>
-
+                                <div class="invalid-feedback">Please select a ULB.</div>
                             </div>
 
                         </div>
-
                     </div>
 
 
                     <!-- ================================================= -->
-                    <!-- CHILD DETAILS -->
+                    <!-- CHILD DETAILS                                       -->
                     <!-- ================================================= -->
 
                     <div class="form-section">
-
                         <h5>Child Details</h5>
-
                         <div class="row g-4">
 
                             <div class="col-xl-4 col-lg-4 col-md-6 col-12">
-
                                 <label class="form-label">
-                                    First Name
-                                    <span class="star-required">*</span>
+                                    First Name <span class="star-required">*</span>
                                 </label>
-
                                 <input type="text"
                                        class="form-control"
+                                       id="child_first_name"
                                        name="child_first_name"
                                        maxlength="100"
-                                       placeholder="Enter first name">
-
+                                       placeholder="Enter first name"
+                                       required>
+                                <div class="invalid-feedback">Child first name is required.</div>
                             </div>
 
-
                             <div class="col-xl-4 col-lg-4 col-md-6 col-12">
-
-                                <label class="form-label">
-                                    Middle Name
-                                </label>
-
+                                <label class="form-label">Middle Name</label>
                                 <input type="text"
                                        class="form-control"
                                        name="child_middle_name"
                                        maxlength="100"
                                        placeholder="Enter middle name">
-
                             </div>
 
-
                             <div class="col-xl-4 col-lg-4 col-md-6 col-12">
-
-                                <label class="form-label">
-                                    Last Name
-                                </label>
-
+                                <label class="form-label">Last Name</label>
                                 <input type="text"
                                        class="form-control"
                                        name="child_last_name"
                                        maxlength="100"
                                        placeholder="Enter last name">
-
                             </div>
-
 
                             <!-- Name Recorded -->
                             <div class="col-xl-4 col-lg-4 col-md-6 col-12">
-
                                 <label class="form-label">
-                                    Name Recorded
-                                    <span class="star-required">*</span>
+                                    Name Recorded <span class="star-required">*</span>
                                 </label>
-
                                 <div class="selectgroup selectgroup-primary selectgroup-pills">
-
                                     <label class="selectgroup-item">
-
                                         <input type="radio"
                                                name="name_recorded"
                                                value="true"
                                                class="selectgroup-input"
                                                checked>
-
-                                        <span class="selectgroup-button">
-                                            Yes
-                                        </span>
-
+                                        <span class="selectgroup-button">Yes</span>
                                     </label>
-
                                     <label class="selectgroup-item">
-
                                         <input type="radio"
                                                name="name_recorded"
                                                value="false"
                                                class="selectgroup-input">
-
-                                        <span class="selectgroup-button">
-                                            No
-                                        </span>
-
+                                        <span class="selectgroup-button">No</span>
                                     </label>
-
                                 </div>
-
                             </div>
 
-
-                            <!-- DOB -->
+                            <!-- Date of Birth -->
                             <div class="col-xl-4 col-lg-4 col-md-6 col-12">
-
                                 <label class="form-label">
-                                    Date of Birth
-                                    <span class="star-required">*</span>
+                                    Date of Birth <span class="star-required">*</span>
                                 </label>
-
                                 <input type="date"
                                        class="form-control"
                                        id="date_of_birth"
                                        name="date_of_birth"
                                        required>
-
+                                <div class="invalid-feedback">Date of birth is required.</div>
                             </div>
 
-
-                            <!-- Time -->
+                            <!-- Time of Birth -->
                             <div class="col-xl-4 col-lg-4 col-md-6 col-12">
-
-                                <label class="form-label">
-                                    Time of Birth
-                                </label>
-
+                                <label class="form-label">Time of Birth</label>
                                 <input type="time"
                                        class="form-control"
                                        name="time_of_birth">
-
                             </div>
-
 
                             <!-- Sex -->
                             <div class="col-xl-4 col-lg-4 col-md-6 col-12">
-
                                 <label class="form-label">
-                                    Sex
-                                    <span class="star-required">*</span>
+                                    Sex <span class="star-required">*</span>
                                 </label>
-
                                 <select class="form-select"
                                         name="sex"
+                                        id="sex"
                                         required>
-
-                                    <option value="">
-                                        Select Sex
-                                    </option>
-
+                                    <option value="">Select Sex</option>
                                     <option value="MALE">Male</option>
                                     <option value="FEMALE">Female</option>
                                     <option value="OTHER">Other / Intersex</option>
                                     <option value="UNKNOWN">Unknown / Not Determined</option>
-
                                 </select>
-
+                                <div class="invalid-feedback">Please select sex.</div>
                             </div>
 
                         </div>
-
                     </div>
 
 
                     <!-- ================================================= -->
-                    <!-- PLACE OF BIRTH -->
+                    <!-- PLACE OF BIRTH                                      -->
                     <!-- ================================================= -->
 
                     <div class="form-section">
-
                         <h5>Place of Birth</h5>
-
                         <div class="row g-4">
 
                             <div class="col-xl-4 col-lg-4 col-md-6 col-12">
-
-                                <label class="form-label">
-                                    Event Location Type
-                                </label>
-
+                                <label class="form-label">Event Location Type</label>
                                 <select class="form-select"
-                                        name="event_location_type">
-
-                                    <option value="">
-                                        Select Location Type
-                                    </option>
-
+                                        name="event_location_type"
+                                        id="event_location_type">
+                                    <option value="">Select Location Type</option>
                                     <option value="HOME">Home</option>
                                     <option value="HOSPITAL">Hospital</option>
                                     <option value="OTHER_INSTITUTION">Other Institution</option>
                                     <option value="OTHER">Other</option>
-
                                 </select>
-
                             </div>
 
-
                             <div class="col-xl-4 col-lg-4 col-md-6 col-12">
-
-                                <label class="form-label">
-                                    Institution
-                                </label>
-
+                                <label class="form-label">Institution Name</label>
                                 <input type="text"
                                        class="form-control"
                                        name="institution_name"
                                        maxlength="250"
                                        placeholder="Enter hospital/institution name (if applicable)">
-
                             </div>
 
-
+                            <!-- Ward (filtered by ULB via AJAX) -->
                             <div class="col-xl-4 col-lg-4 col-md-6 col-12">
-
-                                <label class="form-label">
-                                    Ward
-                                </label>
-
+                                <label class="form-label">Ward</label>
                                 <select class="form-select"
-                                        name="ward">
-
-                                    <option value="">
-                                        Select Ward
-                                    </option>
-
-                                    {% for ward in wards %}
-                                        <option value="{{ ward.pk }}">
-                                            {{ ward.name }}
-                                        </option>
-                                    {% endfor %}
-
+                                        name="ward"
+                                        id="ward"
+                                        disabled>
+                                    <option value="">Select ULB first</option>
                                 </select>
-
                             </div>
-
 
                             <div class="col-12">
-
-                                <label class="form-label">
-                                    Place of Birth Address
-                                </label>
-
+                                <label class="form-label">Place of Birth Address</label>
                                 <textarea class="form-control"
                                           name="place_of_birth_address"
                                           maxlength="1000"
                                           rows="3"
                                           placeholder="Enter complete place of birth address"></textarea>
-
                             </div>
 
                         </div>
-
                     </div>
 
 
                     <!-- ================================================= -->
-                    <!-- MOTHER DETAILS -->
+                    <!-- MOTHER'S DETAILS                                    -->
                     <!-- ================================================= -->
 
                     <div class="form-section">
-
                         <h5>Mother's Details</h5>
-
                         <div class="row g-4">
 
                             <div class="col-md-4">
-
-                                <label class="form-label">
-                                    Mother's Name
-                                </label>
-
-                                <input type="text"
-                                       class="form-control"
-                                       name="mother_name"
-                                       maxlength="150">
-
+                                <label class="form-label">Mother's Name</label>
+                                <input type="text" class="form-control" name="mother_name" maxlength="150">
                             </div>
 
-
                             <div class="col-md-4">
-
-                                <label class="form-label">
-                                    Mother's Age at Birth
-                                </label>
-
-                                <input type="number"
-                                       class="form-control"
-                                       name="mother_age_at_birth"
-                                       min="0"
-                                       max="120">
-
+                                <label class="form-label">Mother's Age at Birth</label>
+                                <input type="number" class="form-control" name="mother_age_at_birth" min="10" max="70">
                             </div>
 
-
                             <div class="col-md-4">
-
-                                <label class="form-label">
-                                    Nationality
-                                </label>
-
-                                <input type="text"
-                                       class="form-control"
-                                       name="mother_nationality"
-                                       maxlength="100"
-                                       value="Indian">
-
+                                <label class="form-label">Nationality</label>
+                                <input type="text" class="form-control" name="mother_nationality" maxlength="100" value="Indian">
                             </div>
 
-
                             <div class="col-md-4">
-
-                                <label class="form-label">
-                                    Education
-                                </label>
-
-                                <input type="text"
-                                       class="form-control"
-                                       name="mother_education"
-                                       maxlength="100">
-
+                                <label class="form-label">Education</label>
+                                <input type="text" class="form-control" name="mother_education" maxlength="100">
                             </div>
 
-
                             <div class="col-md-4">
-
-                                <label class="form-label">
-                                    Occupation
-                                </label>
-
-                                <input type="text"
-                                       class="form-control"
-                                       name="mother_occupation"
-                                       maxlength="100">
-
+                                <label class="form-label">Occupation</label>
+                                <input type="text" class="form-control" name="mother_occupation" maxlength="100">
                             </div>
 
-
                             <div class="col-md-4">
-
-                                <label class="form-label">
-                                    Mobile
-                                </label>
-
-                                <input type="tel"
-                                       class="form-control"
-                                       name="mother_mobile"
-                                       maxlength="15">
-
+                                <label class="form-label">Mobile</label>
+                                <input type="tel" class="form-control" name="mother_mobile" maxlength="15"
+                                       pattern="[6-9][0-9]{9}"
+                                       title="Enter a valid 10-digit Indian mobile number">
+                                <div class="invalid-feedback">Enter a valid 10-digit mobile number.</div>
                             </div>
 
-
                             <div class="col-md-4">
-
-                                <label class="form-label">
-                                    Aadhaar Number
-                                </label>
-
-                                <input type="text"
-                                       class="form-control"
-                                       name="mother_aadhaar"
-                                       maxlength="12"
-                                       inputmode="numeric">
-
+                                <label class="form-label">Aadhaar Number</label>
+                                <input type="text" class="form-control" name="mother_aadhaar" maxlength="12"
+                                       inputmode="numeric"
+                                       pattern="[0-9]{12}"
+                                       title="12-digit Aadhaar number">
+                                <div class="invalid-feedback">Aadhaar must be exactly 12 digits.</div>
                             </div>
 
                         </div>
-
                     </div>
 
 
                     <!-- ================================================= -->
-                    <!-- FATHER DETAILS -->
+                    <!-- FATHER'S DETAILS                                    -->
                     <!-- ================================================= -->
 
                     <div class="form-section">
-
                         <h5>Father's Details</h5>
-
                         <div class="row g-4">
 
                             <div class="col-md-4">
-
-                                <label class="form-label">
-                                    Father's Name
-                                </label>
-
-                                <input type="text"
-                                       class="form-control"
-                                       name="father_name"
-                                       maxlength="150">
-
+                                <label class="form-label">Father's Name</label>
+                                <input type="text" class="form-control" name="father_name" maxlength="150">
                             </div>
 
-
                             <div class="col-md-4">
-
-                                <label class="form-label">
-                                    Father's Age at Birth
-                                </label>
-
-                                <input type="number"
-                                       class="form-control"
-                                       name="father_age_at_birth"
-                                       min="0"
-                                       max="120">
-
+                                <label class="form-label">Father's Age at Birth</label>
+                                <input type="number" class="form-control" name="father_age_at_birth" min="10" max="100">
                             </div>
 
-
                             <div class="col-md-4">
-
-                                <label class="form-label">
-                                    Nationality
-                                </label>
-
-                                <input type="text"
-                                       class="form-control"
-                                       name="father_nationality"
-                                       maxlength="100"
-                                       value="Indian">
-
+                                <label class="form-label">Nationality</label>
+                                <input type="text" class="form-control" name="father_nationality" maxlength="100" value="Indian">
                             </div>
 
-
                             <div class="col-md-4">
-
-                                <label class="form-label">
-                                    Education
-                                </label>
-
-                                <input type="text"
-                                       class="form-control"
-                                       name="father_education"
-                                       maxlength="100">
-
+                                <label class="form-label">Education</label>
+                                <input type="text" class="form-control" name="father_education" maxlength="100">
                             </div>
 
-
                             <div class="col-md-4">
-
-                                <label class="form-label">
-                                    Occupation
-                                </label>
-
-                                <input type="text"
-                                       class="form-control"
-                                       name="father_occupation"
-                                       maxlength="100">
-
+                                <label class="form-label">Occupation</label>
+                                <input type="text" class="form-control" name="father_occupation" maxlength="100">
                             </div>
 
-
                             <div class="col-md-4">
-
-                                <label class="form-label">
-                                    Mobile
-                                </label>
-
-                                <input type="tel"
-                                       class="form-control"
-                                       name="father_mobile"
-                                       maxlength="15">
-
+                                <label class="form-label">Mobile</label>
+                                <input type="tel" class="form-control" name="father_mobile" maxlength="15"
+                                       pattern="[6-9][0-9]{9}"
+                                       title="Enter a valid 10-digit Indian mobile number">
+                                <div class="invalid-feedback">Enter a valid 10-digit mobile number.</div>
                             </div>
 
-
                             <div class="col-md-4">
-
-                                <label class="form-label">
-                                    Aadhaar Number
-                                </label>
-
-                                <input type="text"
-                                       class="form-control"
-                                       name="father_aadhaar"
-                                       maxlength="12"
-                                       inputmode="numeric">
-
+                                <label class="form-label">Aadhaar Number</label>
+                                <input type="text" class="form-control" name="father_aadhaar" maxlength="12"
+                                       inputmode="numeric"
+                                       pattern="[0-9]{12}"
+                                       title="12-digit Aadhaar number">
+                                <div class="invalid-feedback">Aadhaar must be exactly 12 digits.</div>
                             </div>
 
                         </div>
-
                     </div>
 
 
                     <!-- ================================================= -->
-                    <!-- PERMANENT ADDRESS -->
+                    <!-- PERMANENT ADDRESS                                   -->
                     <!-- ================================================= -->
 
                     <div class="form-section">
-
                         <h5>Permanent Address</h5>
-
                         <div class="row g-4">
-
                             <div class="col-12">
-
-                                <label class="form-label">
-                                    Permanent Address
-                                </label>
-
+                                <label class="form-label">Permanent Address</label>
                                 <textarea class="form-control"
                                           name="permanent_address"
                                           maxlength="1000"
                                           rows="3"
                                           placeholder="Enter permanent address"></textarea>
-
                             </div>
-
                         </div>
-
                     </div>
 
 
                     <!-- ================================================= -->
-                    <!-- INFORMANT -->
+                    <!-- INFORMANT DETAILS                                   -->
                     <!-- ================================================= -->
 
                     <div class="form-section">
-
                         <h5>Informant Details</h5>
-
                         <div class="row g-4">
 
                             <div class="col-md-4">
-
-                                <label class="form-label">
-                                    Informant Name
-                                </label>
-
-                                <input type="text"
-                                       class="form-control"
-                                       name="informant_name"
-                                       maxlength="150">
-
+                                <label class="form-label">Informant Name</label>
+                                <input type="text" class="form-control" name="informant_name" maxlength="150">
                             </div>
 
-
                             <div class="col-md-4">
-
-                                <label class="form-label">
-                                    Informant Relation
-                                </label>
-
-                                <select class="form-select"
-                                        name="informant_relation">
-
-                                    <option value="">
-                                        Select Relation
-                                    </option>
-
+                                <label class="form-label">Informant Relation</label>
+                                <select class="form-select" name="informant_relation">
+                                    <option value="">Select Relation</option>
                                     <option value="FATHER">Father</option>
                                     <option value="MOTHER">Mother</option>
                                     <option value="SPOUSE">Spouse</option>
@@ -840,72 +471,53 @@
                                     <option value="RELATIVE">Other Relative</option>
                                     <option value="NEIGHBOUR">Neighbour</option>
                                     <option value="OTHER">Other</option>
-
                                 </select>
-
                             </div>
-
 
                             <div class="col-md-4">
-
-                                <label class="form-label">
-                                    Informant Mobile
-                                </label>
-
-                                <input type="tel"
-                                       class="form-control"
-                                       name="informant_mobile"
-                                       maxlength="15">
-
+                                <label class="form-label">Informant Mobile</label>
+                                <input type="tel" class="form-control" name="informant_mobile" maxlength="15">
                             </div>
-
 
                             <div class="col-12">
-
-                                <label class="form-label">
-                                    Informant Address
-                                </label>
-
-                                <textarea class="form-control"
-                                          name="informant_address"
-                                          maxlength="1000"
-                                          rows="3"></textarea>
-
+                                <label class="form-label">Informant Address</label>
+                                <textarea class="form-control" name="informant_address" maxlength="1000" rows="3"></textarea>
                             </div>
 
                         </div>
-
                     </div>
 
 
                     <!-- ================================================= -->
-                    <!-- DELAY INFORMATION -->
+                    <!-- DELAY / FEE INFORMATION (live, from backend)       -->
                     <!-- ================================================= -->
 
                     <div class="form-section">
+                        <h5>Registration Fee &amp; Delay Information</h5>
 
-                        <h5>Registration Fee & Delay Information</h5>
+                        <div id="delayInfoPanel" class="alert alert-light border">
 
-                        <div class="alert alert-light border">
+                            <div id="delayLoading" class="text-muted small" style="display:none;">
+                                <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                                Calculating delay &amp; fee…
+                            </div>
 
-                            <div class="row g-3">
-
+                            <div id="delayResult" class="row g-3">
                                 <div class="col-md-4">
                                     <strong>Delay Category</strong>
-                                    <div id="delayCategory">—</div>
+                                    <div id="delayCategory" class="mt-1">—</div>
                                 </div>
-
                                 <div class="col-md-4">
                                     <strong>Applicable Fee</strong>
-                                    <div id="applicableFee">—</div>
+                                    <div id="applicableFee" class="mt-1">—</div>
                                 </div>
-
                                 <div class="col-md-4">
                                     <strong>Authority</strong>
-                                    <div id="delayAuthority">—</div>
+                                    <div id="delayAuthority" class="mt-1">—</div>
                                 </div>
-
                             </div>
+
+                            <div id="delayDocuments" class="mt-2 small text-muted" style="display:none;"></div>
 
                         </div>
 
@@ -913,83 +525,68 @@
 
 
                     <!-- ================================================= -->
-                    <!-- DOCUMENTS -->
+                    <!-- SUPPORTING DOCUMENTS                                -->
                     <!-- ================================================= -->
 
                     <div class="form-section">
-
                         <h5>Supporting Documents</h5>
-
                         <div class="file-upload">
-
                             <input type="file"
                                    id="birthDocuments"
                                    name="documents"
                                    class="visually-hidden"
                                    multiple
                                    accept=".jpg,.jpeg,.png,.pdf">
-
-                            <label for="birthDocuments"
-                                   class="drop-zone"
-                                   tabindex="0">
-
-                                <div class="upload-icon">
-                                    📤
-                                </div>
-
-                                <div class="drop-zone-title">
-                                    Drag & drop files here
-                                </div>
-
+                            <label for="birthDocuments" class="drop-zone" tabindex="0">
+                                <div class="upload-icon">📤</div>
+                                <div class="drop-zone-title">Drag &amp; drop files here</div>
                                 <div class="drop-zone-text">
-                                    or click to browse files
-                                    <br>
-                                    PDF, PNG, JPG, JPEG
+                                    or click to browse files<br>PDF, PNG, JPG, JPEG
                                 </div>
-
                             </label>
-
-                            <div id="birthDocumentPreview"
-                                 class="preview mt-2"></div>
-
+                            <div id="birthDocumentPreview" class="preview mt-2"></div>
                         </div>
-
                     </div>
 
 
                     <!-- ================================================= -->
-                    <!-- REMARKS -->
+                    <!-- REMARKS                                             -->
                     <!-- ================================================= -->
 
                     <div class="form-section">
-
                         <h5>Remarks</h5>
-
                         <textarea class="form-control"
                                   name="remarks"
                                   maxlength="2000"
                                   rows="3"
                                   placeholder="Enter remarks if required"></textarea>
-
                     </div>
 
 
                     <!-- ================================================= -->
-                    <!-- BUTTONS -->
+                    <!-- BUTTONS                                             -->
                     <!-- ================================================= -->
 
                     <div class="d-print-none">
-
                         <p class="text-center pt-4">
 
                             <button type="button"
                                     class="btn btn-secondary btn-sm"
                                     id="saveDraftBtn">
+                                <span id="draftSpinner"
+                                      class="spinner-border spinner-border-sm me-1"
+                                      role="status"
+                                      style="display:none;"></span>
                                 Save Draft
                             </button>
 
-                            <button type="submit"
-                                    class="btn btn-primary btn-sm">
+                            <button type="button"
+                                    class="btn btn-primary btn-sm"
+                                    id="submitBtn">
+                                <span id="submitSpinner"
+                                      class="spinner-border spinner-border-sm me-1"
+                                      role="status"
+                                      style="display:none;"></span>
                                 Submit Application
                             </button>
 
@@ -1000,43 +597,34 @@
                             </button>
 
                         </p>
-
                     </div>
 
                 </form>
 
             </div>
-
         </div>
-
     </section>
 
 </main>
 
 
-<style>
+<!-- ======================================================= -->
+<!-- STYLES                                                  -->
+<!-- ======================================================= -->
 
+<style>
 .form-section {
     border-bottom: 1px solid #eeeeee;
     padding-bottom: 24px;
     margin-bottom: 28px;
 }
-
-.form-section:last-child {
-    border-bottom: none;
-}
-
+.form-section:last-child { border-bottom: none; }
 .form-section h5 {
     font-size: 17px;
     font-weight: 600;
     margin-bottom: 20px;
 }
-
-.star-required {
-    color: #dc3545;
-    font-weight: 600;
-}
-
+.star-required { color: #dc3545; font-weight: 600; }
 .drop-zone {
     border: 2px dashed #d8d8d8;
     border-radius: 8px;
@@ -1046,23 +634,9 @@
     display: block;
     transition: all .2s ease;
 }
-
-.drop-zone:hover {
-    border-color: #1572e8;
-    background: #f8fbff;
-}
-
-.drop-zone-title {
-    font-weight: 600;
-    margin-top: 8px;
-}
-
-.drop-zone-text {
-    color: #777;
-    font-size: 13px;
-    margin-top: 5px;
-}
-
+.drop-zone:hover { border-color: #1572e8; background: #f8fbff; }
+.drop-zone-title { font-weight: 600; margin-top: 8px; }
+.drop-zone-text  { color: #777; font-size: 13px; margin-top: 5px; }
 .preview-file {
     padding: 8px 12px;
     background: #f7f7f7;
@@ -1070,111 +644,523 @@
     margin-top: 6px;
     font-size: 13px;
 }
-
+/* Delay category badges */
+.badge-normal   { background:#198754; color:#fff; padding:3px 10px; border-radius:12px; font-size:13px; }
+.badge-delayed  { background:#dc3545; color:#fff; padding:3px 10px; border-radius:12px; font-size:13px; }
+.badge-warning  { background:#ffc107; color:#000; padding:3px 10px; border-radius:12px; font-size:13px; }
 </style>
 
 
-<script>
+<!-- ======================================================= -->
+<!-- SCRIPT                                                  -->
+<!-- ======================================================= -->
 
-document.addEventListener("DOMContentLoaded", function () {
+{% block extra_js %}
+<script type="module">
 
-    /* -----------------------------------------
-       FILE PREVIEW
-    ----------------------------------------- */
+import api from "{% static 'js/api.js' %}";
 
-    const fileInput =
-        document.getElementById("birthDocuments");
+/* ---------------------------------------------------------------
+   HELPERS
+--------------------------------------------------------------- */
 
-    const preview =
-        document.getElementById("birthDocumentPreview");
+const $ = id => document.getElementById(id);
 
-    if (fileInput) {
+/** Show a top-level alert */
+function showAlert(msg, type = 'danger') {
+    const area = $('formAlertArea');
+    area.innerHTML = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${msg}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>`;
+    area.style.display = '';
+    area.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 
-        fileInput.addEventListener("change", function () {
+/** Mark a field invalid with a custom message */
+function markInvalid(el, msg) {
+    el.classList.add('is-invalid');
+    el.classList.remove('is-valid');
+    let fb = el.nextElementSibling;
+    if (fb && fb.classList.contains('invalid-feedback')) {
+        fb.textContent = msg;
+    }
+}
 
-            preview.innerHTML = "";
+/** Mark a field valid */
+function markValid(el) {
+    el.classList.remove('is-invalid');
+    el.classList.add('is-valid');
+}
 
-            Array.from(this.files).forEach(function (file) {
+/** Clear all validation state on the form */
+function clearValidation(form) {
+    form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+    form.querySelectorAll('.is-valid').forEach(el => el.classList.remove('is-valid'));
+}
 
-                const div = document.createElement("div");
+/**
+ * Scroll to + focus the first invalid field.
+ * Works for inputs, selects, textareas.
+ */
+function scrollToFirstError(form) {
+    const first = form.querySelector('.is-invalid');
+    if (!first) return;
+    first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    try { first.focus(); } catch (_) {}
+}
 
-                div.className = "preview-file";
+/**
+ * Client-side validation — returns true if form is valid.
+ * Validates required fields and shows inline messages.
+ */
+function validateForm(form) {
+    clearValidation(form);
+    let valid = true;
 
-                div.innerHTML =
-                    "📎 " +
-                    file.name +
-                    " <small class='text-muted'>(" +
-                    Math.round(file.size / 1024) +
-                    " KB)</small>";
+    const required = form.querySelectorAll('[required]');
+    required.forEach(el => {
+        if (!el.value.trim()) {
+            markInvalid(el, el.dataset.errorMsg || 'This field is required.');
+            valid = false;
+        } else {
+            markValid(el);
+        }
+    });
 
-                preview.appendChild(div);
-
-            });
-
-        });
-
+    // Extra: date_of_reporting must not be before date_of_birth
+    const dob = form.querySelector('[name="date_of_birth"]');
+    const dor = form.querySelector('[name="date_of_reporting"]');
+    if (dob && dor && dob.value && dor.value) {
+        if (new Date(dor.value) < new Date(dob.value)) {
+            markInvalid(dor, 'Date of reporting cannot be before date of birth.');
+            valid = false;
+        }
     }
 
-
-    /* -----------------------------------------
-       FRONTEND VALIDATION
-    ----------------------------------------- */
-
-    const form =
-        document.getElementById("birthApplicationForm");
-
-    if (form) {
-
-        form.addEventListener("submit", function (event) {
-
-            if (!form.checkValidity()) {
-
-                event.preventDefault();
-                event.stopPropagation();
-
-            }
-
-            form.classList.add("was-validated");
-
-        });
-
+    // Extra: date_of_birth must not be in the future
+    if (dob && dob.value) {
+        if (new Date(dob.value) > new Date()) {
+            markInvalid(dob, 'Date of birth cannot be in the future.');
+            valid = false;
+        }
     }
 
+    // Aadhaar must be 12 digits if filled
+    form.querySelectorAll('[name$="_aadhaar"]').forEach(el => {
+        if (el.value && !/^[0-9]{12}$/.test(el.value)) {
+            markInvalid(el, 'Aadhaar must be exactly 12 digits.');
+            valid = false;
+        }
+    });
 
-    /* -----------------------------------------
-       DELAY CHECK
-       Backend should be connected here.
-       Do NOT use this JS for final fee calculation.
-    ----------------------------------------- */
+    if (!valid) scrollToFirstError(form);
+    return valid;
+}
 
-    const eventDate =
-        document.getElementById("date_of_birth");
+/* ---------------------------------------------------------------
+   DEPENDENT DROPDOWNS
+--------------------------------------------------------------- */
 
-    const reportingDate =
-        document.getElementById("date_of_reporting");
+const districtSel = $('district');
+const ulbSel      = $('ulb');
+const wardSel     = $('ward');
 
-    function requestDelayCheck() {
+async function loadULBs(districtId) {
+    ulbSel.innerHTML = '<option value="">Loading…</option>';
+    ulbSel.disabled  = true;
+    wardSel.innerHTML = '<option value="">Select ULB first</option>';
+    wardSel.disabled  = true;
 
-        if (!eventDate.value || !reportingDate.value) {
+    if (!districtId) {
+        ulbSel.innerHTML = '<option value="">Select District first</option>';
+        return;
+    }
+    try {
+        const data = await api.get(
+            `/api/geography/ulbs/?district=${districtId}&is_active=true`
+        );
+        const results = data.results || data;
+        ulbSel.innerHTML = '<option value="">Select ULB</option>' +
+            results.map(u => `<option value="${u.id}">${u.name}</option>`).join('');
+        ulbSel.disabled = false;
+    } catch (err) {
+        ulbSel.innerHTML = '<option value="">Failed to load ULBs</option>';
+        console.error('ULB load error:', err);
+    }
+}
+
+async function loadWards(ulbId) {
+    wardSel.innerHTML = '<option value="">Loading…</option>';
+    wardSel.disabled  = true;
+
+    if (!ulbId) {
+        wardSel.innerHTML = '<option value="">Select ULB first</option>';
+        return;
+    }
+    try {
+        // Wards are under zones which are under ULBs; fetch zones first,
+        // then wards for all zones of this ULB
+        const zoneData = await api.get(
+            `/api/geography/zones/?ulb=${ulbId}&is_active=true`
+        );
+        const zones    = zoneData.results || zoneData;
+
+        if (!zones.length) {
+            wardSel.innerHTML = '<option value="">No wards available</option>';
             return;
         }
 
-        /*
-         * Connect this function to:
-         *
-         * /api/bd-registration/delay-check/
-         *
-         * The backend DelayCalculationService remains
-         * the authoritative source for delay category,
-         * fee and authority.
-         */
+        // Fetch wards for each zone in parallel
+        const wardPromises = zones.map(z =>
+            api.get(`/api/geography/wards/?zone=${z.id}&is_active=true`)
+        );
+        const allWardData = await Promise.all(wardPromises);
+        const allWards    = allWardData.flatMap(d => d.results || d);
+
+        if (!allWards.length) {
+            wardSel.innerHTML = '<option value="">No wards available</option>';
+        } else {
+            wardSel.innerHTML = '<option value="">Select Ward</option>' +
+                allWards.map(w => `<option value="${w.id}">${w.name}</option>`).join('');
+            wardSel.disabled = false;
+        }
+    } catch (err) {
+        wardSel.innerHTML = '<option value="">Failed to load wards</option>';
+        console.error('Ward load error:', err);
+    }
+}
+
+districtSel.addEventListener('change', () => {
+    markValid(districtSel);
+    loadULBs(districtSel.value);
+});
+
+ulbSel.addEventListener('change', () => {
+    markValid(ulbSel);
+    loadWards(ulbSel.value);
+    // Re-trigger delay check if dates are already set
+    requestDelayCheck();
+});
+
+
+/* ---------------------------------------------------------------
+   DELAY CHECK
+--------------------------------------------------------------- */
+
+const dobInput = $('date_of_birth');
+const dorInput = $('date_of_reporting');
+
+async function requestDelayCheck() {
+    const dob = dobInput ? dobInput.value : '';
+    const dor = dorInput ? dorInput.value : '';
+    const stateCode = document.querySelector('[name="state_code"]')?.value || 'RJ';
+
+    // Reset panel
+    $('delayCategory').textContent  = '—';
+    $('applicableFee').textContent  = '—';
+    $('delayAuthority').textContent = '—';
+    $('delayDocuments').style.display = 'none';
+
+    if (!dob || !dor) return;
+    if (new Date(dor) < new Date(dob)) return;
+
+    $('delayLoading').style.display = '';
+    $('delayResult').style.opacity  = '0.4';
+
+    try {
+        const result = await api.post('/api/bd-registration/delay-check/', {
+            event_date:        dob,
+            date_of_reporting: dor,
+            state_code:        stateCode,
+        });
+
+        // Delay category badge
+        let badgeClass = 'badge-normal';
+        if (result.delay_category && result.delay_category !== 'NORMAL') {
+            badgeClass = result.delay_days > 365 ? 'badge-delayed' : 'badge-warning';
+        }
+        $('delayCategory').innerHTML =
+            `<span class="${badgeClass}">${result.delay_category_display || result.delay_category || '—'}</span>
+             <small class="text-muted ms-1">(${result.delay_days} day${result.delay_days !== 1 ? 's' : ''})</small>`;
+
+        // Fee
+        if (result.applicable_fee && parseFloat(result.applicable_fee) > 0) {
+            $('applicableFee').innerHTML =
+                `<strong>₹ ${result.applicable_fee}</strong>
+                 <small class="text-muted ms-1">${result.fee_code || ''}</small>`;
+        } else {
+            $('applicableFee').textContent = result.is_normal ? 'No fee (Normal)' : '₹ 0.00';
+        }
+
+        // Authority
+        $('delayAuthority').textContent =
+            result.authority_name || (result.requires_authority ? 'Required' : 'Not required');
+
+        // Required documents
+        if (result.required_document_names && result.required_document_names.length) {
+            const docs = result.required_document_names.join(', ');
+            $('delayDocuments').innerHTML =
+                `<strong>Required documents:</strong> ${docs}`;
+            $('delayDocuments').style.display = '';
+        }
+
+        // Warn if permission order required
+        if (result.requires_permission_order) {
+            showAlert(
+                '⚠️ This registration is delayed by more than 1 year. ' +
+                'An order from the prescribed authority (DM/SDM) must be uploaded before submission.',
+                'warning'
+            );
+        }
+
+    } catch (err) {
+        // Non-blocking — just clear the panel
+        console.warn('Delay check failed:', err.message);
+    } finally {
+        $('delayLoading').style.display = 'none';
+        $('delayResult').style.opacity  = '1';
+    }
+}
+
+dobInput && dobInput.addEventListener('change', requestDelayCheck);
+dorInput && dorInput.addEventListener('change', requestDelayCheck);
+
+
+/* ---------------------------------------------------------------
+   COLLECT FORM DATA → plain object
+--------------------------------------------------------------- */
+
+function collectFormData(form) {
+    const fd  = new FormData(form);
+    const obj = {};
+    for (const [key, val] of fd.entries()) {
+        if (key === 'csrfmiddlewaretoken' || key === 'documents') continue;
+        const v = (typeof val === 'string') ? val.trim() : val;
+        if (v !== '') obj[key] = v;
     }
 
-    eventDate.addEventListener("change", requestDelayCheck);
-    reportingDate.addEventListener("change", requestDelayCheck);
+    // Coerce types
+    if (obj.name_recorded !== undefined) {
+        obj.name_recorded = obj.name_recorded === 'true';
+    } else {
+        obj.name_recorded = true;  // radio default
+    }
+    if (obj.mother_age_at_birth) obj.mother_age_at_birth = parseInt(obj.mother_age_at_birth, 10);
+    if (obj.father_age_at_birth) obj.father_age_at_birth = parseInt(obj.father_age_at_birth, 10);
 
+    // Blank optional FK fields → remove entirely
+    ['ward', 'registration_office'].forEach(k => {
+        if (k in obj && !obj[k]) delete obj[k];
+    });
+
+    return obj;
+}
+
+
+/* ---------------------------------------------------------------
+   UPLOAD DOCUMENTS to an existing application
+--------------------------------------------------------------- */
+
+async function uploadDocuments(applicationId, fileInput) {
+    const files = fileInput.files;
+    if (!files || !files.length) return;
+
+    const csrf = api.getCsrf();
+    for (const file of files) {
+        const body = new FormData();
+        body.append('file', file);
+        body.append('original_filename', file.name);
+        // Use raw fetch — api.js uses JSON.stringify which breaks FormData
+        await fetch(`/api/bd-registration/applications/${applicationId}/documents/`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'X-CSRFToken': csrf },
+            body,
+        });
+    }
+}
+
+
+/* ---------------------------------------------------------------
+   SAVE DRAFT — atomic endpoint
+--------------------------------------------------------------- */
+
+async function saveDraft() {
+    const form    = $('birthApplicationForm');
+    const btn     = $('saveDraftBtn');
+    const spinner = $('draftSpinner');
+
+    // Draft only requires registration_type
+    const rtSel = form.querySelector('[name="registration_type"]');
+    clearValidation(form);
+
+    if (!rtSel || !rtSel.value) {
+        markInvalid(rtSel, 'Registration type is required to save a draft.');
+        scrollToFirstError(form);
+        return;
+    }
+
+    btn.disabled = true;
+    spinner.style.display = '';
+
+    try {
+        const formData = collectFormData(form);
+        const payload  = { ...formData, action: 'draft' };
+
+        const app = await api.post('/api/bd-registration/birth-applications/', payload);
+
+        // Upload documents if any were attached
+        const fileInput = $('birthDocuments');
+        if (fileInput && fileInput.files.length) {
+            await uploadDocuments(app.id, fileInput);
+        }
+
+        showAlert(
+            `✅ Draft saved. Application number: <strong>${app.application_number}</strong>`,
+            'success'
+        );
+
+    } catch (err) {
+        handleApiError(err, form);
+    } finally {
+        btn.disabled = false;
+        spinner.style.display = 'none';
+    }
+}
+
+
+/* ---------------------------------------------------------------
+   SUBMIT APPLICATION — atomic endpoint
+--------------------------------------------------------------- */
+
+async function submitApplication() {
+    const form    = $('birthApplicationForm');
+    const btn     = $('submitBtn');
+    const spinner = $('submitSpinner');
+
+    // Full client-side validation before hitting the server
+    if (!validateForm(form)) return;
+
+    btn.disabled = true;
+    spinner.style.display = '';
+
+    try {
+        const formData = collectFormData(form);
+        const payload  = { ...formData, action: 'submit' };
+
+        const app = await api.post('/api/bd-registration/birth-applications/', payload);
+
+        // Upload documents if any
+        const fileInput = $('birthDocuments');
+        if (fileInput && fileInput.files.length) {
+            await uploadDocuments(app.id, fileInput);
+        }
+
+        showAlert(
+            `✅ Application submitted successfully! ` +
+            `Application number: <strong>${app.application_number}</strong>`,
+            'success'
+        );
+
+        // Reset form after successful submission
+        form.reset();
+        clearValidation(form);
+        ulbSel.innerHTML  = '<option value="">Select District first</option>';
+        ulbSel.disabled   = true;
+        wardSel.innerHTML = '<option value="">Select ULB first</option>';
+        wardSel.disabled  = true;
+        $('delayCategory').textContent  = '—';
+        $('applicableFee').textContent  = '—';
+        $('delayAuthority').textContent = '—';
+        $('birthDocumentPreview').innerHTML = '';
+
+    } catch (err) {
+        handleApiError(err, form);
+    } finally {
+        btn.disabled = false;
+        spinner.style.display = 'none';
+    }
+}
+
+
+/* ---------------------------------------------------------------
+   API ERROR HANDLER
+--------------------------------------------------------------- */
+
+function handleApiError(err, form) {
+    console.error('API error:', err);
+
+    if (err && err.data && err.data.errors) {
+        // Server returned field-level validation errors
+        const errors = err.data.errors;
+        let first = null;
+
+        Object.entries(errors).forEach(([field, msg]) => {
+            // Try to find matching form element by name
+            const el = form.querySelector(`[name="${field}"]`);
+            if (el) {
+                markInvalid(el, Array.isArray(msg) ? msg.join(' ') : String(msg));
+                if (!first) first = el;
+            }
+        });
+
+        if (first) {
+            first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        showAlert(
+            `⚠️ Please fix the highlighted errors: ${err.data.detail || ''}`,
+            'danger'
+        );
+    } else {
+        showAlert(
+            `❌ ${err.message || 'An unexpected error occurred. Please try again.'}`,
+            'danger'
+        );
+    }
+}
+
+
+/* ---------------------------------------------------------------
+   FILE PREVIEW
+--------------------------------------------------------------- */
+
+const fileInput = $('birthDocuments');
+const preview   = $('birthDocumentPreview');
+
+if (fileInput) {
+    fileInput.addEventListener('change', function () {
+        preview.innerHTML = '';
+        Array.from(this.files).forEach(file => {
+            const div = document.createElement('div');
+            div.className = 'preview-file';
+            div.innerHTML = `📎 ${file.name} <small class="text-muted">(${Math.round(file.size / 1024)} KB)</small>`;
+            preview.appendChild(div);
+        });
+    });
+}
+
+
+/* ---------------------------------------------------------------
+   WIRE UP BUTTONS
+--------------------------------------------------------------- */
+
+$('saveDraftBtn') && $('saveDraftBtn').addEventListener('click', saveDraft);
+$('submitBtn')   && $('submitBtn').addEventListener('click', submitApplication);
+
+
+/* ---------------------------------------------------------------
+   CLEAR is-invalid on user interaction
+--------------------------------------------------------------- */
+
+document.querySelectorAll('.form-control, .form-select').forEach(el => {
+    el.addEventListener('input',  () => { el.classList.remove('is-invalid'); });
+    el.addEventListener('change', () => { el.classList.remove('is-invalid'); });
 });
 
 </script>
+{% endblock %}
 
 {% endblock %}

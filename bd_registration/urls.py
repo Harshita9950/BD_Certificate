@@ -30,6 +30,7 @@ from .views import (
     AdoptedBirthRegistrationViewSet,
     ApplicationDocumentViewSet,
     ApplicationViewSet,
+    BirthApplicationCreateView,
     BirthRegistrationViewSet,
     DeathRegistrationRestrictedViewSet,
     DeathRegistrationViewSet,
@@ -51,6 +52,9 @@ router.register('adopted-births',     AdoptedBirthRegistrationViewSet, basename=
 urlpatterns = [
     # ── Delay calculation endpoint ─────────────────────────────────────────────
     path('delay-check/', DelayCheckView.as_view(), name='delay_check'),
+
+    # ── Atomic birth application create (draft or submit in one call) ──────────
+    path('birth-applications/', BirthApplicationCreateView.as_view(), name='birth_application_create'),
 
     # ── Nested document routes (manual, no extra package needed) ──────────────
     path(

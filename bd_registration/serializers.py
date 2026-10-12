@@ -7,9 +7,15 @@ Key rules:
 1. cause_of_death is NEVER in DeathRegistrationSerializer.
 2. service_type and event_location_type are now CharField choices (not FKs).
 3. institution is replaced by institution_name CharField.
+4. registration_office is optional — not shown on the birth form.
+5. district and ulb are nullable at the serializer level to allow draft saves
+   without a full jurisdiction (validated properly on submit via the action).
 """
 
 from rest_framework import serializers
+
+from bd_master.models import RegistrationOffice, RegistrationType
+from geography.models import District, ULB, Ward as GeographyWard
 
 from .models import (
     Application,
@@ -26,14 +32,21 @@ from .models import (
 class ApplicationSerializer(serializers.ModelSerializer):
     service_type_display    = serializers.CharField(source='get_service_type_display', read_only=True)
     registration_type_name  = serializers.CharField(source='registration_type.name',    read_only=True)
-    ulb_name                = serializers.CharField(source='ulb.name',                  read_only=True)
-    district_name           = serializers.CharField(source='district.name',             read_only=True)
+    ulb_name                = serializers.CharField(source='ulb.name',                  read_only=True, default=None)
+    district_name           = serializers.CharField(source='district.name',             read_only=True, default=None)
     registration_office_name = serializers.CharField(
         source='registration_office.name', read_only=True, default=None
     )
     status_display          = serializers.CharField(source='get_status_display', read_only=True)
     submitted_by_name       = serializers.SerializerMethodField()
     assigned_to_name        = serializers.SerializerMethodField()
+
+    # registration_office is always optional — not required on the birth form
+    registration_office = serializers.PrimaryKeyRelatedField(
+        required=False,
+        allow_null=True,
+        queryset=RegistrationOffice.objects.all(),
+    )
 
     class Meta:
         model  = Application
@@ -305,3 +318,120 @@ class ApplicationDocumentSerializer(serializers.ModelSerializer):
                 return request.build_absolute_uri(obj.file.url)
             return obj.file.url
         return None
+
+
+# ─── Combined Birth Application (atomic create) ───────────────────────────────
+
+class BirthApplicationSerializer(serializers.Serializer):
+    """
+    Write-only serializer for atomically creating an Application +
+    BirthRegistration in a single API call.
+
+    POST /api/bd-registration/birth-applications/
+    Body: { ...application fields..., ...birth fields..., action: 'draft'|'submit' }
+
+    Returns the created Application data on success.
+    """
+
+    # ── Action ────────────────────────────────────────────────────────────────
+    action = serializers.ChoiceField(
+        choices=['draft', 'submit'],
+        default='draft',
+        write_only=True,
+    )
+
+    # ── Application fields ────────────────────────────────────────────────────
+    service_type       = serializers.CharField(default='BIRTH_REGISTRATION')
+    registration_type  = serializers.PrimaryKeyRelatedField(
+        queryset=RegistrationType.objects.filter(is_active=True)
+    )
+    state_code         = serializers.CharField(default='RJ', max_length=10)
+    district           = serializers.PrimaryKeyRelatedField(
+        required=False, allow_null=True,
+        queryset=District.objects.filter(is_active=True),
+    )
+    ulb                = serializers.PrimaryKeyRelatedField(
+        required=False, allow_null=True,
+        queryset=ULB.objects.filter(is_active=True),
+    )
+    date_of_reporting  = serializers.DateField(required=False, allow_null=True)
+    remarks            = serializers.CharField(required=False, allow_blank=True, default='')
+
+    # ── Birth-specific fields ─────────────────────────────────────────────────
+    child_first_name    = serializers.CharField(required=False, allow_blank=True, default='', max_length=100)
+    child_middle_name   = serializers.CharField(required=False, allow_blank=True, default='', max_length=100)
+    child_last_name     = serializers.CharField(required=False, allow_blank=True, default='', max_length=100)
+    name_recorded       = serializers.BooleanField(default=False)
+    date_of_birth       = serializers.DateField(required=False, allow_null=True)
+    time_of_birth       = serializers.TimeField(required=False, allow_null=True)
+    sex                 = serializers.CharField(required=False, allow_blank=True, default='UNKNOWN', max_length=10)
+    event_location_type = serializers.CharField(required=False, allow_blank=True, default='', max_length=25)
+    institution_name    = serializers.CharField(required=False, allow_blank=True, default='', max_length=250)
+    place_of_birth_address = serializers.CharField(required=False, allow_blank=True, default='')
+    ward                = serializers.PrimaryKeyRelatedField(
+        required=False, allow_null=True,
+        queryset=GeographyWard.objects.filter(is_active=True),
+    )
+    mother_name         = serializers.CharField(required=False, allow_blank=True, default='', max_length=150)
+    mother_age_at_birth = serializers.IntegerField(required=False, allow_null=True, min_value=10, max_value=70)
+    mother_nationality  = serializers.CharField(required=False, allow_blank=True, default='Indian', max_length=100)
+    mother_education    = serializers.CharField(required=False, allow_blank=True, default='', max_length=100)
+    mother_occupation   = serializers.CharField(required=False, allow_blank=True, default='', max_length=100)
+    mother_mobile       = serializers.CharField(required=False, allow_blank=True, default='', max_length=15)
+    mother_aadhaar      = serializers.CharField(required=False, allow_blank=True, default='', max_length=12)
+    father_name         = serializers.CharField(required=False, allow_blank=True, default='', max_length=150)
+    father_age_at_birth = serializers.IntegerField(required=False, allow_null=True, min_value=10, max_value=100)
+    father_nationality  = serializers.CharField(required=False, allow_blank=True, default='Indian', max_length=100)
+    father_education    = serializers.CharField(required=False, allow_blank=True, default='', max_length=100)
+    father_occupation   = serializers.CharField(required=False, allow_blank=True, default='', max_length=100)
+    father_mobile       = serializers.CharField(required=False, allow_blank=True, default='', max_length=15)
+    father_aadhaar      = serializers.CharField(required=False, allow_blank=True, default='', max_length=12)
+    permanent_address   = serializers.CharField(required=False, allow_blank=True, default='')
+    informant_name      = serializers.CharField(required=False, allow_blank=True, default='', max_length=150)
+    informant_relation  = serializers.CharField(required=False, allow_blank=True, default='', max_length=20)
+    informant_address   = serializers.CharField(required=False, allow_blank=True, default='')
+    informant_mobile    = serializers.CharField(required=False, allow_blank=True, default='', max_length=15)
+
+    # ── Cross-field validation for SUBMIT action ──────────────────────────────
+
+    def validate(self, data):
+        action = data.get('action', 'draft')
+
+        if action == 'submit':
+            errors = {}
+
+            if not data.get('district'):
+                errors['district'] = 'District is required for submission.'
+            if not data.get('ulb'):
+                errors['ulb'] = 'ULB is required for submission.'
+            if not data.get('date_of_reporting'):
+                errors['date_of_reporting'] = 'Date of reporting is required for submission.'
+            if not data.get('date_of_birth'):
+                errors['date_of_birth'] = 'Date of birth is required for submission.'
+            if not data.get('sex') or data.get('sex') == 'UNKNOWN':
+                errors['sex'] = 'Sex is required for submission.'
+
+            from django.utils import timezone
+            today = timezone.localdate()
+
+            dob = data.get('date_of_birth')
+            dor = data.get('date_of_reporting')
+
+            if dob and dob > today:
+                errors['date_of_birth'] = 'Date of birth cannot be in the future.'
+            if dor and dor > today:
+                errors['date_of_reporting'] = 'Date of reporting cannot be in the future.'
+            if dob and dor and dor < dob:
+                errors['date_of_reporting'] = 'Date of reporting cannot be before date of birth.'
+
+            # Aadhaar format check
+            import re
+            for field in ('mother_aadhaar', 'father_aadhaar'):
+                val = data.get(field, '')
+                if val and not re.match(r'^[0-9]{12}$', val):
+                    errors[field] = 'Aadhaar must be exactly 12 digits.'
+
+            if errors:
+                raise serializers.ValidationError(errors)
+
+        return data

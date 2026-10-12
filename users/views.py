@@ -335,15 +335,19 @@ class ProfileView(generics.RetrieveUpdateAPIView):
     def get_object(self):
         return self.request.user
 
-class UserManagementListView(generics.ListAPIView):
+class UserManagementListView(generics.ListCreateAPIView):
     queryset = User.objects.all().select_related(
         'ulb_fk',
         'ulb_fk__district',
         'zone_fk',
         'ward_fk',
     )
-    serializer_class = UserManagementSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return UserCreateSerializer
+        return UserManagementSerializer
 
 
 class UserManagementDetailView(generics.RetrieveAPIView):

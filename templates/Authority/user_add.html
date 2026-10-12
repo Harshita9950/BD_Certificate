@@ -57,17 +57,7 @@
                             class="form-select"
                             required
                         >
-                            <option value="">Select Role</option>
-                            <option value="DA">DA</option>
-                            <option value="HEALTH_OFFICER">Health Officer</option>
-                            <option value="CHO">CHO</option>
-                            <option value="ACCOUNTANT">Accountant</option>
-                            <option value="RI">RI</option>
-                            <option value="ZONE_OFFICER">Zone Officer</option>
-                            <option value="OFFICER">Officer</option>
-                            <option value="COMMISSIONER">Commissioner</option>
-                            <option value="AUDITOR">Auditor</option>
-                            <option value="ADMIN">Admin</option>
+                            <option value="">Loading roles…</option>
                         </select>
                     </div>
 
@@ -328,6 +318,32 @@
 
             select.disabled =
                 items.length === 0;
+        }
+
+
+        const roleSelect = document.getElementById("role");
+
+        async function loadRoles() {
+            try {
+                const data = await api.get("/api/users/roles/");
+                const roles = data.results || data;
+
+                roleSelect.innerHTML = '<option value="">Select Role</option>';
+
+                roles
+                    .filter(r => r.is_active !== false)
+                    .forEach(role => {
+                        const opt = document.createElement("option");
+                        // The User model stores role as the role.code string
+                        opt.value = role.code;
+                        opt.textContent = role.name;
+                        roleSelect.appendChild(opt);
+                    });
+
+            } catch (err) {
+                roleSelect.innerHTML = '<option value="">Failed to load roles</option>';
+                console.error("Unable to load roles:", err);
+            }
         }
 
 
@@ -702,7 +718,7 @@ userAddForm.addEventListener(
     }
 );
 
-        await loadGeography();
+        await Promise.all([loadRoles(), loadGeography()]);
     });
 </script>
 {% endblock %}

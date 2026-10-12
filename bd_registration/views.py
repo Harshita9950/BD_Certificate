@@ -47,6 +47,7 @@ from .serializers import (
     AdoptedBirthRegistrationSerializer,
     ApplicationDocumentSerializer,
     ApplicationSerializer,
+    BirthApplicationSerializer,
     BirthRegistrationSerializer,
     DeathRegistrationRestrictedSerializer,
     DeathRegistrationSerializer,
@@ -709,3 +710,152 @@ class DelayCheckView(APIView):
             'rule_code':                result.rule_code,
             'error':                    result.error,
         }, status=http_status.HTTP_200_OK)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# BIRTH APPLICATION — ATOMIC CREATE (draft or submit in one round-trip)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class BirthApplicationCreateView(APIView):
+    """
+    POST /api/bd-registration/birth-applications/
+
+    Creates an Application + BirthRegistration atomically.
+    Accepts an `action` field:
+        "draft"  → saves as DRAFT, no strict validation beyond registration_type
+        "submit" → runs full validation then transitions to SUBMITTED
+
+    Request body: all Application + BirthRegistration fields + action.
+    Returns the Application record on success.
+
+    This endpoint eliminates the race condition of the two-step approach
+    (POST /applications/ then POST /births/) where an Application could be
+    left without a BirthRegistration if the second call fails.
+    """
+
+    from .serializers import BirthApplicationSerializer as _BirthAppSer  # local alias
+
+    def post(self, request):
+        from .serializers import BirthApplicationSerializer
+
+        ser = BirthApplicationSerializer(data=request.data)
+        if not ser.is_valid():
+            return Response(
+                {'detail': 'Validation failed.', 'errors': ser.errors,
+                 'code': 'validation_error'},
+                status=http_status.HTTP_400_BAD_REQUEST,
+            )
+
+        data   = ser.validated_data
+        action = data.pop('action', 'draft')
+
+        # ── Separate application vs birth fields ──────────────────────────────
+        app_field_names = {
+            'service_type', 'registration_type', 'state_code',
+            'district', 'ulb', 'date_of_reporting', 'remarks',
+        }
+        birth_field_names = {
+            'child_first_name', 'child_middle_name', 'child_last_name',
+            'name_recorded', 'date_of_birth', 'time_of_birth', 'sex',
+            'event_location_type', 'institution_name', 'place_of_birth_address',
+            'ward',
+            'mother_name', 'mother_age_at_birth', 'mother_nationality',
+            'mother_education', 'mother_occupation', 'mother_mobile', 'mother_aadhaar',
+            'father_name', 'father_age_at_birth', 'father_nationality',
+            'father_education', 'father_occupation', 'father_mobile', 'father_aadhaar',
+            'permanent_address',
+            'informant_name', 'informant_relation', 'informant_address', 'informant_mobile',
+        }
+
+        app_data   = {k: v for k, v in data.items() if k in app_field_names and v is not None}
+        birth_data = {k: v for k, v in data.items() if k in birth_field_names}
+
+        # Remove empty string values for non-nullable FK fields
+        for fk_field in ('district', 'ulb'):
+            if fk_field in app_data and not app_data[fk_field]:
+                del app_data[fk_field]
+
+        try:
+            with transaction.atomic():
+                # Create Application
+                app = Application(**app_data)
+                app.submitted_by = request.user
+                app.save()
+
+                _record_transition(
+                    application=app,
+                    old_status='',
+                    new_status=ApplicationStatus.DRAFT,
+                    action_code='CREATED',
+                    user=request.user,
+                )
+
+                # Create BirthRegistration
+                BirthRegistration.objects.create(
+                    application=app,
+                    **birth_data,
+                )
+
+                # If action is submit, run the submit transition
+                if action == 'submit':
+                    errors = {}
+                    if not app.date_of_reporting:
+                        errors['date_of_reporting'] = 'Date of reporting is required.'
+
+                    event_date = birth_data.get('date_of_birth')
+                    if not event_date:
+                        errors['date_of_birth'] = 'Date of birth is required.'
+
+                    if errors:
+                        raise ValueError(errors)
+
+                    # Delay rule validation
+                    state_code = app.state_code or ''
+                    delay_result = DelayCalculationService.calculate(
+                        event_date=event_date,
+                        date_of_reporting=app.date_of_reporting,
+                        state_code=state_code,
+                    )
+                    if delay_result.error and delay_result.delay_category == '':
+                        raise ValueError({'non_field': delay_result.error})
+
+                    if delay_result.requires_permission_order:
+                        raise ValueError({
+                            'non_field': (
+                                'This registration is delayed by more than 1 year. '
+                                'An order from the prescribed authority must be uploaded '
+                                'before submission. Please save as draft first, upload '
+                                'the document, then submit.'
+                            )
+                        })
+
+                    app.status      = ApplicationStatus.SUBMITTED
+                    app.submitted_at = timezone.now()
+                    app.save(update_fields=['status', 'submitted_at'])
+
+                    _record_transition(
+                        application=app,
+                        old_status=ApplicationStatus.DRAFT,
+                        new_status=ApplicationStatus.SUBMITTED,
+                        action_code='SUBMITTED',
+                        user=request.user,
+                        remarks=app_data.get('remarks', ''),
+                    )
+
+        except ValueError as exc:
+            errs = exc.args[0] if exc.args else {}
+            if isinstance(errs, dict):
+                return Response(
+                    {'detail': 'Validation failed.', 'errors': errs,
+                     'code': 'validation_error'},
+                    status=http_status.HTTP_400_BAD_REQUEST,
+                )
+            return Response(
+                {'detail': str(exc), 'code': 'validation_error'},
+                status=http_status.HTTP_400_BAD_REQUEST,
+            )
+
+        return Response(
+            ApplicationSerializer(app, context={'request': request}).data,
+            status=http_status.HTTP_201_CREATED,
+        )
