@@ -1,0 +1,279 @@
+{% extends 'Authority/base.html' %}
+
+{% block title %}Application Inbox | Birth & Death Registration{% endblock %}
+
+{% block content %}
+<main class="content">
+
+    <section class="page-inner d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-3">
+        <div class="page-heading">
+            <h1 class="page-title fw-bold">
+                {% if inbox_title %}{{ inbox_title }}{% else %}Application Inbox{% endif %}
+            </h1>
+
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}">Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item">Birth &amp; Death Registration</li>
+                    <li class="breadcrumb-item">Applications</li>
+                    <li class="breadcrumb-item active">Inbox</li>
+                </ol>
+            </nav>
+        </div>
+    </section>
+
+    <section class="mb-4">
+        <div class="card">
+
+            <!-- Search and entries selector -->
+            <div class="card-body border-bottom py-3">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+
+                    <div class="d-flex align-items-center gap-2">
+                        <label for="tableSearch" class="mb-0 fw-bold">Search:</label>
+                        <input
+                            type="search"
+                            id="tableSearch"
+                            class="form-control form-control-sm"
+                            placeholder="Search records..."
+                            style="width: 280px; max-width: 100%;">
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2">
+                        <label for="entriesSelect" class="mb-0 fw-bold">Show</label>
+                        <select id="entriesSelect"
+                                class="form-select form-select-sm"
+                                style="width: 85px;">
+                            <option value="5">5</option>
+                            <option value="10" selected>10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                            <option value="-1">All</option>
+                        </select>
+                        <span>entries</span>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Applications table -->
+            <div class="card-body p-3">
+                <div class="table-responsive">
+
+                    <table class="table table-bordered table-hover align-middle mb-0"
+                           id="applicationsTable">
+
+                        <thead class="table-light">
+                            <tr>
+                                <th class="text-center fw-bold">#</th>
+                                <th class="fw-bold">Application No.</th>
+                                <th class="fw-bold">Registration Type</th>
+                                <th class="fw-bold">Applicant / Informant</th>
+                                <th class="fw-bold">Event Date</th>
+                                <th class="fw-bold">District</th>
+                                <th class="fw-bold">ULB</th>
+                                <th class="fw-bold">Received On</th>
+                                <th class="fw-bold">Status</th>
+                                <th class="text-center fw-bold">Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="applicationsBody">
+
+                            {% for app in applications %}
+                            <tr>
+                                <td class="text-center">{{ forloop.counter }}</td>
+
+                                <td class="text-nowrap">
+                                    {{ app.application_number|default:"—" }}
+                                </td>
+
+                                <td>
+                                    {% if app.registration_type %}
+                                        {{ app.registration_type.name }}
+                                    {% else %}
+                                        {{ app.get_service_type_display|default:"—" }}
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if app.submitted_by %}
+                                        {{ app.submitted_by.get_full_name|default:app.submitted_by.username }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+
+                                <td class="text-nowrap">
+                                    {% if app.birth_registration %}
+                                        {{ app.birth_registration.date_of_birth|date:"d-m-Y" }}
+                                    {% elif app.death_registration %}
+                                        {{ app.death_registration.date_of_death|date:"d-m-Y" }}
+                                    {% elif app.still_birth_registration %}
+                                        {{ app.still_birth_registration.date_of_birth|date:"d-m-Y" }}
+                                    {% elif app.adopted_birth_registration %}
+                                        {{ app.adopted_birth_registration.date_of_birth|date:"d-m-Y" }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+
+                                <td>{{ app.district.name|default:"—" }}</td>
+
+                                <td>{{ app.ulb.name|default:"—" }}</td>
+
+                                <td class="text-nowrap">
+                                    {% if app.submitted_at %}
+                                        {{ app.submitted_at|date:"d-m-Y" }}
+                                    {% else %}
+                                        {{ app.created_at|date:"d-m-Y" }}
+                                    {% endif %}
+                                </td>
+
+                                <td class="text-nowrap">
+                                    {% if app.status == "REJECTED" %}
+                                        <span class="badge bg-danger">Rejected</span>
+                                    {% elif app.status == "PAYMENT_PENDING" %}
+                                        <span class="badge bg-warning text-dark">Payment Pending</span>
+                                    {% elif app.status == "PENDING_DOCS" %}
+                                        <span class="badge bg-warning text-dark">Pending Documents</span>
+                                    {% elif app.status == "APPROVED" %}
+                                        <span class="badge bg-success">Approved</span>
+                                    {% elif app.status == "REGISTERED" %}
+                                        <span class="badge bg-success">Registered</span>
+                                    {% elif app.status == "DRAFT" %}
+                                        <span class="badge bg-secondary">Draft</span>
+                                    {% elif app.status == "CANCELLED" %}
+                                        <span class="badge bg-dark">Cancelled</span>
+                                    {% else %}
+                                        <span class="badge bg-primary">
+                                            {{ app.get_status_display|default:app.status }}
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                <td class="text-center text-nowrap">
+                                    {% if app.status == "PAYMENT_PENDING" %}
+                                        <a href="{% url 'application_review' app.pk %}"
+                                           class="btn btn-warning btn-sm rounded-circle"
+                                           title="Pay Now"
+                                           aria-label="Pay Now">
+                                            <i class="ri-secure-payment-line"></i>
+                                        </a>
+                                    {% else %}
+                                        <a href="{% url 'application_detail' app.pk %}"
+                                           class="btn btn-primary btn-sm rounded-circle"
+                                           title="View Application"
+                                           aria-label="View Application">
+                                            <i class="ri-eye-line"></i>
+                                        </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+
+                            {% empty %}
+                            <tr class="empty-row">
+                                <td colspan="10" class="text-center text-muted py-4">
+                                    No applications found in your Inbox.
+                                </td>
+                            </tr>
+                            {% endfor %}
+
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="card-footer bg-white">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <div id="tableInfo" class="text-muted small">
+                        Showing 0 entries
+                    </div>
+                    <div class="d-flex gap-1" id="pagination"></div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+</main>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const searchInput   = document.getElementById("tableSearch");
+    const entriesSelect = document.getElementById("entriesSelect");
+    const tableBody     = document.getElementById("applicationsBody");
+    const tableInfo     = document.getElementById("tableInfo");
+    const pagination    = document.getElementById("pagination");
+
+    if (!searchInput || !entriesSelect || !tableBody || !tableInfo || !pagination) return;
+
+    const allRows = Array.from(tableBody.querySelectorAll("tr"))
+        .filter(row => !row.classList.contains("empty-row"));
+
+    let currentPage = 1;
+
+    function getFilteredRows() {
+        const query = searchInput.value.toLowerCase().trim();
+        return allRows.filter(row => row.innerText.toLowerCase().includes(query));
+    }
+
+    function renderTable() {
+        const filtered = getFilteredRows();
+        const pageSize = parseInt(entriesSelect.value, 10);
+        const total    = filtered.length;
+        const totalPages = pageSize === -1 ? 1 : Math.max(1, Math.ceil(total / pageSize));
+
+        currentPage = Math.min(currentPage, totalPages);
+
+        allRows.forEach(row => { row.style.display = "none"; });
+
+        const start = pageSize === -1 ? 0 : (currentPage - 1) * pageSize;
+        const end   = pageSize === -1 ? total : Math.min(start + pageSize, total);
+
+        filtered.slice(start, end).forEach(row => { row.style.display = ""; });
+
+        tableInfo.textContent = total
+            ? `Showing ${start + 1} to ${end} of ${total} entries`
+            : "No matching records found";
+
+        pagination.innerHTML = "";
+
+        function createBtn(label, disabled, onClick, active = false) {
+            const btn = document.createElement("button");
+            btn.type      = "button";
+            btn.className = active ? "btn btn-primary btn-sm" : "btn btn-outline-secondary btn-sm";
+            btn.textContent = label;
+            btn.disabled    = disabled;
+            btn.addEventListener("click", onClick);
+            return btn;
+        }
+
+        pagination.appendChild(createBtn("Previous", currentPage === 1, () => {
+            if (currentPage > 1) { currentPage--; renderTable(); }
+        }));
+
+        for (let page = 1; page <= totalPages; page++) {
+            const p = page;
+            pagination.appendChild(createBtn(String(p), false, () => {
+                currentPage = p; renderTable();
+            }, p === currentPage));
+        }
+
+        pagination.appendChild(createBtn("Next", currentPage === totalPages, () => {
+            if (currentPage < totalPages) { currentPage++; renderTable(); }
+        }));
+    }
+
+    searchInput.addEventListener("input",  () => { currentPage = 1; renderTable(); });
+    entriesSelect.addEventListener("change", () => { currentPage = 1; renderTable(); });
+
+    renderTable();
+});
+</script>
+{% endblock %}

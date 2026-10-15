@@ -1,0 +1,693 @@
+﻿{% extends 'Authority/base.html' %}
+
+{% load static %}
+
+{% block title %}{{ app.application_number }} | BD Portal{% endblock %}
+
+{% block content %}
+
+<main class="content">
+
+    <!-- BREADCRUMB -->
+
+    <section class="page-inner d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-3">
+
+        <div class="page-heading">
+
+            <h1 class="page-title">Application Detail</h1>
+
+            <nav aria-label="breadcrumb">
+
+                <ol class="breadcrumb">
+
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+
+                    <li class="breadcrumb-item"><a href="{% url 'my_applications' %}">My Applications</a></li>
+
+                    <li class="breadcrumb-item active">{{ app.application_number }}</li>
+
+                </ol>
+
+            </nav>
+
+        </div>
+
+        <div class="ms-auto d-print-none d-flex gap-2">
+
+            <button onclick="window.print()" class="btn btn-outline-secondary btn-sm"><i
+
+                    class="ri-printer-line me-1"></i> Print</button>
+
+            <a href="{% url 'my_applications' %}" class="btn btn-light btn-sm"><i class="ri-arrow-left-line me-1"></i>
+
+                Back</a>
+
+        </div>
+
+    </section>
+
+    <!-- STATUS BANNER -->
+
+    <div class="alert {% if app.status == 'SUBMITTED' or app.status == 'UNDER_SCRUTINY' or app.status == 'UNDER_PROCESS' or app.status == 'PENDING_DOCS' %}alert-info{% elif app.status == 'APPROVED' or app.status == 'REGISTERED' %}alert-success{% elif app.status == 'REJECTED' or app.status == 'CANCELLED' %}alert-danger{% else %}alert-warning{% endif %} d-flex justify-content-between align-items-center mb-4"
+
+        role="alert">
+
+        <div><strong>{{ app.application_number }}</strong> &nbsp;·&nbsp; {{ service_label }}</div>
+
+        <span
+
+            class="badge fs-6 {% if app.status == 'SUBMITTED' %}bg-primary{% elif app.status == 'APPROVED' or app.status == 'REGISTERED' %}bg-success{% elif app.status == 'REJECTED' or app.status == 'CANCELLED' %}bg-danger{% else %}bg-warning text-dark{% endif %}">{{ app.get_status_display }}</span>
+
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-body p-4">
+
+            <!-- 1. APPLICATION DETAILS -->
+
+            <h5 class="section-title">Application Details</h5>
+
+            <div class="row g-3 mb-4">
+
+                <div class="col-md-4">
+
+                    <p class="text-muted small mb-1">Application Number</p>
+
+                    <p class="fw-semibold mb-0">{{ app.application_number }}</p>
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <p class="text-muted small mb-1">Service Type</p>
+
+                    <p class="fw-semibold mb-0">{{ service_label }}</p>
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <p class="text-muted small mb-1">Registration Type</p>
+
+                    <p class="fw-semibold mb-0">{{ app.registration_type.name|default:"—" }}</p>
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <p class="text-muted small mb-1">State</p>
+
+                    <p class="fw-semibold mb-0">{{ app.state_code|default:"—" }}</p>
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <p class="text-muted small mb-1">District</p>
+
+                    <p class="fw-semibold mb-0">{{ app.district.name|default:"—" }}</p>
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <p class="text-muted small mb-1">ULB</p>
+
+                    <p class="fw-semibold mb-0">{{ app.ulb.name|default:"—" }}</p>
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <p class="text-muted small mb-1">Date of Reporting</p>
+
+                    <p class="fw-semibold mb-0">{{ app.date_of_reporting|date:"d-m-Y"|default:"—" }}</p>
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <p class="text-muted small mb-1">Event Date</p>
+
+                    <p class="fw-semibold mb-0">{{ event_date|date:"d-m-Y"|default:"—" }}</p>
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <p class="text-muted small mb-1">Submitted By</p>
+
+                    <p class="fw-semibold mb-0">{% if app.submitted_by %}{{ app.submitted_by.get_full_name|default:app.submitted_by.username }}{% else %}—{% endif %}</p>
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <p class="text-muted small mb-1">Submitted At</p>
+
+                    <p class="fw-semibold mb-0">{{ app.submitted_at|date:"d-m-Y H:i"|default:"—" }}</p>
+
+                </div>
+
+                {% if app.remarks %}<div class="col-12">
+
+                    <p class="text-muted small mb-1">Remarks</p>
+
+                    <p class="fw-semibold mb-0">{{ app.remarks }}</p>
+
+                </div>{% endif %}
+
+            </div>
+
+            <hr>
+
+            <!-- 2. CHILD / DECEASED DETAILS -->
+
+            {% if child_record %}
+
+            <h5 class="section-title">{% if app.service_type == 'DEATH_REGISTRATION' %}Deceased Details{% else %}Child
+
+                Details{% endif %}</h5>
+
+            <div class="row g-3 mb-4">
+
+                {% if child_record.child_first_name %}<div class="col-md-4">
+
+                    <p class="text-muted small mb-1">Name</p>
+
+                    <p class="fw-semibold mb-0">{{ child_record.child_first_name }}{% if child_record.child_middle_name %} {{ child_record.child_middle_name }}{% endif %} {{ child_record.child_last_name }}</p>
+
+                </div>{% endif %}
+
+                {% if child_record.date_of_birth %}<div class="col-md-4">
+
+                    <p class="text-muted small mb-1">Date of Birth</p>
+
+                    <p class="fw-semibold mb-0">{{ child_record.date_of_birth|date:"d-m-Y" }}</p>
+
+                </div>{% endif %}
+
+                {% if child_record.date_of_death %}<div class="col-md-4">
+
+                    <p class="text-muted small mb-1">Date of Death</p>
+
+                    <p class="fw-semibold mb-0">{{ child_record.date_of_death|date:"d-m-Y" }}</p>
+
+                </div>{% endif %}
+
+                {% if child_record.time_of_birth %}<div class="col-md-4">
+
+                    <p class="text-muted small mb-1">Time of Birth</p>
+
+                    <p class="fw-semibold mb-0">{{ child_record.time_of_birth|time:"H:i" }}</p>
+
+                </div>{% endif %}
+
+                {% if child_record.sex %}<div class="col-md-4">
+
+                    <p class="text-muted small mb-1">Sex</p>
+
+                    <p class="fw-semibold mb-0">{{ child_record.get_sex_display|default:"—" }}</p>
+
+                </div>{% endif %}
+
+                <div class="col-md-4">
+
+                    <p class="text-muted small mb-1">Name Recorded</p>
+
+                    <p class="fw-semibold mb-0">{% if child_record.name_recorded %}Yes{% else %}No{% endif %}</p>
+
+                </div>
+
+                {% if child_record.registration_number %}<div class="col-md-4">
+
+                    <p class="text-muted small mb-1">Registration Number</p>
+
+                    <p class="fw-semibold mb-0 text-success">{{ child_record.registration_number }}</p>
+
+                </div>{% endif %}
+
+                {% if child_record.date_of_registration %}<div class="col-md-4">
+
+                    <p class="text-muted small mb-1">Date of Registration</p>
+
+                    <p class="fw-semibold mb-0">{{ child_record.date_of_registration|date:"d-m-Y" }}</p>
+
+                </div>{% endif %}
+
+            </div>
+
+            <hr>
+
+            <!-- 3. PLACE OF BIRTH / DEATH -->
+
+            <h5 class="section-title">Place of {% if app.service_type == 'DEATH_REGISTRATION' %}Death{% else %}Birth{% endif %}</h5>
+
+            <div class="row g-3 mb-4">
+
+                {% if child_record.event_location_type %}<div class="col-md-4">
+
+                    <p class="text-muted small mb-1">Location Type</p>
+
+                    <p class="fw-semibold mb-0">{{ child_record.get_event_location_type_display|default:"—" }}</p>
+
+                </div>{% endif %}
+
+                {% if child_record.institution_name %}<div class="col-md-4">
+
+                    <p class="text-muted small mb-1">Institution Name</p>
+
+                    <p class="fw-semibold mb-0">{{ child_record.institution_name }}</p>
+
+                </div>{% endif %}
+
+                {% if child_record.ward %}<div class="col-md-4">
+
+                    <p class="text-muted small mb-1">Ward</p>
+
+                    <p class="fw-semibold mb-0">{{ child_record.ward.name }}</p>
+
+                </div>{% endif %}
+
+                {% if child_record.place_of_birth_address %}<div class="col-md-8">
+
+                    <p class="text-muted small mb-1">Address</p>
+
+                    <p class="fw-semibold mb-0">{{ child_record.place_of_birth_address }}</p>
+
+                </div>{% endif %}
+
+                {% if child_record.place_of_death_address %}<div class="col-md-8">
+
+                    <p class="text-muted small mb-1">Address</p>
+
+                    <p class="fw-semibold mb-0">{{ child_record.place_of_death_address }}</p>
+
+                </div>{% endif %}
+
+            </div>
+
+            <hr>
+
+            <!-- 4. MOTHER'S DETAILS -->
+
+            {% if child_record.mother_name or child_record.mother_age_at_birth or child_record.mother_nationality %}
+
+            <h5 class="section-title">Mother's Details</h5>
+
+            <div class="row g-3 mb-4">
+
+                {% if child_record.mother_name %}<div class="col-md-4">
+
+                    <p class="text-muted small mb-1">Name</p>
+
+                    <p class="fw-semibold mb-0">{{ child_record.mother_name }}</p>
+
+                </div>{% endif %}
+
+                {% if child_record.mother_age_at_birth %}<div class="col-md-4">
+
+                    <p class="text-muted small mb-1">Age at Birth</p>
+
+                    <p class="fw-semibold mb-0">{{ child_record.mother_age_at_birth }} yrs</p>
+
+                </div>{% endif %}
+
+                {% if child_record.mother_nationality %}<div class="col-md-4">
+
+                    <p class="text-muted small mb-1">Nationality</p>
+
+                    <p class="fw-semibold mb-0">{{ child_record.mother_nationality }}</p>
+
+                </div>{% endif %}
+
+                {% if child_record.mother_education %}<div class="col-md-4">
+
+                    <p class="text-muted small mb-1">Education</p>
+
+                    <p class="fw-semibold mb-0">{{ child_record.mother_education }}</p>
+
+                </div>{% endif %}
+
+                {% if child_record.mother_occupation %}<div class="col-md-4">
+
+                    <p class="text-muted small mb-1">Occupation</p>
+
+                    <p class="fw-semibold mb-0">{{ child_record.mother_occupation }}</p>
+
+                </div>{% endif %}
+
+                {% if child_record.mother_mobile %}<div class="col-md-4">
+
+                    <p class="text-muted small mb-1">Mobile</p>
+
+                    <p class="fw-semibold mb-0">{{ child_record.mother_mobile }}</p>
+
+                </div>{% endif %}
+
+            </div>
+
+            <hr>
+
+            {% endif %}
+
+            <!-- 5. FATHER'S DETAILS -->
+
+            {% if child_record.father_name or child_record.father_age_at_birth %}
+
+            <h5 class="section-title">Father's Details</h5>
+
+            <div class="row g-3 mb-4">
+
+                {% if child_record.father_name %}<div class="col-md-4">
+
+                    <p class="text-muted small mb-1">Name</p>
+
+                    <p class="fw-semibold mb-0">{{ child_record.father_name }}</p>
+
+                </div>{% endif %}
+
+                {% if child_record.father_age_at_birth %}<div class="col-md-4">
+
+                    <p class="text-muted small mb-1">Age at Birth</p>
+
+                    <p class="fw-semibold mb-0">{{ child_record.father_age_at_birth }} yrs</p>
+
+                </div>{% endif %}
+
+                {% if child_record.father_nationality %}<div class="col-md-4">
+
+                    <p class="text-muted small mb-1">Nationality</p>
+
+                    <p class="fw-semibold mb-0">{{ child_record.father_nationality }}</p>
+
+                </div>{% endif %}
+
+                {% if child_record.father_education %}<div class="col-md-4">
+
+                    <p class="text-muted small mb-1">Education</p>
+
+                    <p class="fw-semibold mb-0">{{ child_record.father_education }}</p>
+
+                </div>{% endif %}
+
+                {% if child_record.father_occupation %}<div class="col-md-4">
+
+                    <p class="text-muted small mb-1">Occupation</p>
+
+                    <p class="fw-semibold mb-0">{{ child_record.father_occupation }}</p>
+
+                </div>{% endif %}
+
+                {% if child_record.father_mobile %}<div class="col-md-4">
+
+                    <p class="text-muted small mb-1">Mobile</p>
+
+                    <p class="fw-semibold mb-0">{{ child_record.father_mobile }}</p>
+
+                </div>{% endif %}
+
+            </div>
+
+            <hr>
+
+            {% endif %}
+
+            <!-- 6. PERMANENT ADDRESS -->
+
+            {% if child_record.permanent_address %}
+
+            <h5 class="section-title">Permanent Address</h5>
+
+            <div class="row g-3 mb-4">
+
+                <div class="col-12">
+
+                    <p class="fw-semibold mb-0">{{ child_record.permanent_address }}</p>
+
+                </div>
+
+            </div>
+
+            <hr>
+
+            {% endif %}
+
+            <!-- 7. INFORMANT DETAILS -->
+
+            {% if child_record.informant_name or child_record.informant_relation %}
+
+            <h5 class="section-title">Informant Details</h5>
+
+            <div class="row g-3 mb-4">
+
+                {% if child_record.informant_name %}<div class="col-md-4">
+
+                    <p class="text-muted small mb-1">Name</p>
+
+                    <p class="fw-semibold mb-0">{{ child_record.informant_name }}</p>
+
+                </div>{% endif %}
+
+                {% if child_record.informant_relation %}<div class="col-md-4">
+
+                    <p class="text-muted small mb-1">Relation</p>
+
+                    <p class="fw-semibold mb-0">{{ child_record.get_informant_relation_display|default:child_record.informant_relation }}</p>
+
+                </div>{% endif %}
+
+                {% if child_record.informant_mobile %}<div class="col-md-4">
+
+                    <p class="text-muted small mb-1">Mobile</p>
+
+                    <p class="fw-semibold mb-0">{{ child_record.informant_mobile }}</p>
+
+                </div>{% endif %}
+
+                {% if child_record.informant_address %}<div class="col-md-8">
+
+                    <p class="text-muted small mb-1">Address</p>
+
+                    <p class="fw-semibold mb-0">{{ child_record.informant_address }}</p>
+
+                </div>{% endif %}
+
+            </div>
+
+            <hr>
+
+            {% endif %}
+
+            {% endif %}{# end child_record #}
+
+            <!-- 8. DELAY & FEE -->
+
+            <h5 class="section-title">Delay &amp; Fee Information</h5>
+
+            <div class="row g-3 mb-4">
+
+                <div class="col-md-3">
+
+                    <p class="text-muted small mb-1">Delay Days</p>
+
+                    <p class="fw-semibold mb-0">{{ delay_days }} day{{ delay_days|pluralize }}</p>
+
+                </div>
+
+                <div class="col-md-3">
+
+                    <p class="text-muted small mb-1">Delay Category</p>
+
+                    <p class="fw-semibold mb-0">{{ delay_category_display }}</p>
+
+                </div>
+
+                <div class="col-md-3">
+
+                    <p class="text-muted small mb-1">Fee Code</p>
+
+                    <p class="fw-semibold mb-0">{{ fee_code|default:"—" }}</p>
+
+                </div>
+
+                <div class="col-md-3">
+
+                    <p class="text-muted small mb-1">Amount Payable</p>
+
+                    <p class="fw-semibold mb-0">{% if is_free %}<span class="text-success">Free</span>{% else %}<span
+
+                            class="text-primary">&#8377; {{ fee_amount }}</span>{% endif %}</p>
+
+                </div>
+
+            </div>
+
+            <hr>
+
+            <!-- 9. PAYMENT -->
+
+            {% if payment_order %}
+
+            <h5 class="section-title">Payment</h5>
+
+            <div class="row g-3 mb-4">
+
+                <div class="col-md-3">
+
+                    <p class="text-muted small mb-1">Method</p>
+
+                    <p class="fw-semibold mb-0">{{ payment_order.get_payment_method_display }}</p>
+
+                </div>
+
+                <div class="col-md-3">
+
+                    <p class="text-muted small mb-1">Amount</p>
+
+                    <p class="fw-semibold mb-0">&#8377; {{ payment_order.amount }}</p>
+
+                </div>
+
+                <div class="col-md-3">
+
+                    <p class="text-muted small mb-1">Status</p>
+
+                    <p class="mb-0">{% if payment_order.status == 'PAID' %}<span class="badge bg-success">Paid</span>{% elif payment_order.status == 'PENDING' %}<span
+
+                            class="badge bg-warning text-dark">Pending</span>{% else %}<span
+
+                            class="badge bg-secondary">{{ payment_order.status }}</span>{% endif %}</p>
+
+                </div>
+
+                {% with txn=payment_order.transactions.last %}{% if txn and txn.receipt_number %}<div class="col-md-3">
+
+                    <p class="text-muted small mb-1">Receipt No.</p>
+
+                    <p class="fw-semibold mb-0">{{ txn.receipt_number }}</p>
+
+                </div>{% endif %}{% endwith %}
+
+            </div>
+
+            <hr>
+
+            {% endif %}
+
+            <!-- 10. SUPPORTING DOCUMENTS -->
+
+            <h5 class="section-title">Supporting Documents</h5>
+
+            {% if documents %}
+
+            <div class="table-responsive mb-2">
+
+                <table class="table table-sm table-bordered mb-0">
+
+                    <thead class="table-light">
+
+                        <tr>
+
+                            <th>#</th>
+
+                            <th>Document</th>
+
+                            <th>Uploaded By</th>
+
+                            <th class="text-nowrap">Uploaded On</th>
+
+                            <th class="text-center">Verification</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for doc in documents %}
+
+                        <tr>
+
+                            <td>{{ forloop.counter }}</td>
+
+                            <td><a href="{{ doc.file.url }}" target="\_blank" rel="noopener"><i
+
+                                        class="ri-file-line me-1"></i>{{ doc.original_filename|default:"Document" }}</a>
+
+                            </td>
+
+                            <td>{% if doc.uploaded_by %}{{ doc.uploaded_by.get_full_name|default:doc.uploaded_by.username }}{% else %}—{% endif %}
+
+                            </td>
+
+                            <td class="text-nowrap">{{ doc.created_at|date:"d-m-Y H:i" }}</td>
+
+                            <td class="text-center">{% if doc.verification_status == 'VERIFIED' %}<span
+
+                                    class="badge bg-success">Verified</span>{% elif doc.verification_status == 'REJECTED' %}<span class="badge bg-danger">Rejected</span>{% else %}<span
+
+                                    class="badge bg-warning text-dark">Pending</span>{% endif %}</td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            {% else %}
+
+            <p class="text-muted small mb-0">No documents uploaded.</p>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</main>
+
+<style>
+
+    .section-title {
+
+        font-size: 15px;
+
+        font-weight: 700;
+
+        color: #1572e8;
+
+        margin-bottom: 16px;
+
+        padding-bottom: 6px;
+
+        border-bottom: 2px solid #e8f0fe;
+
+    }
+
+    @media print {
+
+        .d-print-none {
+
+            display: none !important;
+
+        }
+
+        .card {
+
+            box-shadow: none !important;
+
+            border: 1px solid #dee2e6 !important;
+
+        }
+
+    }
+
+</style>
+
+{% endblock %}

@@ -22,8 +22,11 @@ Permissions:    read = any authenticated user
 
 import logging
 
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
+from django.shortcuts import render
 from django.utils import timezone
+from django.views import View
 
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, mixins, status, viewsets
@@ -167,3 +170,56 @@ class CalculationTypeListView(APIView):
             for v, l in CalculationType.choices
         ]
         return Response(choices)
+
+
+# ─── Fee Master HTML Page View ────────────────────────────────────────────────
+
+class FeeMasterPageView(LoginRequiredMixin, View):
+    """GET /masters/fees/"""
+    login_url = '/login/'
+
+    def get(self, request):
+        service_type_choices = [
+            {'value': v, 'display': str(l)}
+            for v, l in ServiceType.choices
+        ]
+        calculation_type_choices = [
+            {'value': v, 'display': str(l)}
+            for v, l in CalculationType.choices
+        ]
+        return render(request, 'Authority/fee_master_list.html', {
+            'service_type_choices':     service_type_choices,
+            'calculation_type_choices': calculation_type_choices,
+        })
+
+
+class FeeMasterAddView(LoginRequiredMixin, View):
+    """GET /masters/fees/add/"""
+    login_url = '/login/'
+
+    def get(self, request):
+        return render(request, 'Authority/fee_master_add.html', {
+            'fee_id': '',
+            'service_type_choices': [
+                {'value': v, 'display': str(l)} for v, l in ServiceType.choices
+            ],
+            'calculation_type_choices': [
+                {'value': v, 'display': str(l)} for v, l in CalculationType.choices
+            ],
+        })
+
+
+class FeeMasterEditView(LoginRequiredMixin, View):
+    """GET /masters/fees/<pk>/edit/"""
+    login_url = '/login/'
+
+    def get(self, request, pk):
+        return render(request, 'Authority/fee_master_add.html', {
+            'fee_id': pk,
+            'service_type_choices': [
+                {'value': v, 'display': str(l)} for v, l in ServiceType.choices
+            ],
+            'calculation_type_choices': [
+                {'value': v, 'display': str(l)} for v, l in CalculationType.choices
+            ],
+        })

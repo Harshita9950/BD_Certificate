@@ -28,7 +28,19 @@ from bd_registration.views import (
     DeathRegistrationPageView,
     StillBirthRegistrationPageView,
     AdoptedBirthRegistrationPageView,
+    ApplicationInboxView,
+    ApplicationReviewView,
+    ApplicationDetailView,
+    MyApplicationsView,
+    ReportApplicationRegisterView,
+    ReportPendingApplicationsView,
+    ReportRegistrationRegisterView,
+    ReportRegistrationSummaryView,
+    ReportFeePaymentRegisterView,
+    ReportCertificateHistoryView,
 )
+
+from fee_master.views import FeeMasterPageView, FeeMasterAddView, FeeMasterEditView
 
 
 # ─── Generic Geography Template Views ────────────────────────────────────────
@@ -186,6 +198,31 @@ urlpatterns = [
     path('still-birth-registration/',   StillBirthRegistrationPageView.as_view(), name='still_birth_registration'),
     path('adopted-birth-registration/', AdoptedBirthRegistrationPageView.as_view(), name='adopted_birth_registration'),
 
+    # ── Mailbox ───────────────────────────────────────────────────────────────
+    path('mailbox/inbox/',  ApplicationInboxView.as_view(), name='application_inbox'),
+
+    # ── My Applications (current user's submitted applications) ───────────────
+    path('my-applications/', MyApplicationsView.as_view(), name='my_applications'),
+
+    # ── Reports ───────────────────────────────────────────────────────────────
+    path('reports/application-register/',  ReportApplicationRegisterView.as_view(),  name='report_application_register'),
+    path('reports/pending-applications/',  ReportPendingApplicationsView.as_view(),  name='report_pending_applications'),
+    path('reports/registration-register/', ReportRegistrationRegisterView.as_view(), name='report_registration_register'),
+    path('reports/registration-summary/',  ReportRegistrationSummaryView.as_view(),  name='report_registration_summary'),
+    path('reports/fee-payment/',           ReportFeePaymentRegisterView.as_view(),   name='report_fee_payment'),
+    path('reports/certificate-history/',   ReportCertificateHistoryView.as_view(),   name='report_certificate_history'),
+
+    # ── Application detail (read-only, all statuses) ──────────────────────────
+    path('applications/<int:pk>/',        ApplicationDetailView.as_view(), name='application_detail'),
+
+    # ── Application review + payment mode page ────────────────────────────────
+    path('applications/<int:pk>/review/', ApplicationReviewView.as_view(), name='application_review'),
+
+    # ── Fee Master page ───────────────────────────────────────────────────────
+    path('masters/fees/',              FeeMasterPageView.as_view(),    name='fee_master_page'),
+    path('masters/fees/add/',          FeeMasterAddView.as_view(),     name='fee_master_add'),
+    path('masters/fees/<int:pk>/edit/', FeeMasterEditView.as_view(),   name='fee_master_edit'),
+
     # ── Geography Pages ───────────────────────────────────────────────────────
     path('districts/',                  DistrictMasterView.as_view(), name='district_master'),
     path('districts/add/',              DistrictAddView.as_view(),    name='district_add'),
@@ -250,6 +287,9 @@ urlpatterns = [
 
     # ── BD Registration APIs ──────────────────────────────────────────────────
     path('api/bd-registration/', include('bd_registration.urls', namespace='bd_registration')),
+
+    # ── Payments APIs ─────────────────────────────────────────────────────────
+    path('api/payments/', include('payments.urls', namespace='payments')),
 ]
 
 if settings.DEBUG:

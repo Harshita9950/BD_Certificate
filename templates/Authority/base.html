@@ -8,9 +8,7 @@
 
     <meta charset="UTF-8">
 
-    <meta name="viewport"
-
-          content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>
 
@@ -18,31 +16,15 @@
 
     </title>
 
-    <link rel="shortcut icon"
+    <link rel="shortcut icon" href="{% static 'images/logo/favicon.png' %}" type="image/png" />
 
-          href="{% static 'images/logo/favicon.png' %}"
+    <link href="{% static 'fonts/noto-sans-v42-latin-regular.woff2' %}" as="font" type="font/woff2" crossorigin>
 
-          type="image/png" />
+    <link rel="stylesheet" href="{% static 'remixicon/remixicon.css' %}">
 
-    <link href="{% static 'fonts/noto-sans-v42-latin-regular.woff2' %}"
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
 
-          as="font"
-
-          type="font/woff2"
-
-          crossorigin>
-
-    <link rel="stylesheet"
-
-          href="{% static 'remixicon/remixicon.css' %}">
-
-    <link rel="stylesheet"
-
-          href="{% static 'css/bootstrap.min.css' %}">
-
-    <link rel="stylesheet"
-
-          href="{% static 'choices/choices.min.css' %}">
+    <link rel="stylesheet" href="{% static 'choices/choices.min.css' %}">
 
     <!-- ================= THEME ================= -->
 
@@ -76,12 +58,9 @@
 
     </script>
 
-    <link rel="stylesheet"
-
-          href="{% static 'css/admin.css' %}">
+    <link rel="stylesheet" href="{% static 'css/admin.css' %}">
 
     <style>
-
         body {
 
             font-family: 'Noto Sans', sans-serif;
@@ -92,11 +71,7 @@
 
             font-family: "remixicon";
 
-            src:
-
-                url("{% static 'remixicon/remixicon.woff2' %}")
-
-                format("woff2");
+            src: url("{% static 'remixicon/remixicon.woff2' %}") format("woff2");
 
             font-display: swap;
 
@@ -110,11 +85,7 @@
 
             font-weight: 300;
 
-            src:
-
-                url("{% static 'fonts/noto-sans-v42-latin-300.woff2' %}")
-
-                format('woff2');
+            src: url("{% static 'fonts/noto-sans-v42-latin-300.woff2' %}") format('woff2');
 
             font-display: swap;
 
@@ -128,11 +99,7 @@
 
             font-weight: 400;
 
-            src:
-
-                url("{% static 'fonts/noto-sans-v42-latin-regular.woff2' %}")
-
-                format('woff2');
+            src: url("{% static 'fonts/noto-sans-v42-latin-regular.woff2' %}") format('woff2');
 
             font-display: swap;
 
@@ -146,11 +113,7 @@
 
             font-weight: 400;
 
-            src:
-
-                url("{% static 'fonts/noto-sans-v42-latin-italic.woff2' %}")
-
-                format('woff2');
+            src: url("{% static 'fonts/noto-sans-v42-latin-italic.woff2' %}") format('woff2');
 
             font-display: swap;
 
@@ -164,11 +127,7 @@
 
             font-weight: 500;
 
-            src:
-
-                url("{% static 'fonts/noto-sans-v42-latin-500.woff2' %}")
-
-                format('woff2');
+            src: url("{% static 'fonts/noto-sans-v42-latin-500.woff2' %}") format('woff2');
 
             font-display: swap;
 
@@ -182,11 +141,7 @@
 
             font-weight: 600;
 
-            src:
-
-                url("{% static 'fonts/noto-sans-v42-latin-600.woff2' %}")
-
-                format('woff2');
+            src: url("{% static 'fonts/noto-sans-v42-latin-600.woff2' %}") format('woff2');
 
             font-display: swap;
 
@@ -200,11 +155,7 @@
 
             font-weight: 700;
 
-            src:
-
-                url("{% static 'fonts/noto-sans-v42-latin-700.woff2' %}")
-
-                format('woff2');
+            src: url("{% static 'fonts/noto-sans-v42-latin-700.woff2' %}") format('woff2');
 
             font-display: swap;
 
@@ -218,376 +169,370 @@
 
             font-weight: 800;
 
-            src:
-
-                url("{% static 'fonts/noto-sans-v42-latin-800.woff2' %}")
-
-                format('woff2');
+            src: url("{% static 'fonts/noto-sans-v42-latin-800.woff2' %}") format('woff2');
 
             font-display: swap;
 
         }
 
-        /\* =================================================
-
-           BIRTH / DEATH SIDEBAR
-
-           ================================================= \*/
-
-        .birth-death-submenu .sidebar-link {
+        /\*=================================================BIRTH / DEATH SIDEBAR=================================================\*/ .birth-death-submenu .sidebar-link {
 
             padding-left: 42px;
 
         }
-
     </style>
 
 </head>
 
 <body class="sidebar-collapsed">
 
-<div class="app-wrapper">
+    <div class="app-wrapper">
 
-    <!-- =====================================================
+        <!-- =====================================================
 
          SIDEBAR
 
          ===================================================== -->
 
-    <aside class="sidebar"
+        <aside class="sidebar" id="sidebar" aria-label="Main navigation">
 
-           id="sidebar"
+            <!-- ================= SIDEBAR HEADER ================= -->
 
-           aria-label="Main navigation">
+            <div class="sidebar-header">
 
-        <!-- ================= SIDEBAR HEADER ================= -->
+                <a href="{% url 'dashboard' %}" class="logo">
 
-        <div class="sidebar-header">
+                    <div class="brand-icon">
 
-            <a href="{% url 'dashboard' %}"
+                        <img src="{% static 'images/logo/logo.png' %}" alt="BD Portal" class="navbar-brand" height="40">
 
-               class="logo">
+                    </div>
 
-                <div class="brand-icon">
+                    <span class="brand-text">
 
-                    <img src="{% static 'images/logo/logo.png' %}"
+                        Birth &amp; Death Certificate Management
 
-                         alt="BD Portal"
+                    </span>
 
-                         class="navbar-brand"
+                </a>
 
-                         height="40">
-
-                </div>
-
-                <span class="brand-text">
-
-                    Birth &amp; Death Certificate Management
-
-                </span>
-
-            </a>
-
-            <button type="button"
-
-                    class="icon-btn mobile-sidebar-close"
-
-                    id="mobileSidebarClose"
-
+                <button type="button" class="icon-btn mobile-sidebar-close" id="mobileSidebarClose"
                     aria-label="Close navigation">
 
-                <svg viewBox="0 0 24 24"
+                    <svg viewBox="0 0 24 24" fill="currentColor">
 
-                     fill="currentColor">
+                        <path
+                            d="M21 17.9996V19.9996H3V17.9996H21ZM7 3.5V13.5L2 8.49955L7 3.5ZM21 10.9996V12.9996H12V10.9996H21ZM21 3.99955V5.99955H12V3.99955H21Z" />
 
-                    <path
+                    </svg>
 
-                        d="M21 17.9996V19.9996H3V17.9996H21ZM7 3.5V13.5L2 8.49955L7 3.5ZM21 10.9996V12.9996H12V10.9996H21ZM21 3.99955V5.99955H12V3.99955H21Z" />
+                </button>
 
-                </svg>
+            </div>
 
-            </button>
-
-        </div>
-
-        <!-- =====================================================
+            <!-- =====================================================
 
              NAVIGATION
 
              ===================================================== -->
 
-        <nav aria-label="Main navigation">
-            <div class="sidebar-section">
+            <nav aria-label="Main navigation">
+                <div class="sidebar-section">
 
-                <!-- Dashboard -->
-                <a href="{% url 'dashboard' %}"
-                   class="sidebar-link"
-                   data-page="Dashboard">
-                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                        <path d="M14 21C13.4477 21 13 20.5523 13 20V12C13 11.4477 13.4477 11 14 11H20C20.5523 11 21 11.4477 21 12V20C21 20.5523 20.5523 21 20 21H14ZM4 13C3.44772 13 3 12.5523 3 12V4C3 3.44772 3.44772 3 4 3H10C10.5523 3 11 3.44772 11 4V12C11 12.5523 10 13 10 13H4ZM9 11V5H5V11H9ZM4 21C3.44772 21 3 20.5523 3 20V16C3 15.4477 3.44772 15 4 15H10C10.5523 15 11 15.4477 11 16V20C11 20.5523 10 21 10 21H4ZM5 19H9V17H5V19ZM15 19H19V13H15V19ZM13 4C13 3.44772 13 3 14 3H20C20.5523 3 21 3.44772 22 4V8C22 8.55228 21.5523 9 20 9H14C13.4477 9 13 8.55228 13 8V4ZM15 5V7H19V5H15Z"/>
-                    </svg>
-                    <span class="sidebar-label">Dashboard</span>
-                </a>
+                    <!-- Dashboard -->
+                    <a href="{% url 'dashboard' %}" class="sidebar-link" data-page="Dashboard">
+                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path
+                                d="M14 21C13.4477 21 13 20.5523 13 20V12C13 11.4477 13.4477 11 14 11H20C20.5523 11 21 11.4477 21 12V20C21 20.5523 20.5523 21 20 21H14ZM4 13C3.44772 13 3 12.5523 3 12V4C3 3.44772 3.44772 3 4 3H10C10.5523 3 11 3.44772 11 4V12C11 12.5523 10 13 10 13H4ZM9 11V5H5V11H9ZM4 21C3.44772 21 3 20.5523 3 20V16C3 15.4477 3.44772 15 4 15H10C10.5523 15 11 15.4477 11 16V20C11 20.5523 10 21 10 21H4ZM5 19H9V17H5V19ZM15 19H19V13H15V19ZM13 4C13 3.44772 13 3 14 3H20C20.5523 3 21 3.44772 22 4V8C22 8.55228 21.5523 9 20 9H14C13.4477 9 13 8.55228 13 8V4ZM15 5V7H19V5H15Z" />
+                        </svg>
+                        <span class="sidebar-label">Dashboard</span>
+                    </a>
 
-                <!-- Masters -->
-                <button type="button"
-                        class="sidebar-link"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#sidebarMasters"
-                        aria-expanded="false"
-                        aria-controls="sidebarMasters">
-                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                        <path d="M12 2L2 7L12 12L22 7L12 2ZM4 12L12 16L20 12V16L12 20L4 16V12Z"/>
-                    </svg>
-                    <span class="sidebar-label">Masters</span>
-                    <svg class="sidebar-toggle-arrow" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                        <path d="M11.9999 13.1714L16.9497 8.22168L18.3639 9.63589L11.9999 15.9999L5.63599 9.63589L7.0502 8.22168L11.9999 13.1714Z"/>
-                    </svg>
-                </button>
+                    <!-- Masters -->
+                    <button type="button" class="sidebar-link" data-bs-toggle="collapse"
+                        data-bs-target="#sidebarMasters" aria-expanded="false" aria-controls="sidebarMasters">
+                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M12 2L2 7L12 12L22 7L12 2ZM4 12L12 16L20 12V16L12 20L4 16V12Z" />
+                        </svg>
+                        <span class="sidebar-label">Masters</span>
+                        <svg class="sidebar-toggle-arrow" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path
+                                d="M11.9999 13.1714L16.9497 8.22168L18.3639 9.63589L11.9999 15.9999L5.63599 9.63589L7.0502 8.22168L11.9999 13.1714Z" />
+                        </svg>
+                    </button>
 
-                <div class="collapse" id="sidebarMasters">
-                    <div class="submenu">
-                        <a href="{% url 'users' %}" class="sidebar-link">
-                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 12C14.21 12 16 10.21 16 8S14.21 4 12 4 8 5.79 8 8 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z"/></svg>
-                            <span class="sidebar-label">Users</span>
-                        </a>
-                        <a href="{% url 'roles' %}" class="sidebar-link">
-                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 1L3 5V11C3 16.55 6.84 21.74 12 23C17.16 21.74 21 16.55 21 11V5L12 1ZM10 16L6 12L7.41 10.59L10 13.17L16.59 6.58L18 8L10 16Z"/></svg>
-                            <span class="sidebar-label">Roles</span>
-                        </a>
-                        <a href="{% url 'district_master' %}" class="sidebar-link">
-                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22S19 14.25 19 9C19 5.13 15.87 2 12 2ZM12 11.5C10.62 11.5 9.5 10.38 9.5 9S10.62 6.5 12 6.5 14.5 7.62 14.5 9 13.38 11.5 12 11.5Z"/></svg>
-                            <span class="sidebar-label">District</span>
-                        </a>
-                        <a href="{% url 'ulbs' %}" class="sidebar-link">
-                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 21V7L12 3L21 7V21H14V14H10V21H3ZM5 8.3V19H8V12H16V19H19V8.3L12 5.2L5 8.3Z"/></svg>
-                            <span class="sidebar-label">ULB</span>
-                        </a>
-                        <a href="{% url 'zones' %}" class="sidebar-link">
-                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 3H11V11H3V3ZM13 3H21V11H13V3ZM3 13H11V21H3V13ZM13 13H21V21H13V13Z"/></svg>
-                            <span class="sidebar-label">Zone</span>
-                        </a>
-                        <a href="{% url 'wards' %}" class="sidebar-link">
-                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 4H20V20H4V4ZM6 6V18H18V6H6ZM8 8H16V10H8V8ZM8 12H16V14H8V12Z"/></svg>
-                            <span class="sidebar-label">Ward</span>
-                        </a>
-                        <a href="{% url 'workflows' %}" class="sidebar-link">
-                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 4H10V10H4V4ZM14 4H20V10H14V4ZM9 7H15V9H9V7ZM4 14H10V20H4V14ZM14 14H20V20H14V14ZM9 16H15V18H9V16Z"/></svg>
-                            <span class="sidebar-label">Workflow</span>
-                        </a>
-                        <a href="{% url 'workflow_steps' %}" class="sidebar-link">
-                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 5H20V7H4V5ZM4 11H20V13H4V11ZM4 17H20V19H4V17Z"/></svg>
-                            <span class="sidebar-label">Workflow Steps</span>
-                        </a>
+                    <div class="collapse" id="sidebarMasters">
+                        <div class="submenu">
+                            <a href="{% url 'users' %}" class="sidebar-link">
+                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path
+                                        d="M12 12C14.21 12 16 10.21 16 8S14.21 4 12 4 8 5.79 8 8 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z" />
+                                </svg>
+                                <span class="sidebar-label">Users</span>
+                            </a>
+                            <a href="{% url 'roles' %}" class="sidebar-link">
+                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path
+                                        d="M12 1L3 5V11C3 16.55 6.84 21.74 12 23C17.16 21.74 21 16.55 21 11V5L12 1ZM10 16L6 12L7.41 10.59L10 13.17L16.59 6.58L18 8L10 16Z" />
+                                </svg>
+                                <span class="sidebar-label">Roles</span>
+                            </a>
+                            <a href="{% url 'district_master' %}" class="sidebar-link">
+                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path
+                                        d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22S19 14.25 19 9C19 5.13 15.87 2 12 2ZM12 11.5C10.62 11.5 9.5 10.38 9.5 9S10.62 6.5 12 6.5 14.5 7.62 14.5 9 13.38 11.5 12 11.5Z" />
+                                </svg>
+                                <span class="sidebar-label">District</span>
+                            </a>
+                            <a href="{% url 'ulbs' %}" class="sidebar-link">
+                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path
+                                        d="M3 21V7L12 3L21 7V21H14V14H10V21H3ZM5 8.3V19H8V12H16V19H19V8.3L12 5.2L5 8.3Z" />
+                                </svg>
+                                <span class="sidebar-label">ULB</span>
+                            </a>
+                            <a href="{% url 'zones' %}" class="sidebar-link">
+                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M3 3H11V11H3V3ZM13 3H21V11H13V3ZM3 13H11V21H3V13ZM13 13H21V21H13V13Z" />
+                                </svg>
+                                <span class="sidebar-label">Zone</span>
+                            </a>
+                            <a href="{% url 'wards' %}" class="sidebar-link">
+                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M4 4H20V20H4V4ZM6 6V18H18V6H6ZM8 8H16V10H8V8ZM8 12H16V14H8V12Z" />
+                                </svg>
+                                <span class="sidebar-label">Ward</span>
+                            </a>
+                            <a href="{% url 'workflows' %}" class="sidebar-link">
+                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path
+                                        d="M4 4H10V10H4V4ZM14 4H20V10H14V4ZM9 7H15V9H9V7ZM4 14H10V20H4V14ZM14 14H20V20H14V14ZM9 16H15V18H9V16Z" />
+                                </svg>
+                                <span class="sidebar-label">Workflow</span>
+                            </a>
+                            <a href="{% url 'workflow_steps' %}" class="sidebar-link">
+                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M4 5H20V7H4V5ZM4 11H20V13H4V11ZM4 17H20V19H4V17Z" />
+                                </svg>
+                                <span class="sidebar-label">Workflow Steps</span>
+                            </a>
+                            <a href="{% url 'fee_master_page' %}" class="sidebar-link">
+                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path
+                                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+                                </svg>
+                                <span class="sidebar-label">Fee Master</span>
+                            </a>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Birth/Death Registration -->
-                <button type="button"
-                        class="sidebar-link"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#birthDeathRegistration"
-                        aria-expanded="false"
+                    <!-- Birth/Death Registration -->
+                    <button type="button" class="sidebar-link" data-bs-toggle="collapse"
+                        data-bs-target="#birthDeathRegistration" aria-expanded="false"
                         aria-controls="birthDeathRegistration">
-                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                        <path d="M19 2H5C3.895 2 3 2.895 3 4V20C3 21.105 3.895 22 5 22H19C20.105 22 21 21.105 21 20V4C21 2.895 20.105 2 19 2ZM19 20H5V4H19V20ZM7 6H17V8H7V6ZM7 10H17V12H7V10ZM7 14H12V16H7V14Z"/>
-                    </svg>
-                    <span class="sidebar-label">Birth/Death Registration</span>
-                    <svg class="sidebar-toggle-arrow" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                        <path d="M11.9999 13.1714L16.9497 8.22168L18.3639 9.63589L11.9999 15.9999L5.63599 9.63589L7.0502 8.22168L11.9999 13.1714Z"/>
-                    </svg>
-                </button>
+                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path
+                                d="M19 2H5C3.895 2 3 2.895 3 4V20C3 21.105 3.895 22 5 22H19C20.105 22 21 21.105 21 20V4C21 2.895 20.105 2 19 2ZM19 20H5V4H19V20ZM7 6H17V8H7V6ZM7 10H17V12H7V10ZM7 14H12V16H7V14Z" />
+                        </svg>
+                        <span class="sidebar-label">Birth/Death Registration</span>
+                        <svg class="sidebar-toggle-arrow" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path
+                                d="M11.9999 13.1714L16.9497 8.22168L18.3639 9.63589L11.9999 15.9999L5.63599 9.63589L7.0502 8.22168L11.9999 13.1714Z" />
+                        </svg>
+                    </button>
 
-                <div class="collapse" id="birthDeathRegistration">
-                    <div class="submenu birth-death-submenu">
-                        <a href="{% url 'birth_registration' %}" class="sidebar-link">
-                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 3H14.82C14.4 1.84 13.3 1 12 1C10.7 1 9.6 1.84 9.18 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM12 3C12.55 3 13 3.45 13 4C13 4.55 12.55 5 12 5C11.45 5 11 4.55 11 4C11 3.45 11.45 3 12 3ZM19 19H5V5H7V7H17V5H19V19Z"/></svg>
-                            <span class="sidebar-label">Birth Registration</span>
-                        </a>
-                        <a href="{% url 'death_registration' %}" class="sidebar-link">
-                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C7.03 2 3 6.03 3 11C3 14.31 4.81 17.19 7.5 18.63V22H16.5V18.63C19.19 17.19 21 14.31 21 11C21 6.03 16.97 2 12 2ZM14.5 20H9.5V18H14.5V20ZM11 7H13V10H16V12H13V15H11V12H8V10H11V7Z"/></svg>
-                            <span class="sidebar-label">Death Registration</span>
-                        </a>
-                        <a href="{% url 'still_birth_registration' %}" class="sidebar-link">
-                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C8.69 2 6 4.69 6 8V10H4C2.9 10 2 10.9 2 12V19C2 20.1 2.9 21 4 21H20C21.1 21 22 20.1 22 19V12C22 10.9 21.1 10 20 10H18V8C18 4.69 15.31 2 12 2ZM8 8C8 5.79 9.79 4 12 4C14.21 4 16 5.79 16 8V10H8V8ZM20 19H4V12H20V19Z"/></svg>
-                            <span class="sidebar-label">Still Birth Registration</span>
-                        </a>
-                        <a href="{% url 'adopted_birth_registration' %}" class="sidebar-link">
-                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21C12 21 4 16.5 4 10C4 6.69 6.69 4 10 4C11.54 4 12.94 4.58 14 5.54C15.06 4.58 16.46 4 18 4C21.31 4 24 6.69 24 10C24 16.5 16 21 16 21H12Z"/></svg>
-                            <span class="sidebar-label">Adopted Birth Registration</span>
-                        </a>
+                    <div class="collapse" id="birthDeathRegistration">
+                        <div class="submenu birth-death-submenu">
+                            <a href="{% url 'birth_registration' %}" class="sidebar-link">
+                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path
+                                        d="M19 3H14.82C14.4 1.84 13.3 1 12 1C10.7 1 9.6 1.84 9.18 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM12 3C12.55 3 13 3.45 13 4C13 4.55 12.55 5 12 5C11.45 5 11 4.55 11 4C11 3.45 11.45 3 12 3ZM19 19H5V5H7V7H17V5H19V19Z" />
+                                </svg>
+                                <span class="sidebar-label">Birth Registration</span>
+                            </a>
+                            <a href="{% url 'death_registration' %}" class="sidebar-link">
+                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path
+                                        d="M12 2C7.03 2 3 6.03 3 11C3 14.31 4.81 17.19 7.5 18.63V22H16.5V18.63C19.19 17.19 21 14.31 21 11C21 6.03 16.97 2 12 2ZM14.5 20H9.5V18H14.5V20ZM11 7H13V10H16V12H13V15H11V12H8V10H11V7Z" />
+                                </svg>
+                                <span class="sidebar-label">Death Registration</span>
+                            </a>
+                            <a href="{% url 'still_birth_registration' %}" class="sidebar-link">
+                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path
+                                        d="M12 2C8.69 2 6 4.69 6 8V10H4C2.9 10 2 10.9 2 12V19C2 20.1 2.9 21 4 21H20C21.1 21 22 20.1 22 19V12C22 10.9 21.1 10 20 10H18V8C18 4.69 15.31 2 12 2ZM8 8C8 5.79 9.79 4 12 4C14.21 4 16 5.79 16 8V10H8V8ZM20 19H4V12H20V19Z" />
+                                </svg>
+                                <span class="sidebar-label">Still Birth Registration</span>
+                            </a>
+                            <a href="{% url 'adopted_birth_registration' %}" class="sidebar-link">
+                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path
+                                        d="M12 21C12 21 4 16.5 4 10C4 6.69 6.69 4 10 4C11.54 4 12.94 4.58 14 5.54C15.06 4.58 16.46 4 18 4C21.31 4 24 6.69 24 10C24 16.5 16 21 16 21H12Z" />
+                                </svg>
+                                <span class="sidebar-label">Adopted Birth Registration</span>
+                            </a>
+                            <a href="{% url 'my_applications' %}" class="sidebar-link">
+                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M9 5H7C5.895 5 5 5.895 5 7V19C5 20.105 5.895 21 7 21H17C18.105 21 19 20.105 19 19V7C19 5.895 18.105 5 17 5H15M9 5C9 5.552 9.448 6 10 6H14C14.552 6 15 5.552 15 5M9 5C9 4.448 9.448 4 10 4H14C14.552 4 15 4.448 15 5M12 12H15M12 16H15M9 12H9.01M9 16H9.01" />
+                                </svg>
+                                <span class="sidebar-label">My Applications</span>
+                            </a>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Mailbox -->
+                    <!-- Mailbox -->
+                    <button type="button" class="sidebar-link" data-bs-toggle="collapse"
+                        data-bs-target="#sidebarMailbox" aria-expanded="false" aria-controls="sidebarMailbox">
+                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path
+                                d="M20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 8L12 13L4 8V6L12 11L20 6V8Z" />
+                        </svg>
+                        <span class="sidebar-label">Mailbox</span>
+                        <svg class="sidebar-toggle-arrow" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path
+                                d="M11.9999 13.1714L16.9497 8.22168L18.3639 9.63589L11.9999 15.9999L5.63599 9.63589L7.0502 8.22168L11.9999 13.1714Z" />
+                        </svg>
+                    </button>
+
+                    <div class="collapse" id="sidebarMailbox">
+                        <div class="submenu">
+                            <a href="{% url 'application_inbox' %}" class="sidebar-link">
+                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path
+                                        d="M19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM19 19H5V7H19V19ZM7 9H17V11H7V9ZM7 13H14V15H7V13Z" />
+                                </svg>
+                                <span class="sidebar-label">Inbox</span>
+                            </a>
+                            <a href="#" class="sidebar-link">
+                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path
+                                        d="M20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 18H4V8L12 13L20 8V18ZM12 11L4 6H20L12 11Z" />
+                                </svg>
+                                <span class="sidebar-label">Sent</span>
+                            </a>
+                        </div>
+                    </div>
+
+                <!-- Reports -->
                 <button type="button"
                         class="sidebar-link"
                         data-bs-toggle="collapse"
-                        data-bs-target="#sidebarMailbox"
+                        data-bs-target="#sidebarReports"
                         aria-expanded="false"
-                        aria-controls="sidebarMailbox">
+                        aria-controls="sidebarReports">
                     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                        <path d="M20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 8L12 13L4 8V6L12 11L20 6V8Z"/>
+                        <path d="M9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4zm2.5 2.1h-15V5h15v14.1zm0-16.1h-15C3.1 3 2 4.1 2 5.3V19c0 1.1.9 2 2 2h15c1.1 0 2-.9 2-2V5.3C21 4.1 19.9 3 18.5 3z"/>
                     </svg>
-                    <span class="sidebar-label">Mailbox</span>
+                    <span class="sidebar-label">Reports</span>
                     <svg class="sidebar-toggle-arrow" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                         <path d="M11.9999 13.1714L16.9497 8.22168L18.3639 9.63589L11.9999 15.9999L5.63599 9.63589L7.0502 8.22168L11.9999 13.1714Z"/>
                     </svg>
                 </button>
 
-                <div class="collapse" id="sidebarMailbox">
+                <div class="collapse" id="sidebarReports">
                     <div class="submenu">
-                        <a href="#" class="sidebar-link">
-                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                <path d="M19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM19 19H5V7H19V19ZM7 9H17V11H7V9ZM7 13H14V15H7V13Z"/>
-                            </svg>
-                            <span class="sidebar-label">Inbox</span>
+                        <p class="submenu-group-label text-muted small px-3 mt-2 mb-1" style="font-size:11px;text-transform:uppercase;letter-spacing:.05em;">Applications</p>
+                        <a href="{% url 'report_application_register' %}" class="sidebar-link">
+                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/></svg>
+                            <span class="sidebar-label">Application Register</span>
                         </a>
-                        <a href="#" class="sidebar-link">
-                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                <path d="M20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 18H4V8L12 13L20 8V18ZM12 11L4 6H20L12 11Z"/>
-                            </svg>
-                            <span class="sidebar-label">Sent</span>
+                        <a href="{% url 'report_pending_applications' %}" class="sidebar-link">
+                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8zm.5-13H11v6l5.2 3.2.8-1.3-4.5-2.7V7z"/></svg>
+                            <span class="sidebar-label">Pending &amp; Workflow</span>
+                        </a>
+                        <p class="submenu-group-label text-muted small px-3 mt-2 mb-1" style="font-size:11px;text-transform:uppercase;letter-spacing:.05em;">Registrations</p>
+                        <a href="{% url 'report_registration_register' %}" class="sidebar-link">
+                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>
+                            <span class="sidebar-label">Registration Register</span>
+                        </a>
+                        <a href="{% url 'report_registration_summary' %}" class="sidebar-link">
+                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4zm2.5 2.1h-15V5h15v14.1zm0-16.1h-15C3.1 3 2 4.1 2 5.3V19c0 1.1.9 2 2 2h15c1.1 0 2-.9 2-2V5.3C21 4.1 19.9 3 18.5 3z"/></svg>
+                            <span class="sidebar-label">Registration Summary</span>
+                        </a>
+                        <p class="submenu-group-label text-muted small px-3 mt-2 mb-1" style="font-size:11px;text-transform:uppercase;letter-spacing:.05em;">Payments</p>
+                        <a href="{% url 'report_fee_payment' %}" class="sidebar-link">
+                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+                            <span class="sidebar-label">Fee &amp; Payment</span>
+                        </a>
+                        <p class="submenu-group-label text-muted small px-3 mt-2 mb-1" style="font-size:11px;text-transform:uppercase;letter-spacing:.05em;">Certificates &amp; History</p>
+                        <a href="{% url 'report_certificate_history' %}" class="sidebar-link">
+                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+                            <span class="sidebar-label">Certificate &amp; History</span>
                         </a>
                     </div>
                 </div>
 
-            </div>
-        </nav>
+                </div>
+            </nav>
 
-    </aside>
+        </aside>
 
-    <!-- =====================================================
+        <!-- =====================================================
 
          MOBILE OVERLAY
 
          ===================================================== -->
 
-    <div class="mobile-overlay"
+        <div class="mobile-overlay" id="mobileOverlay" aria-hidden="true">
 
-         id="mobileOverlay"
+        </div>
 
-         aria-hidden="true">
-
-    </div>
-
-    <!-- =====================================================
+        <!-- =====================================================
 
          MAIN WRAPPER
 
          ===================================================== -->
 
-    <div class="main-wrapper">
+        <div class="main-wrapper">
 
-        <!-- =================================================
+            <!-- =================================================
 
              TOPBAR
 
              ================================================= -->
 
-        <header class="topbar">
+            <header class="topbar">
 
-            <div class="topbar-inner">
+                <div class="topbar-inner">
 
-                <button type="button"
+                    <button type="button" class="icon-btn" id="sidebarToggle" aria-label="Toggle navigation sidebar"
+                        aria-expanded="true" data-bs-toggle-tooltip="tooltip" title="Navigation">
 
-                        class="icon-btn"
+                        <svg viewBox="0 0 24 24" fill="currentColor">
 
-                        id="sidebarToggle"
+                            <path d="M18 18V20H6V18H18ZM21 11V13H3V11H21ZM18 4V6H6V4H18Z" />
 
-                        aria-label="Toggle navigation sidebar"
-
-                        aria-expanded="true"
-
-                        data-bs-toggle-tooltip="tooltip"
-
-                        title="Navigation">
-
-                    <svg viewBox="0 0 24 24"
-
-                         fill="currentColor">
-
-                        <path
-
-                            d="M18 18V20H6V18H18ZM21 11V13H3V11H21ZM18 4V6H6V4H18Z" />
-
-                    </svg>
-
-                </button>
-
-                <div class="header-actions">
-
-                    <!-- Theme -->
-
-                    <button type="button"
-
-                            class="icon-btn"
-
-                            id="themeToggle"
-
-                            aria-label="Toggle light and dark mode"
-
-                            data-bs-toggle-tooltip="tooltip"
-
-                            data-bs-placement="bottom"
-
-                            title="Theme">
-
-                        <i class="ri-moon-clear-line"
-
-                           id="themeIcon">
-
-                        </i>
+                        </svg>
 
                     </button>
 
-                    <!-- User -->
+                    <div class="header-actions">
 
-                    <div class="dropdown"
+                        <!-- Theme -->
 
-                         data-bs-toggle-tooltip="tooltip"
+                        <button type="button" class="icon-btn" id="themeToggle" aria-label="Toggle light and dark mode"
+                            data-bs-toggle-tooltip="tooltip" data-bs-placement="bottom" title="Theme">
 
-                         data-bs-placement="right"
+                            <i class="ri-moon-clear-line" id="themeIcon">
 
-                         title="User">
-
-                        <button type="button"
-
-                                class="user-button dropdown-toggle"
-
-                                data-bs-toggle="dropdown"
-
-                                aria-expanded="false">
-
-                            <span class="avatar">
-
-                                {{ auth_user.get_full_name|slice:":2"|upper }}
-
-                            </span>
-
-                            <span class="userBlock">
-
-                                <span class="user-name d-block">
-
-                                    {{ auth_user.get_full_name }}
-
-                                </span>
-
-                                <span class="user-role d-block">
-
-                                    {{ auth_user.get_role_display }}
-
-                                </span>
-
-                            </span>
+                            </i>
 
                         </button>
 
-                        <ul class="dropdown-menu dropdown-menu-end">
+                        <!-- User -->
 
-                            <li class="ps-1 uName">
+                        <div class="dropdown" data-bs-toggle-tooltip="tooltip" data-bs-placement="right" title="User">
 
-                                <span class="dropdown-item">
+                            <button type="button" class="user-button dropdown-toggle" data-bs-toggle="dropdown"
+                                aria-expanded="false">
+
+                                <span class="avatar">
+
+                                    {{ auth_user.get_full_name|slice:":2"|upper }}
+
+                                </span>
+
+                                <span class="userBlock">
 
                                     <span class="user-name d-block">
 
@@ -603,683 +548,641 @@
 
                                 </span>
 
-                            </li>
+                            </button>
 
-                            <li class="uNameDivider">
+                            <ul class="dropdown-menu dropdown-menu-end">
 
-                                <hr class="dropdown-divider">
+                                <li class="ps-1 uName">
 
-                            </li>
+                                    <span class="dropdown-item">
 
-                            <li>
+                                        <span class="user-name d-block">
 
-                                <a class="dropdown-item"
+                                            {{ auth_user.get_full_name }}
 
-                                   href="#">
+                                        </span>
 
-                                    Profile
+                                        <span class="user-role d-block">
 
-                                </a>
+                                            {{ auth_user.get_role_display }}
 
-                            </li>
+                                        </span>
 
-                            <li>
+                                    </span>
 
-                                <a class="dropdown-item"
+                                </li>
 
-                                   href="#">
+                                <li class="uNameDivider">
 
-                                    Change Password
+                                    <hr class="dropdown-divider">
 
-                                </a>
+                                </li>
 
-                            </li>
+                                <li>
 
-                            <li>
+                                    <a class="dropdown-item" href="#">
 
-                                <hr class="dropdown-divider">
+                                        Profile
 
-                            </li>
+                                    </a>
 
-                            <li>
+                                </li>
 
-                                <button type="button"
+                                <li>
 
-                                        class="dropdown-item text-danger"
+                                    <a class="dropdown-item" href="#">
 
-                                        id="dropdownLogout">
+                                        Change Password
 
-                                    Logout
+                                    </a>
 
-                                </button>
+                                </li>
 
-                            </li>
+                                <li>
 
-                        </ul>
+                                    <hr class="dropdown-divider">
+
+                                </li>
+
+                                <li>
+
+                                    <button type="button" class="dropdown-item text-danger" id="dropdownLogout">
+
+                                        Logout
+
+                                    </button>
+
+                                </li>
+
+                            </ul>
+
+                        </div>
+
+                        <!-- Quick Logout -->
+
+                        <button type="button" class="icon-btn" id="logoutBtn" aria-label="Logout"
+                            data-bs-toggle-tooltip="tooltip" data-bs-placement="bottom" title="Logout">
+
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+
+                                <path
+                                    d="M5 22C4.44772 22 4 21.5523 4 21V3C4 2.44772 4.44772 2 5 2H19C19.5523 2 20 2.44772 20 3V6H18V4H6V20H18V18H20V21C20 21.5523 19.5523 22 19 22H5ZM18 16V13H11V11H18V8L23 12L18 16Z" />
+
+                            </svg>
+
+                        </button>
 
                     </div>
 
-                    <!-- Quick Logout -->
-
-                    <button type="button"
-
-                            class="icon-btn"
-
-                            id="logoutBtn"
-
-                            aria-label="Logout"
-
-                            data-bs-toggle-tooltip="tooltip"
-
-                            data-bs-placement="bottom"
-
-                            title="Logout">
-
-                        <svg viewBox="0 0 24 24"
-
-                             fill="currentColor">
-
-                            <path
-
-                                d="M5 22C4.44772 22 4 21.5523 4 21V3C4 2.44772 4.44772 2 5 2H19C19.5523 2 20 2.44772 20 3V6H18V4H6V20H18V18H20V21C20 21.5523 19.5523 22 19 22H5ZM18 16V13H11V11H18V8L23 12L18 16Z" />
-
-                        </svg>
-
-                    </button>
-
                 </div>
 
-            </div>
+            </header>
 
-        </header>
-
-        <!-- =================================================
+            <!-- =================================================
 
              PAGE CONTENT
 
              ================================================= -->
 
-        {% block content %}
+            {% block content %}
 
-        {% endblock %}
+            {% endblock %}
+
+        </div>
 
     </div>
 
-</div>
-
-<!-- =====================================================
+    <!-- =====================================================
 
      TOAST
 
      ===================================================== -->
 
-<div id="toastContainer"
-
-     class="toast-container position-fixed top-0 end-0 p-0"
-
-     style="margin-top:20px;
+    <div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-0" style="margin-top:20px;
 
             margin-right:10px;
 
             z-index:1090;">
 
-</div>
+    </div>
 
-<!-- =====================================================
+    <!-- =====================================================
 
      JS
 
      ===================================================== -->
 
-<script src="{% static 'js/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'js/jquery/jquery.min.js' %}"></script>
 
-<script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
 
-<script src="{% static 'js/jquery/jquery.scrollbar.min.js' %}"></script>
+    <script src="{% static 'js/jquery/jquery.scrollbar.min.js' %}"></script>
 
-<script src="{% static 'choices/choices.min.js' %}"></script>
+    <script src="{% static 'choices/choices.min.js' %}"></script>
 
-<script src="{% static 'js/datatables/datatables.min.js' %}"></script>
+    <script src="{% static 'js/datatables/datatables.min.js' %}"></script>
 
-<script src="{% static 'js/sweetalert/sweetalert.min.js' %}"></script>
+    <script src="{% static 'js/sweetalert/sweetalert.min.js' %}"></script>
 
-<script src="{% static 'js/admin.js' %}"></script>
+    <script src="{% static 'js/admin.js' %}"></script>
 
-<script src="{% static 'js/api.js' %}"
+    <script src="{% static 'js/api.js' %}" type="module">
 
-        type="module">
+    </script>
 
-</script>
-
-<!-- =====================================================
+    <!-- =====================================================
 
      LOGOUT
 
      ===================================================== -->
 
-<script>
+    <script>
 
-(function () {
+        (function () {
 
-    const CSRF_COOKIE = "bd_csrftoken";
+            const CSRF_COOKIE = "bd_csrftoken";
 
-    function getCsrf() {
+            function getCsrf() {
 
-        const row =
+                const row =
 
-            document.cookie
+                    document.cookie
 
-                .split("; ")
+                        .split("; ")
 
-                .find(
+                        .find(
 
-                    r => r.startsWith(
+                            r => r.startsWith(
 
-                        CSRF_COOKIE + "="
+                                CSRF_COOKIE + "="
 
-                    )
+                            )
 
-                );
+                        );
 
-        return row
+                return row
 
-            ? row.split("=")[1]
+                    ? row.split("=")[1]
 
-            : "";
+                    : "";
 
-    }
+            }
 
-    async function doLogout() {
+            async function doLogout() {
 
-        try {
+                try {
 
-            await fetch(
+                    await fetch(
 
-                "/api/auth/logout/",
+                        "/api/auth/logout/",
 
-                {
+                        {
 
-                    method: "POST",
+                            method: "POST",
 
-                    credentials: "include",
+                            credentials: "include",
 
-                    headers: {
+                            headers: {
 
-                        "Content-Type":
+                                "Content-Type":
 
-                            "application/json",
+                                    "application/json",
 
-                        "X-CSRFToken":
+                                "X-CSRFToken":
 
-                            getCsrf()
+                                    getCsrf()
 
-                    }
+                            }
+
+                        }
+
+                    );
+
+                } finally {
+
+                    window.location.href = "/login/";
 
                 }
 
-            );
+            }
 
-        } finally {
+            document
 
-            window.location.href = "/login/";
+                .getElementById("logoutBtn")
 
-        }
+                ?.addEventListener(
 
-    }
+                    "click",
 
-    document
+                    doLogout
 
-        .getElementById("logoutBtn")
+                );
 
-        ?.addEventListener(
+            document
 
-            "click",
+                .getElementById("dropdownLogout")
 
-            doLogout
+                ?.addEventListener(
 
-        );
+                    "click",
 
-    document
+                    doLogout
 
-        .getElementById("dropdownLogout")
+                );
 
-        ?.addEventListener(
+        })();
 
-            "click",
+    </script>
 
-            doLogout
+    {% block extra_js %}
 
-        );
+    {% endblock %}
 
-})();
-
-</script>
-
-{% block extra_js %}
-
-{% endblock %}
-
-<!-- =====================================================
+    <!-- =====================================================
 
      SESSION TIMEOUT
 
      ===================================================== -->
 
-<div id="sessionTimeoutModal"
+    <div id="sessionTimeoutModal" class="session-timeout-modal" role="dialog" aria-modal="true"
+        aria-labelledby="sessionTimeoutTitle" style="display:none;">
 
-     class="session-timeout-modal"
+        <div class="session-timeout-backdrop"></div>
 
-     role="dialog"
+        <div class="session-timeout-dialog">
 
-     aria-modal="true"
+            <div class="session-timeout-icon">
 
-     aria-labelledby="sessionTimeoutTitle"
+                <svg viewBox="0 0 24 24" fill="currentColor" width="32" height="32">
 
-     style="display:none;">
+                    <path
+                        d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM11 7H13V13H11V7ZM11 15H13V17H11V15Z" />
 
-    <div class="session-timeout-backdrop"></div>
+                </svg>
 
-    <div class="session-timeout-dialog">
+            </div>
 
-        <div class="session-timeout-icon">
+            <h2 id="sessionTimeoutTitle" class="session-timeout-heading">
 
-            <svg viewBox="0 0 24 24"
+                Session Expiring Soon
 
-                 fill="currentColor"
+            </h2>
 
-                 width="32"
+            <p class="session-timeout-body">
 
-                 height="32">
+                Your session will expire in
 
-                <path
+                <strong id="sessionTimeoutCountdown"></strong>.
 
-                    d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM11 7H13V13H11V7ZM11 15H13V17H11V15Z" />
+                <br>
 
-            </svg>
+                Do you want to stay signed in?
 
-        </div>
+            </p>
 
-        <h2 id="sessionTimeoutTitle"
+            <div class="session-timeout-actions">
 
-            class="session-timeout-heading">
+                <button type="button" id="sessionTimeoutStay" class="session-timeout-btn-primary">
 
-            Session Expiring Soon
+                    Stay Signed In
 
-        </h2>
+                </button>
 
-        <p class="session-timeout-body">
+                <button type="button" id="sessionTimeoutLeave" class="session-timeout-btn-secondary">
 
-            Your session will expire in
+                    Sign Out Now
 
-            <strong id="sessionTimeoutCountdown"></strong>.
+                </button>
 
-            <br>
-
-            Do you want to stay signed in?
-
-        </p>
-
-        <div class="session-timeout-actions">
-
-            <button type="button"
-
-                    id="sessionTimeoutStay"
-
-                    class="session-timeout-btn-primary">
-
-                Stay Signed In
-
-            </button>
-
-            <button type="button"
-
-                    id="sessionTimeoutLeave"
-
-                    class="session-timeout-btn-secondary">
-
-                Sign Out Now
-
-            </button>
+            </div>
 
         </div>
 
     </div>
 
-</div>
+    <style>
+        .session-timeout-modal {
 
-<style>
+            position: fixed;
 
-.session-timeout-modal {
+            inset: 0;
 
-    position: fixed;
+            z-index: 9999;
 
-    inset: 0;
+            display: flex;
 
-    z-index: 9999;
+            align-items: center;
 
-    display: flex;
+            justify-content: center;
 
-    align-items: center;
+        }
 
-    justify-content: center;
+        .session-timeout-backdrop {
 
-}
+            position: absolute;
 
-.session-timeout-backdrop {
+            inset: 0;
 
-    position: absolute;
+            background:
 
-    inset: 0;
+                rgba(0, 0, 0, .55);
 
-    background:
+        }
 
-        rgba(0, 0, 0, .55);
+        .session-timeout-dialog {
 
-}
+            position: relative;
 
-.session-timeout-dialog {
+            background:
 
-    position: relative;
+                var(--card-bg, #fff);
 
-    background:
+            color:
 
-        var(--card-bg, #fff);
+                var(--text-primary, #111);
 
-    color:
+            border-radius: 12px;
 
-        var(--text-primary, #111);
+            padding:
 
-    border-radius: 12px;
+                2rem 2.25rem;
 
-    padding:
+            width:
 
-        2rem 2.25rem;
+                min(420px, 92vw);
 
-    width:
+            box-shadow:
 
-        min(420px, 92vw);
+                0 20px 60px rgba(0, 0, 0, .25);
 
-    box-shadow:
+            text-align: center;
 
-        0 20px 60px
+            animation:
 
-        rgba(0, 0, 0, .25);
+                stm-in .18s ease-out;
 
-    text-align: center;
+        }
 
-    animation:
+        @keyframes stm-in {
 
-        stm-in .18s ease-out;
+            from {
 
-}
+                opacity: 0;
 
-@keyframes stm-in {
+                transform:
 
-    from {
+                    scale(.95) translateY(-8px);
 
-        opacity: 0;
+            }
 
-        transform:
+            to {
 
-            scale(.95)
+                opacity: 1;
 
-            translateY(-8px);
+                transform:
 
-    }
+                    scale(1) translateY(0);
 
-    to {
+            }
 
-        opacity: 1;
+        }
 
-        transform:
+        .session-timeout-icon {
 
-            scale(1)
+            color:
 
-            translateY(0);
+                #f59e0b;
 
-    }
+            margin-bottom:
 
-}
+                .75rem;
 
-.session-timeout-icon {
+        }
 
-    color:
+        .session-timeout-heading {
 
-        #f59e0b;
+            font-size:
 
-    margin-bottom:
+                1.125rem;
 
-        .75rem;
+            font-weight:
 
-}
+                600;
 
-.session-timeout-heading {
+            margin:
 
-    font-size:
+                0 0 .5rem;
 
-        1.125rem;
+        }
 
-    font-weight:
+        .session-timeout-body {
 
-        600;
+            font-size:
 
-    margin:
+                .9rem;
 
-        0 0 .5rem;
+            color:
 
-}
+                var(--text-secondary, #555);
 
-.session-timeout-body {
+            margin:
 
-    font-size:
+                0 0 1.5rem;
 
-        .9rem;
+            line-height:
 
-    color:
+                1.6;
 
-        var(--text-secondary, #555);
+        }
 
-    margin:
+        .session-timeout-actions {
 
-        0 0 1.5rem;
+            display:
 
-    line-height:
+                flex;
 
-        1.6;
+            gap:
 
-}
+                .75rem;
 
-.session-timeout-actions {
+            justify-content:
 
-    display:
+                center;
 
-        flex;
+        }
 
-    gap:
+        .session-timeout-btn-primary,
 
-        .75rem;
+        .session-timeout-btn-secondary {
 
-    justify-content:
+            padding:
 
-        center;
+                .5rem 1.25rem;
 
-}
+            border-radius:
 
-.session-timeout-btn-primary,
+                6px;
 
-.session-timeout-btn-secondary {
+            font-size:
 
-    padding:
+                .875rem;
 
-        .5rem 1.25rem;
+            font-weight:
 
-    border-radius:
+                500;
 
-        6px;
+            cursor:
 
-    font-size:
+                pointer;
 
-        .875rem;
+            border:
 
-    font-weight:
+                none;
 
-        500;
+            transition:
 
-    cursor:
+                opacity .15s;
 
-        pointer;
+        }
 
-    border:
+        .session-timeout-btn-primary:hover,
 
-        none;
+        .session-timeout-btn-secondary:hover {
 
-    transition:
+            opacity:
 
-        opacity .15s;
+                .85;
 
-}
+        }
 
-.session-timeout-btn-primary:hover,
+        .session-timeout-btn-primary {
 
-.session-timeout-btn-secondary:hover {
+            background:
 
-    opacity:
+                #2563eb;
 
-        .85;
+            color:
 
-}
+                #fff;
 
-.session-timeout-btn-primary {
+        }
 
-    background:
+        .session-timeout-btn-secondary {
 
-        #2563eb;
+            background:
 
-    color:
+                transparent;
 
-        #fff;
+            color:
 
-}
+                var(--text-secondary, #555);
 
-.session-timeout-btn-secondary {
+            border:
 
-    background:
+                1px solid var(--border-color, #ddd);
 
-        transparent;
+        }
+    </style>
 
-    color:
+    <script>
 
-        var(--text-secondary, #555);
+        (function () {
 
-    border:
+            const IDLE_TIMEOUT_MS =
 
-        1px solid
+                15 \* 60 \* 1000;
 
-        var(--border-color, #ddd);
+            const WARN_BEFORE_MS =
 
-}
+                2 \* 60 \* 1000;
 
-</style>
+            const CSRF_COOKIE =
 
-<script>
+                "bd_csrftoken";
 
-(function () {
+            function getCsrf() {
 
-    const IDLE_TIMEOUT_MS =
+                const row =
 
-        15 \* 60 \* 1000;
+                    document.cookie
 
-    const WARN_BEFORE_MS =
+                        .split("; ")
 
-        2 \* 60 \* 1000;
+                        .find(
 
-    const CSRF_COOKIE =
+                            r => r.startsWith(
 
-        "bd_csrftoken";
+                                CSRF_COOKIE + "="
 
-    function getCsrf() {
+                            )
 
-        const row =
+                        );
 
-            document.cookie
+                return row
 
-                .split("; ")
+                    ? row.split("=")[1]
 
-                .find(
+                    : "";
 
-                    r => r.startsWith(
+            }
 
-                        CSRF_COOKIE + "="
+            const modal =
 
-                    )
+                document.getElementById(
+
+                    "sessionTimeoutModal"
 
                 );
 
-        return row
+            const countdown =
 
-            ? row.split("=")[1]
+                document.getElementById(
 
-            : "";
+                    "sessionTimeoutCountdown"
 
-    }
+                );
 
-    const modal =
+            const stayBtn =
 
-        document.getElementById(
+                document.getElementById(
 
-            "sessionTimeoutModal"
+                    "sessionTimeoutStay"
 
-        );
+                );
 
-    const countdown =
+            const leaveBtn =
 
-        document.getElementById(
+                document.getElementById(
 
-            "sessionTimeoutCountdown"
+                    "sessionTimeoutLeave"
 
-        );
+                );
 
-    const stayBtn =
+            let idleTimer = null;
 
-        document.getElementById(
+            let warnTimer = null;
 
-            "sessionTimeoutStay"
+            let countdownInt = null;
 
-        );
+            let warningShown = false;
 
-    const leaveBtn =
+            function formatSeconds(s) {
 
-        document.getElementById(
+                const m =
 
-            "sessionTimeoutLeave"
+                    Math.floor(s / 60);
 
-        );
+                const sec =
 
-    let idleTimer = null;
+                    s % 60;
 
-    let warnTimer = null;
+                return m > 0
 
-    let countdownInt = null;
+                    ?\`${m}m ${sec
 
-    let warningShown = false;
+                        .toString()
 
-    function formatSeconds(s) {
-
-        const m =
-
-            Math.floor(s / 60);
-
-        const sec =
-
-            s % 60;
-
-        return m > 0
-
-            ? \`${m}m ${sec
-
-                .toString()
-
-                .padStart(2, "0")}s\`
+                        .padStart(2, "0")}s\`
 
             : \`${sec}s\`;
 
@@ -1587,7 +1490,7 @@
 
 })();
 
-</script>
+    </script>
 
 </body>
 

@@ -1,0 +1,74 @@
+{% extends 'Authority/reports/report_base.html' %}
+
+{% block filter_form %}
+<form method="get" class="card border-0 shadow-sm mb-4 d-print-none">
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-2"><label class="form-label small">From Date</label><input type="date" name="date_from" class="form-control form-control-sm" value="{{ filter_params.date_from }}"></div>
+            <div class="col-md-2"><label class="form-label small">To Date</label><input type="date" name="date_to" class="form-control form-control-sm" value="{{ filter_params.date_to }}"></div>
+            <div class="col-md-2"><label class="form-label small">Group By</label>
+                <select name="group_by" class="form-select form-select-sm">
+                    <option value="monthly"{% if group_by == 'monthly' %} selected{% endif %}>Monthly</option>
+                    <option value="daily"{% if group_by == 'daily' %} selected{% endif %}>Daily</option>
+                </select>
+            </div>
+            <div class="col-md-2"><label class="form-label small">District</label>
+                <select name="district" class="form-select form-select-sm">
+                    <option value="">All</option>
+                    {% for d in districts %}<option value="{{ d.pk }}"{% if filter_params.district == d.pk|stringformat:"s" %} selected{% endif %}>{{ d.name }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+                <a href="{% url 'report_registration_summary' %}" class="btn btn-light btn-sm">Reset</a>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block report_table %}
+<div class="p-3">
+    <div class="row g-4 mb-4">
+        <!-- Service Type Summary -->
+        <div class="col-md-4">
+            <h6 class="fw-bold mb-3">By Service Type</h6>
+            <table class="table table-sm table-bordered">
+                <thead class="table-light"><tr><th>Service</th><th class="text-end">Count</th></tr></thead>
+                <tbody>
+                    {% for r in by_service %}<tr><td><small>{{ r.service_type }}</small></td><td class="text-end fw-semibold">{{ r.count }}</td></tr>{% empty %}<tr><td colspan="2" class="text-muted text-center">—</td></tr>{% endfor %}
+                    <tr class="table-light fw-bold"><td>Total</td><td class="text-end">{{ total }}</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <!-- Status Summary -->
+        <div class="col-md-4">
+            <h6 class="fw-bold mb-3">By Status</h6>
+            <table class="table table-sm table-bordered">
+                <thead class="table-light"><tr><th>Status</th><th class="text-end">Count</th></tr></thead>
+                <tbody>
+                    {% for r in by_status %}<tr><td><small>{{ r.status }}</small></td><td class="text-end fw-semibold">{{ r.count }}</td></tr>{% empty %}<tr><td colspan="2" class="text-muted text-center">—</td></tr>{% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <!-- District Summary -->
+        <div class="col-md-4">
+            <h6 class="fw-bold mb-3">Top Districts</h6>
+            <table class="table table-sm table-bordered">
+                <thead class="table-light"><tr><th>District</th><th class="text-end">Count</th></tr></thead>
+                <tbody>
+                    {% for r in by_district %}<tr><td><small>{{ r.district__name|default:"—" }}</small></td><td class="text-end fw-semibold">{{ r.count }}</td></tr>{% empty %}<tr><td colspan="2" class="text-muted text-center">—</td></tr>{% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- Time Series -->
+    <h6 class="fw-bold mb-3">{% if group_by == 'monthly' %}Monthly{% else %}Daily{% endif %} Trend</h6>
+    <table class="table table-hover table-bordered">
+        <thead class="table-primary"><tr><th>Period</th><th>Service Type</th><th class="text-end">Count</th></tr></thead>
+        <tbody>
+            {% for r in time_series %}<tr><td class="text-nowrap">{% if r.period %}{{ r.period|date:"Y-m" }}{% else %}—{% endif %}</td><td><small>{{ r.service_type }}</small></td><td class="text-end fw-semibold">{{ r.count }}</td></tr>{% empty %}<tr><td colspan="3" class="text-center text-muted py-4">No data found.</td></tr>{% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

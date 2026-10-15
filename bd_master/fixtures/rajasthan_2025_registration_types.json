@@ -1,0 +1,114 @@
+[
+  {
+    "model": "bd_master.registrationtype",
+    "pk": 1,
+    "fields": {
+      "code": "BIRTH_NORMAL",
+      "name": "Normal Birth Registration",
+      "event_category": "BIRTH",
+      "requires_institution": false,
+      "is_delayed": false,
+      "is_active": true,
+      "created_at": "2025-02-07T00:00:00Z",
+      "updated_at": "2025-02-07T00:00:00Z"
+    }
+  },
+  {
+    "model": "bd_master.registrationtype",
+    "pk": 2,
+    "fields": {
+      "code": "BIRTH_DELAYED",
+      "name": "Delayed Birth Registration",
+      "event_category": "BIRTH",
+      "requires_institution": false,
+      "is_delayed": true,
+      "is_active": true,
+      "created_at": "2025-02-07T00:00:00Z",
+      "updated_at": "2025-02-07T00:00:00Z"
+    }
+  },
+  {
+    "model": "bd_master.registrationtype",
+    "pk": 3,
+    "fields": {
+      "code": "BIRTH_INSTITUTIONAL",
+      "name": "Institutional Birth Registration",
+      "event_category": "BIRTH",
+      "requires_institution": true,
+      "is_delayed": false,
+      "is_active": true,
+      "created_at": "2025-02-07T00:00:00Z",
+      "updated_at": "2025-02-07T00:00:00Z"
+    }
+  },
+  {
+    "model": "bd_master.registrationtype",
+    "pk": 4,
+    "fields": {
+      "code": "DEATH_NORMAL",
+      "name": "Normal Death Registration",
+      "event_category": "DEATH",
+      "requires_institution": false,
+      "is_delayed": false,
+      "is_active": true,
+      "created_at": "2025-02-07T00:00:00Z",
+      "updated_at": "2025-02-07T00:00:00Z"
+    }
+  },
+  {
+    "model": "bd_master.registrationtype",
+    "pk": 5,
+    "fields": {
+      "code": "DEATH_DELAYED",
+      "name": "Delayed Death Registration",
+      "event_category": "DEATH",
+      "requires_institution": false,
+      "is_delayed": true,
+      "is_active": true,
+      "created_at": "2025-02-07T00:00:00Z",
+      "updated_at": "2025-02-07T00:00:00Z"
+    }
+  },
+  {
+    "model": "bd_master.registrationtype",
+    "pk": 6,
+    "fields": {
+      "code": "DEATH_INSTITUTIONAL",
+      "name": "Institutional Death Registration",
+      "event_category": "DEATH",
+      "requires_institution": true,
+      "is_delayed": false,
+      "is_active": true,
+      "created_at": "2025-02-07T00:00:00Z",
+      "updated_at": "2025-02-07T00:00:00Z"
+    }
+  },
+  {
+    "model": "bd_master.registrationtype",
+    "pk": 7,
+    "fields": {
+      "code": "STILL_BIRTH_NORMAL",
+      "name": "Still Birth Registration",
+      "event_category": "STILL_BIRTH",
+      "requires_institution": false,
+      "is_delayed": false,
+      "is_active": true,
+      "created_at": "2025-02-07T00:00:00Z",
+      "updated_at": "2025-02-07T00:00:00Z"
+    }
+  },
+  {
+    "model": "bd_master.registrationtype",
+    "pk": 8,
+    "fields": {
+      "code": "BIRTH_ADOPTED",
+      "name": "Adopted Child Birth Registration",
+      "event_category": "BIRTH",
+      "requires_institution": false,
+      "is_delayed": false,
+      "is_active": true,
+      "created_at": "2025-02-07T00:00:00Z",
+      "updated_at": "2025-02-07T00:00:00Z"
+    }
+  }
+]

@@ -41,11 +41,18 @@
                     </p>
                 </div>
 
-                <form id="birthApplicationForm"
-                      enctype="multipart/form-data"
-                      novalidate>
+                <form id="birthApplicationForm" enctype="multipart/form-data" autocomplete="off" novalidate>
 
                     {% csrf_token %}
+                    {% if application %}
+                    <!-- Hidden field: editing existing PAYMENT_PENDING application -->
+                    <input type="hidden" id="existingAppId" value="{{ application.pk }}">
+                    <div class="alert alert-warning py-2 mb-3">
+                        <i class="ri-edit-line me-1"></i>
+                        Editing application <strong>{{ application.application_number }}</strong>.
+                        After re-submitting, please complete the payment.
+                    </div>
+                    {% endif %}
 
 
                     <!-- ================================================= -->
@@ -64,17 +71,14 @@
                                 <label class="form-label">
                                     Registration Type <span class="star-required">*</span>
                                 </label>
-                                <select class="form-select"
-                                        name="registration_type"
-                                        id="registration_type"
-                                        required>
+                                <select class="form-select" name="registration_type" id="registration_type" required>
                                     <option value="">Select Registration Type</option>
                                     {% if registration_types %}
-                                        {% for rt in registration_types %}
-                                            <option value="{{ rt.pk }}">{{ rt.name }}</option>
-                                        {% endfor %}
+                                    {% for rt in registration_types %}
+                                    <option value="{{ rt.pk }}"{% if application and application.registration_type_id == rt.pk %} selected{% endif %}>{{ rt.name }}</option>
+                                    {% endfor %}
                                     {% else %}
-                                        <option value="">No registration types configured</option>
+                                    <option value="">No registration types configured</option>
                                     {% endif %}
                                 </select>
                                 <div class="invalid-feedback">Please select a registration type.</div>
@@ -85,11 +89,9 @@
                                 <label for="date_of_reporting" class="form-label">
                                     Date of Reporting <span class="star-required">*</span>
                                 </label>
-                                <input type="date"
-                                       class="form-control"
-                                       id="date_of_reporting"
-                                       name="date_of_reporting"
-                                       required>
+                                <input type="date" class="form-control" id="date_of_reporting" name="date_of_reporting"
+                                    value="{% if application %}{{ application.date_of_reporting|date:'Y-m-d' }}{% endif %}"
+                                    required>
                                 <div class="invalid-feedback">Date of reporting is required.</div>
                             </div>
 
@@ -110,10 +112,7 @@
                                 <label class="form-label">
                                     State <span class="star-required">*</span>
                                 </label>
-                                <select class="form-select"
-                                        name="state_code"
-                                        id="state_code"
-                                        required>
+                                <select class="form-select" name="state_code" id="state_code" required>
                                     <option value="">Select State</option>
                                     <option value="RJ" selected>Rajasthan</option>
                                 </select>
@@ -125,13 +124,10 @@
                                 <label class="form-label">
                                     District <span class="star-required">*</span>
                                 </label>
-                                <select class="form-select"
-                                        name="district"
-                                        id="district"
-                                        required>
+                                <select class="form-select" name="district" id="district" required>
                                     <option value="">Select District</option>
                                     {% for district in districts %}
-                                        <option value="{{ district.pk }}">{{ district.name }}</option>
+                                    <option value="{{ district.pk }}"{% if application and application.district_id == district.pk %} selected{% endif %}>{{ district.name }}</option>
                                     {% endfor %}
                                 </select>
                                 <div class="invalid-feedback">Please select a district.</div>
@@ -142,11 +138,8 @@
                                 <label class="form-label">
                                     ULB <span class="star-required">*</span>
                                 </label>
-                                <select class="form-select"
-                                        name="ulb"
-                                        id="ulb"
-                                        required
-                                        disabled>
+                                <select class="form-select" name="ulb" id="ulb" required disabled
+                                    data-prefill-ulb="{% if application %}{{ application.ulb_id }}{% endif %}">
                                     <option value="">Select District first</option>
                                 </select>
                                 <div class="invalid-feedback">Please select a ULB.</div>
@@ -168,32 +161,25 @@
                                 <label class="form-label">
                                     First Name <span class="star-required">*</span>
                                 </label>
-                                <input type="text"
-                                       class="form-control"
-                                       id="child_first_name"
-                                       name="child_first_name"
-                                       maxlength="100"
-                                       placeholder="Enter first name"
-                                       required>
+                                <input type="text" class="form-control" id="child_first_name" name="child_first_name"
+                                    maxlength="100" placeholder="Enter first name"
+                                    value="{% if birth_registration %}{{ birth_registration.child_first_name }}{% endif %}"
+                                    required>
                                 <div class="invalid-feedback">Child first name is required.</div>
                             </div>
 
                             <div class="col-xl-4 col-lg-4 col-md-6 col-12">
                                 <label class="form-label">Middle Name</label>
-                                <input type="text"
-                                       class="form-control"
-                                       name="child_middle_name"
-                                       maxlength="100"
-                                       placeholder="Enter middle name">
+                                <input type="text" class="form-control" name="child_middle_name" maxlength="100"
+                                    placeholder="Enter middle name"
+                                    value="{% if birth_registration %}{{ birth_registration.child_middle_name }}{% endif %}">
                             </div>
 
                             <div class="col-xl-4 col-lg-4 col-md-6 col-12">
                                 <label class="form-label">Last Name</label>
-                                <input type="text"
-                                       class="form-control"
-                                       name="child_last_name"
-                                       maxlength="100"
-                                       placeholder="Enter last name">
+                                <input type="text" class="form-control" name="child_last_name" maxlength="100"
+                                    placeholder="Enter last name"
+                                    value="{% if birth_registration %}{{ birth_registration.child_last_name }}{% endif %}">
                             </div>
 
                             <!-- Name Recorded -->
@@ -203,18 +189,13 @@
                                 </label>
                                 <div class="selectgroup selectgroup-primary selectgroup-pills">
                                     <label class="selectgroup-item">
-                                        <input type="radio"
-                                               name="name_recorded"
-                                               value="true"
-                                               class="selectgroup-input"
-                                               checked>
+                                        <input type="radio" name="name_recorded" value="true" class="selectgroup-input"
+                                            {% if not birth_registration or birth_registration.name_recorded %}checked{% endif %}>
                                         <span class="selectgroup-button">Yes</span>
                                     </label>
                                     <label class="selectgroup-item">
-                                        <input type="radio"
-                                               name="name_recorded"
-                                               value="false"
-                                               class="selectgroup-input">
+                                        <input type="radio" name="name_recorded" value="false" class="selectgroup-input"
+                                            {% if birth_registration and not birth_registration.name_recorded %}checked{% endif %}>
                                         <span class="selectgroup-button">No</span>
                                     </label>
                                 </div>
@@ -225,20 +206,17 @@
                                 <label class="form-label">
                                     Date of Birth <span class="star-required">*</span>
                                 </label>
-                                <input type="date"
-                                       class="form-control"
-                                       id="date_of_birth"
-                                       name="date_of_birth"
-                                       required>
+                                <input type="date" class="form-control" id="date_of_birth" name="date_of_birth"
+                                    value="{% if birth_registration %}{{ birth_registration.date_of_birth|date:'Y-m-d' }}{% endif %}"
+                                    required>
                                 <div class="invalid-feedback">Date of birth is required.</div>
                             </div>
 
                             <!-- Time of Birth -->
                             <div class="col-xl-4 col-lg-4 col-md-6 col-12">
                                 <label class="form-label">Time of Birth</label>
-                                <input type="time"
-                                       class="form-control"
-                                       name="time_of_birth">
+                                <input type="time" class="form-control" name="time_of_birth"
+                                    value="{% if birth_registration and birth_registration.time_of_birth %}{{ birth_registration.time_of_birth|time:'H:i' }}{% endif %}">
                             </div>
 
                             <!-- Sex -->
@@ -246,15 +224,12 @@
                                 <label class="form-label">
                                     Sex <span class="star-required">*</span>
                                 </label>
-                                <select class="form-select"
-                                        name="sex"
-                                        id="sex"
-                                        required>
+                                <select class="form-select" name="sex" id="sex" required>
                                     <option value="">Select Sex</option>
-                                    <option value="MALE">Male</option>
-                                    <option value="FEMALE">Female</option>
-                                    <option value="OTHER">Other / Intersex</option>
-                                    <option value="UNKNOWN">Unknown / Not Determined</option>
+                                    <option value="MALE"{% if birth_registration and birth_registration.sex == 'MALE' %} selected{% endif %}>Male</option>
+                                    <option value="FEMALE"{% if birth_registration and birth_registration.sex == 'FEMALE' %} selected{% endif %}>Female</option>
+                                    <option value="OTHER"{% if birth_registration and birth_registration.sex == 'OTHER' %} selected{% endif %}>Other / Intersex</option>
+                                    <option value="UNKNOWN"{% if birth_registration and birth_registration.sex == 'UNKNOWN' %} selected{% endif %}>Unknown / Not Determined</option>
                                 </select>
                                 <div class="invalid-feedback">Please select sex.</div>
                             </div>
@@ -273,44 +248,35 @@
 
                             <div class="col-xl-4 col-lg-4 col-md-6 col-12">
                                 <label class="form-label">Event Location Type</label>
-                                <select class="form-select"
-                                        name="event_location_type"
-                                        id="event_location_type">
+                                <select class="form-select" name="event_location_type" id="event_location_type">
                                     <option value="">Select Location Type</option>
-                                    <option value="HOME">Home</option>
-                                    <option value="HOSPITAL">Hospital</option>
-                                    <option value="OTHER_INSTITUTION">Other Institution</option>
-                                    <option value="OTHER">Other</option>
+                                    <option value="HOME"{% if birth_registration and birth_registration.event_location_type == 'HOME' %} selected{% endif %}>Home</option>
+                                    <option value="HOSPITAL"{% if birth_registration and birth_registration.event_location_type == 'HOSPITAL' %} selected{% endif %}>Hospital</option>
+                                    <option value="OTHER_INSTITUTION"{% if birth_registration and birth_registration.event_location_type == 'OTHER_INSTITUTION' %} selected{% endif %}>Other Institution</option>
+                                    <option value="OTHER"{% if birth_registration and birth_registration.event_location_type == 'OTHER' %} selected{% endif %}>Other</option>
                                 </select>
                             </div>
 
                             <div class="col-xl-4 col-lg-4 col-md-6 col-12">
                                 <label class="form-label">Institution Name</label>
-                                <input type="text"
-                                       class="form-control"
-                                       name="institution_name"
-                                       maxlength="250"
-                                       placeholder="Enter hospital/institution name (if applicable)">
+                                <input type="text" class="form-control" name="institution_name" maxlength="250"
+                                    placeholder="Enter hospital/institution name (if applicable)"
+                                    value="{% if birth_registration %}{{ birth_registration.institution_name }}{% endif %}">
                             </div>
 
                             <!-- Ward (filtered by ULB via AJAX) -->
                             <div class="col-xl-4 col-lg-4 col-md-6 col-12">
                                 <label class="form-label">Ward</label>
-                                <select class="form-select"
-                                        name="ward"
-                                        id="ward"
-                                        disabled>
+                                <select class="form-select" name="ward" id="ward" disabled
+                                    data-prefill-ward="{% if birth_registration %}{{ birth_registration.ward_id }}{% endif %}">
                                     <option value="">Select ULB first</option>
                                 </select>
                             </div>
 
                             <div class="col-12">
                                 <label class="form-label">Place of Birth Address</label>
-                                <textarea class="form-control"
-                                          name="place_of_birth_address"
-                                          maxlength="1000"
-                                          rows="3"
-                                          placeholder="Enter complete place of birth address"></textarea>
+                                <textarea class="form-control" name="place_of_birth_address" maxlength="1000" rows="3"
+                                    placeholder="Enter complete place of birth address">{% if birth_registration %}{{ birth_registration.place_of_birth_address }}{% endif %}</textarea>
                             </div>
 
                         </div>
@@ -327,43 +293,47 @@
 
                             <div class="col-md-4">
                                 <label class="form-label">Mother's Name</label>
-                                <input type="text" class="form-control" name="mother_name" maxlength="150">
+                                <input type="text" class="form-control" name="mother_name" maxlength="150"
+                                    value="{% if birth_registration %}{{ birth_registration.mother_name }}{% endif %}">
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label">Mother's Age at Birth</label>
-                                <input type="number" class="form-control" name="mother_age_at_birth" min="10" max="70">
+                                <input type="number" class="form-control" name="mother_age_at_birth" min="10" max="70"
+                                    value="{% if birth_registration and birth_registration.mother_age_at_birth %}{{ birth_registration.mother_age_at_birth }}{% endif %}">
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label">Nationality</label>
-                                <input type="text" class="form-control" name="mother_nationality" maxlength="100" value="Indian">
+                                <input type="text" class="form-control" name="mother_nationality" maxlength="100"
+                                    value="{% if birth_registration %}{{ birth_registration.mother_nationality }}{% else %}Indian{% endif %}">
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label">Education</label>
-                                <input type="text" class="form-control" name="mother_education" maxlength="100">
+                                <input type="text" class="form-control" name="mother_education" maxlength="100"
+                                    value="{% if birth_registration %}{{ birth_registration.mother_education }}{% endif %}">
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label">Occupation</label>
-                                <input type="text" class="form-control" name="mother_occupation" maxlength="100">
+                                <input type="text" class="form-control" name="mother_occupation" maxlength="100"
+                                    value="{% if birth_registration %}{{ birth_registration.mother_occupation }}{% endif %}">
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label">Mobile</label>
                                 <input type="tel" class="form-control" name="mother_mobile" maxlength="15"
-                                       pattern="[6-9][0-9]{9}"
-                                       title="Enter a valid 10-digit Indian mobile number">
+                                    pattern="[6-9][0-9]{9}" title="Enter a valid 10-digit Indian mobile number"
+                                    value="{% if birth_registration %}{{ birth_registration.mother_mobile }}{% endif %}">
                                 <div class="invalid-feedback">Enter a valid 10-digit mobile number.</div>
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label">Aadhaar Number</label>
                                 <input type="text" class="form-control" name="mother_aadhaar" maxlength="12"
-                                       inputmode="numeric"
-                                       pattern="[0-9]{12}"
-                                       title="12-digit Aadhaar number">
+                                    inputmode="numeric" pattern="[0-9]{12}" title="12-digit Aadhaar number"
+                                    value="{% if birth_registration %}{{ birth_registration.mother_aadhaar }}{% endif %}">
                                 <div class="invalid-feedback">Aadhaar must be exactly 12 digits.</div>
                             </div>
 
@@ -381,43 +351,47 @@
 
                             <div class="col-md-4">
                                 <label class="form-label">Father's Name</label>
-                                <input type="text" class="form-control" name="father_name" maxlength="150">
+                                <input type="text" class="form-control" name="father_name" maxlength="150"
+                                    value="{% if birth_registration %}{{ birth_registration.father_name }}{% endif %}">
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label">Father's Age at Birth</label>
-                                <input type="number" class="form-control" name="father_age_at_birth" min="10" max="100">
+                                <input type="number" class="form-control" name="father_age_at_birth" min="10" max="100"
+                                    value="{% if birth_registration and birth_registration.father_age_at_birth %}{{ birth_registration.father_age_at_birth }}{% endif %}">
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label">Nationality</label>
-                                <input type="text" class="form-control" name="father_nationality" maxlength="100" value="Indian">
+                                <input type="text" class="form-control" name="father_nationality" maxlength="100"
+                                    value="{% if birth_registration %}{{ birth_registration.father_nationality }}{% else %}Indian{% endif %}">
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label">Education</label>
-                                <input type="text" class="form-control" name="father_education" maxlength="100">
+                                <input type="text" class="form-control" name="father_education" maxlength="100"
+                                    value="{% if birth_registration %}{{ birth_registration.father_education }}{% endif %}">
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label">Occupation</label>
-                                <input type="text" class="form-control" name="father_occupation" maxlength="100">
+                                <input type="text" class="form-control" name="father_occupation" maxlength="100"
+                                    value="{% if birth_registration %}{{ birth_registration.father_occupation }}{% endif %}">
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label">Mobile</label>
                                 <input type="tel" class="form-control" name="father_mobile" maxlength="15"
-                                       pattern="[6-9][0-9]{9}"
-                                       title="Enter a valid 10-digit Indian mobile number">
+                                    pattern="[6-9][0-9]{9}" title="Enter a valid 10-digit Indian mobile number"
+                                    value="{% if birth_registration %}{{ birth_registration.father_mobile }}{% endif %}">
                                 <div class="invalid-feedback">Enter a valid 10-digit mobile number.</div>
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label">Aadhaar Number</label>
                                 <input type="text" class="form-control" name="father_aadhaar" maxlength="12"
-                                       inputmode="numeric"
-                                       pattern="[0-9]{12}"
-                                       title="12-digit Aadhaar number">
+                                    inputmode="numeric" pattern="[0-9]{12}" title="12-digit Aadhaar number"
+                                    value="{% if birth_registration %}{{ birth_registration.father_aadhaar }}{% endif %}">
                                 <div class="invalid-feedback">Aadhaar must be exactly 12 digits.</div>
                             </div>
 
@@ -434,11 +408,8 @@
                         <div class="row g-4">
                             <div class="col-12">
                                 <label class="form-label">Permanent Address</label>
-                                <textarea class="form-control"
-                                          name="permanent_address"
-                                          maxlength="1000"
-                                          rows="3"
-                                          placeholder="Enter permanent address"></textarea>
+                                <textarea class="form-control" name="permanent_address" maxlength="1000" rows="3"
+                                    placeholder="Enter permanent address">{% if birth_registration %}{{ birth_registration.permanent_address }}{% endif %}</textarea>
                             </div>
                         </div>
                     </div>
@@ -454,34 +425,36 @@
 
                             <div class="col-md-4">
                                 <label class="form-label">Informant Name</label>
-                                <input type="text" class="form-control" name="informant_name" maxlength="150">
+                                <input type="text" class="form-control" name="informant_name" maxlength="150"
+                                    value="{% if birth_registration %}{{ birth_registration.informant_name }}{% endif %}">
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label">Informant Relation</label>
                                 <select class="form-select" name="informant_relation">
                                     <option value="">Select Relation</option>
-                                    <option value="FATHER">Father</option>
-                                    <option value="MOTHER">Mother</option>
-                                    <option value="SPOUSE">Spouse</option>
-                                    <option value="SON_DAUGHTER">Son / Daughter</option>
-                                    <option value="HEAD_OF_FAMILY">Head of Family</option>
-                                    <option value="MEDICAL_OFFICER">Medical Officer / In-charge</option>
-                                    <option value="INSTITUTION_HEAD">Institution Head</option>
-                                    <option value="RELATIVE">Other Relative</option>
-                                    <option value="NEIGHBOUR">Neighbour</option>
-                                    <option value="OTHER">Other</option>
+                                    <option value="FATHER"{% if birth_registration and birth_registration.informant_relation == 'FATHER' %} selected{% endif %}>Father</option>
+                                    <option value="MOTHER"{% if birth_registration and birth_registration.informant_relation == 'MOTHER' %} selected{% endif %}>Mother</option>
+                                    <option value="SPOUSE"{% if birth_registration and birth_registration.informant_relation == 'SPOUSE' %} selected{% endif %}>Spouse</option>
+                                    <option value="SON_DAUGHTER"{% if birth_registration and birth_registration.informant_relation == 'SON_DAUGHTER' %} selected{% endif %}>Son / Daughter</option>
+                                    <option value="HEAD_OF_FAMILY"{% if birth_registration and birth_registration.informant_relation == 'HEAD_OF_FAMILY' %} selected{% endif %}>Head of Family</option>
+                                    <option value="MEDICAL_OFFICER"{% if birth_registration and birth_registration.informant_relation == 'MEDICAL_OFFICER' %} selected{% endif %}>Medical Officer / In-charge</option>
+                                    <option value="INSTITUTION_HEAD"{% if birth_registration and birth_registration.informant_relation == 'INSTITUTION_HEAD' %} selected{% endif %}>Institution Head</option>
+                                    <option value="RELATIVE"{% if birth_registration and birth_registration.informant_relation == 'RELATIVE' %} selected{% endif %}>Other Relative</option>
+                                    <option value="NEIGHBOUR"{% if birth_registration and birth_registration.informant_relation == 'NEIGHBOUR' %} selected{% endif %}>Neighbour</option>
+                                    <option value="OTHER"{% if birth_registration and birth_registration.informant_relation == 'OTHER' %} selected{% endif %}>Other</option>
                                 </select>
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label">Informant Mobile</label>
-                                <input type="tel" class="form-control" name="informant_mobile" maxlength="15">
+                                <input type="tel" class="form-control" name="informant_mobile" maxlength="15"
+                                    value="{% if birth_registration %}{{ birth_registration.informant_mobile }}{% endif %}">
                             </div>
 
                             <div class="col-12">
                                 <label class="form-label">Informant Address</label>
-                                <textarea class="form-control" name="informant_address" maxlength="1000" rows="3"></textarea>
+                                <textarea class="form-control" name="informant_address" maxlength="1000" rows="3">{% if birth_registration %}{{ birth_registration.informant_address }}{% endif %}</textarea>
                             </div>
 
                         </div>
@@ -531,12 +504,8 @@
                     <div class="form-section">
                         <h5>Supporting Documents</h5>
                         <div class="file-upload">
-                            <input type="file"
-                                   id="birthDocuments"
-                                   name="documents"
-                                   class="visually-hidden"
-                                   multiple
-                                   accept=".jpg,.jpeg,.png,.pdf">
+                            <input type="file" id="birthDocuments" name="documents" class="visually-hidden" multiple
+                                accept=".jpg,.jpeg,.png,.pdf">
                             <label for="birthDocuments" class="drop-zone" tabindex="0">
                                 <div class="upload-icon">📤</div>
                                 <div class="drop-zone-title">Drag &amp; drop files here</div>
@@ -555,11 +524,8 @@
 
                     <div class="form-section">
                         <h5>Remarks</h5>
-                        <textarea class="form-control"
-                                  name="remarks"
-                                  maxlength="2000"
-                                  rows="3"
-                                  placeholder="Enter remarks if required"></textarea>
+                        <textarea class="form-control" name="remarks" maxlength="2000" rows="3"
+                            placeholder="Enter remarks if required">{% if application %}{{ application.remarks }}{% endif %}</textarea>
                     </div>
 
 
@@ -570,29 +536,19 @@
                     <div class="d-print-none">
                         <p class="text-center pt-4">
 
-                            <button type="button"
-                                    class="btn btn-secondary btn-sm"
-                                    id="saveDraftBtn">
-                                <span id="draftSpinner"
-                                      class="spinner-border spinner-border-sm me-1"
-                                      role="status"
-                                      style="display:none;"></span>
+                            <button type="button" class="btn btn-secondary btn-sm" id="saveDraftBtn">
+                                <span id="draftSpinner" class="spinner-border spinner-border-sm me-1" role="status"
+                                    style="display:none;"></span>
                                 Save Draft
                             </button>
 
-                            <button type="button"
-                                    class="btn btn-primary btn-sm"
-                                    id="submitBtn">
-                                <span id="submitSpinner"
-                                      class="spinner-border spinner-border-sm me-1"
-                                      role="status"
-                                      style="display:none;"></span>
+                            <button type="button" class="btn btn-primary btn-sm" id="submitBtn">
+                                <span id="submitSpinner" class="spinner-border spinner-border-sm me-1" role="status"
+                                    style="display:none;"></span>
                                 Submit Application
                             </button>
 
-                            <button type="button"
-                                    class="btn btn-light btn-sm"
-                                    onclick="history.back()">
+                            <button type="button" class="btn btn-light btn-sm" onclick="history.back()">
                                 Back
                             </button>
 
@@ -613,41 +569,85 @@
 <!-- ======================================================= -->
 
 <style>
-.form-section {
-    border-bottom: 1px solid #eeeeee;
-    padding-bottom: 24px;
-    margin-bottom: 28px;
-}
-.form-section:last-child { border-bottom: none; }
-.form-section h5 {
-    font-size: 17px;
-    font-weight: 600;
-    margin-bottom: 20px;
-}
-.star-required { color: #dc3545; font-weight: 600; }
-.drop-zone {
-    border: 2px dashed #d8d8d8;
-    border-radius: 8px;
-    padding: 30px;
-    text-align: center;
-    cursor: pointer;
-    display: block;
-    transition: all .2s ease;
-}
-.drop-zone:hover { border-color: #1572e8; background: #f8fbff; }
-.drop-zone-title { font-weight: 600; margin-top: 8px; }
-.drop-zone-text  { color: #777; font-size: 13px; margin-top: 5px; }
-.preview-file {
-    padding: 8px 12px;
-    background: #f7f7f7;
-    border-radius: 5px;
-    margin-top: 6px;
-    font-size: 13px;
-}
-/* Delay category badges */
-.badge-normal   { background:#198754; color:#fff; padding:3px 10px; border-radius:12px; font-size:13px; }
-.badge-delayed  { background:#dc3545; color:#fff; padding:3px 10px; border-radius:12px; font-size:13px; }
-.badge-warning  { background:#ffc107; color:#000; padding:3px 10px; border-radius:12px; font-size:13px; }
+    .form-section {
+        border-bottom: 1px solid #eeeeee;
+        padding-bottom: 24px;
+        margin-bottom: 28px;
+    }
+
+    .form-section:last-child {
+        border-bottom: none;
+    }
+
+    .form-section h5 {
+        font-size: 17px;
+        font-weight: 600;
+        margin-bottom: 20px;
+    }
+
+    .star-required {
+        color: #dc3545;
+        font-weight: 600;
+    }
+
+    .drop-zone {
+        border: 2px dashed #d8d8d8;
+        border-radius: 8px;
+        padding: 30px;
+        text-align: center;
+        cursor: pointer;
+        display: block;
+        transition: all .2s ease;
+    }
+
+    .drop-zone:hover {
+        border-color: #1572e8;
+        background: #f8fbff;
+    }
+
+    .drop-zone-title {
+        font-weight: 600;
+        margin-top: 8px;
+    }
+
+    .drop-zone-text {
+        color: #777;
+        font-size: 13px;
+        margin-top: 5px;
+    }
+
+    .preview-file {
+        padding: 8px 12px;
+        background: #f7f7f7;
+        border-radius: 5px;
+        margin-top: 6px;
+        font-size: 13px;
+    }
+
+    /* Delay category badges */
+    .badge-normal {
+        background: #198754;
+        color: #fff;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 13px;
+    }
+
+    .badge-delayed {
+        background: #dc3545;
+        color: #fff;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 13px;
+    }
+
+    .badge-warning {
+        background: #ffc107;
+        color: #000;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 13px;
+    }
 </style>
 
 
@@ -658,507 +658,542 @@
 {% block extra_js %}
 <script type="module">
 
-import api from "{% static 'js/api.js' %}";
+    import api from "{% static 'js/api.js' %}";
 
-/* ---------------------------------------------------------------
-   HELPERS
---------------------------------------------------------------- */
+    /* ---------------------------------------------------------------
+       HELPERS
+    --------------------------------------------------------------- */
 
-const $ = id => document.getElementById(id);
+    const $ = id => document.getElementById(id);
 
-/** Show a top-level alert */
-function showAlert(msg, type = 'danger') {
-    const area = $('formAlertArea');
-    area.innerHTML = `
+    /** Show a top-level alert */
+    function showAlert(msg, type = 'danger') {
+        const area = $('formAlertArea');
+        area.innerHTML = `
         <div class="alert alert-${type} alert-dismissible fade show" role="alert">
             ${msg}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>`;
-    area.style.display = '';
-    area.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-/** Mark a field invalid with a custom message */
-function markInvalid(el, msg) {
-    el.classList.add('is-invalid');
-    el.classList.remove('is-valid');
-    let fb = el.nextElementSibling;
-    if (fb && fb.classList.contains('invalid-feedback')) {
-        fb.textContent = msg;
+        area.style.display = '';
+        area.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-}
 
-/** Mark a field valid */
-function markValid(el) {
-    el.classList.remove('is-invalid');
-    el.classList.add('is-valid');
-}
-
-/** Clear all validation state on the form */
-function clearValidation(form) {
-    form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
-    form.querySelectorAll('.is-valid').forEach(el => el.classList.remove('is-valid'));
-}
-
-/**
- * Scroll to + focus the first invalid field.
- * Works for inputs, selects, textareas.
- */
-function scrollToFirstError(form) {
-    const first = form.querySelector('.is-invalid');
-    if (!first) return;
-    first.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    try { first.focus(); } catch (_) {}
-}
-
-/**
- * Client-side validation — returns true if form is valid.
- * Validates required fields and shows inline messages.
- */
-function validateForm(form) {
-    clearValidation(form);
-    let valid = true;
-
-    const required = form.querySelectorAll('[required]');
-    required.forEach(el => {
-        if (!el.value.trim()) {
-            markInvalid(el, el.dataset.errorMsg || 'This field is required.');
-            valid = false;
-        } else {
-            markValid(el);
-        }
-    });
-
-    // Extra: date_of_reporting must not be before date_of_birth
-    const dob = form.querySelector('[name="date_of_birth"]');
-    const dor = form.querySelector('[name="date_of_reporting"]');
-    if (dob && dor && dob.value && dor.value) {
-        if (new Date(dor.value) < new Date(dob.value)) {
-            markInvalid(dor, 'Date of reporting cannot be before date of birth.');
-            valid = false;
+    /** Mark a field invalid with a custom message */
+    function markInvalid(el, msg) {
+        el.classList.add('is-invalid');
+        el.classList.remove('is-valid');
+        let fb = el.nextElementSibling;
+        if (fb && fb.classList.contains('invalid-feedback')) {
+            fb.textContent = msg;
         }
     }
 
-    // Extra: date_of_birth must not be in the future
-    if (dob && dob.value) {
-        if (new Date(dob.value) > new Date()) {
-            markInvalid(dob, 'Date of birth cannot be in the future.');
-            valid = false;
-        }
+    /** Mark a field valid */
+    function markValid(el) {
+        el.classList.remove('is-invalid');
+        el.classList.add('is-valid');
     }
 
-    // Aadhaar must be 12 digits if filled
-    form.querySelectorAll('[name$="_aadhaar"]').forEach(el => {
-        if (el.value && !/^[0-9]{12}$/.test(el.value)) {
-            markInvalid(el, 'Aadhaar must be exactly 12 digits.');
-            valid = false;
-        }
-    });
-
-    if (!valid) scrollToFirstError(form);
-    return valid;
-}
-
-/* ---------------------------------------------------------------
-   DEPENDENT DROPDOWNS
---------------------------------------------------------------- */
-
-const districtSel = $('district');
-const ulbSel      = $('ulb');
-const wardSel     = $('ward');
-
-async function loadULBs(districtId) {
-    ulbSel.innerHTML = '<option value="">Loading…</option>';
-    ulbSel.disabled  = true;
-    wardSel.innerHTML = '<option value="">Select ULB first</option>';
-    wardSel.disabled  = true;
-
-    if (!districtId) {
-        ulbSel.innerHTML = '<option value="">Select District first</option>';
-        return;
-    }
-    try {
-        const data = await api.get(
-            `/api/geography/ulbs/?district=${districtId}&is_active=true`
-        );
-        const results = data.results || data;
-        ulbSel.innerHTML = '<option value="">Select ULB</option>' +
-            results.map(u => `<option value="${u.id}">${u.name}</option>`).join('');
-        ulbSel.disabled = false;
-    } catch (err) {
-        ulbSel.innerHTML = '<option value="">Failed to load ULBs</option>';
-        console.error('ULB load error:', err);
-    }
-}
-
-async function loadWards(ulbId) {
-    wardSel.innerHTML = '<option value="">Loading…</option>';
-    wardSel.disabled  = true;
-
-    if (!ulbId) {
-        wardSel.innerHTML = '<option value="">Select ULB first</option>';
-        return;
-    }
-    try {
-        // Wards are under zones which are under ULBs; fetch zones first,
-        // then wards for all zones of this ULB
-        const zoneData = await api.get(
-            `/api/geography/zones/?ulb=${ulbId}&is_active=true`
-        );
-        const zones    = zoneData.results || zoneData;
-
-        if (!zones.length) {
-            wardSel.innerHTML = '<option value="">No wards available</option>';
-            return;
-        }
-
-        // Fetch wards for each zone in parallel
-        const wardPromises = zones.map(z =>
-            api.get(`/api/geography/wards/?zone=${z.id}&is_active=true`)
-        );
-        const allWardData = await Promise.all(wardPromises);
-        const allWards    = allWardData.flatMap(d => d.results || d);
-
-        if (!allWards.length) {
-            wardSel.innerHTML = '<option value="">No wards available</option>';
-        } else {
-            wardSel.innerHTML = '<option value="">Select Ward</option>' +
-                allWards.map(w => `<option value="${w.id}">${w.name}</option>`).join('');
-            wardSel.disabled = false;
-        }
-    } catch (err) {
-        wardSel.innerHTML = '<option value="">Failed to load wards</option>';
-        console.error('Ward load error:', err);
-    }
-}
-
-districtSel.addEventListener('change', () => {
-    markValid(districtSel);
-    loadULBs(districtSel.value);
-});
-
-ulbSel.addEventListener('change', () => {
-    markValid(ulbSel);
-    loadWards(ulbSel.value);
-    // Re-trigger delay check if dates are already set
-    requestDelayCheck();
-});
-
-
-/* ---------------------------------------------------------------
-   DELAY CHECK
---------------------------------------------------------------- */
-
-const dobInput = $('date_of_birth');
-const dorInput = $('date_of_reporting');
-
-async function requestDelayCheck() {
-    const dob = dobInput ? dobInput.value : '';
-    const dor = dorInput ? dorInput.value : '';
-    const stateCode = document.querySelector('[name="state_code"]')?.value || 'RJ';
-
-    // Reset panel
-    $('delayCategory').textContent  = '—';
-    $('applicableFee').textContent  = '—';
-    $('delayAuthority').textContent = '—';
-    $('delayDocuments').style.display = 'none';
-
-    if (!dob || !dor) return;
-    if (new Date(dor) < new Date(dob)) return;
-
-    $('delayLoading').style.display = '';
-    $('delayResult').style.opacity  = '0.4';
-
-    try {
-        const result = await api.post('/api/bd-registration/delay-check/', {
-            event_date:        dob,
-            date_of_reporting: dor,
-            state_code:        stateCode,
-        });
-
-        // Delay category badge
-        let badgeClass = 'badge-normal';
-        if (result.delay_category && result.delay_category !== 'NORMAL') {
-            badgeClass = result.delay_days > 365 ? 'badge-delayed' : 'badge-warning';
-        }
-        $('delayCategory').innerHTML =
-            `<span class="${badgeClass}">${result.delay_category_display || result.delay_category || '—'}</span>
-             <small class="text-muted ms-1">(${result.delay_days} day${result.delay_days !== 1 ? 's' : ''})</small>`;
-
-        // Fee
-        if (result.applicable_fee && parseFloat(result.applicable_fee) > 0) {
-            $('applicableFee').innerHTML =
-                `<strong>₹ ${result.applicable_fee}</strong>
-                 <small class="text-muted ms-1">${result.fee_code || ''}</small>`;
-        } else {
-            $('applicableFee').textContent = result.is_normal ? 'No fee (Normal)' : '₹ 0.00';
-        }
-
-        // Authority
-        $('delayAuthority').textContent =
-            result.authority_name || (result.requires_authority ? 'Required' : 'Not required');
-
-        // Required documents
-        if (result.required_document_names && result.required_document_names.length) {
-            const docs = result.required_document_names.join(', ');
-            $('delayDocuments').innerHTML =
-                `<strong>Required documents:</strong> ${docs}`;
-            $('delayDocuments').style.display = '';
-        }
-
-        // Warn if permission order required
-        if (result.requires_permission_order) {
-            showAlert(
-                '⚠️ This registration is delayed by more than 1 year. ' +
-                'An order from the prescribed authority (DM/SDM) must be uploaded before submission.',
-                'warning'
-            );
-        }
-
-    } catch (err) {
-        // Non-blocking — just clear the panel
-        console.warn('Delay check failed:', err.message);
-    } finally {
-        $('delayLoading').style.display = 'none';
-        $('delayResult').style.opacity  = '1';
-    }
-}
-
-dobInput && dobInput.addEventListener('change', requestDelayCheck);
-dorInput && dorInput.addEventListener('change', requestDelayCheck);
-
-
-/* ---------------------------------------------------------------
-   COLLECT FORM DATA → plain object
---------------------------------------------------------------- */
-
-function collectFormData(form) {
-    const fd  = new FormData(form);
-    const obj = {};
-    for (const [key, val] of fd.entries()) {
-        if (key === 'csrfmiddlewaretoken' || key === 'documents') continue;
-        const v = (typeof val === 'string') ? val.trim() : val;
-        if (v !== '') obj[key] = v;
+    /** Clear all validation state on the form */
+    function clearValidation(form) {
+        form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        form.querySelectorAll('.is-valid').forEach(el => el.classList.remove('is-valid'));
     }
 
-    // Coerce types
-    if (obj.name_recorded !== undefined) {
-        obj.name_recorded = obj.name_recorded === 'true';
-    } else {
-        obj.name_recorded = true;  // radio default
-    }
-    if (obj.mother_age_at_birth) obj.mother_age_at_birth = parseInt(obj.mother_age_at_birth, 10);
-    if (obj.father_age_at_birth) obj.father_age_at_birth = parseInt(obj.father_age_at_birth, 10);
-
-    // Blank optional FK fields → remove entirely
-    ['ward', 'registration_office'].forEach(k => {
-        if (k in obj && !obj[k]) delete obj[k];
-    });
-
-    return obj;
-}
-
-
-/* ---------------------------------------------------------------
-   UPLOAD DOCUMENTS to an existing application
---------------------------------------------------------------- */
-
-async function uploadDocuments(applicationId, fileInput) {
-    const files = fileInput.files;
-    if (!files || !files.length) return;
-
-    const csrf = api.getCsrf();
-    for (const file of files) {
-        const body = new FormData();
-        body.append('file', file);
-        body.append('original_filename', file.name);
-        // Use raw fetch — api.js uses JSON.stringify which breaks FormData
-        await fetch(`/api/bd-registration/applications/${applicationId}/documents/`, {
-            method: 'POST',
-            credentials: 'include',
-            headers: { 'X-CSRFToken': csrf },
-            body,
-        });
-    }
-}
-
-
-/* ---------------------------------------------------------------
-   SAVE DRAFT — atomic endpoint
---------------------------------------------------------------- */
-
-async function saveDraft() {
-    const form    = $('birthApplicationForm');
-    const btn     = $('saveDraftBtn');
-    const spinner = $('draftSpinner');
-
-    // Draft only requires registration_type
-    const rtSel = form.querySelector('[name="registration_type"]');
-    clearValidation(form);
-
-    if (!rtSel || !rtSel.value) {
-        markInvalid(rtSel, 'Registration type is required to save a draft.');
-        scrollToFirstError(form);
-        return;
+    /**
+     * Scroll to + focus the first invalid field.
+     * Works for inputs, selects, textareas.
+     */
+    function scrollToFirstError(form) {
+        const first = form.querySelector('.is-invalid');
+        if (!first) return;
+        first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        try { first.focus(); } catch (_) { }
     }
 
-    btn.disabled = true;
-    spinner.style.display = '';
-
-    try {
-        const formData = collectFormData(form);
-        const payload  = { ...formData, action: 'draft' };
-
-        const app = await api.post('/api/bd-registration/birth-applications/', payload);
-
-        // Upload documents if any were attached
-        const fileInput = $('birthDocuments');
-        if (fileInput && fileInput.files.length) {
-            await uploadDocuments(app.id, fileInput);
-        }
-
-        showAlert(
-            `✅ Draft saved. Application number: <strong>${app.application_number}</strong>`,
-            'success'
-        );
-
-    } catch (err) {
-        handleApiError(err, form);
-    } finally {
-        btn.disabled = false;
-        spinner.style.display = 'none';
-    }
-}
-
-
-/* ---------------------------------------------------------------
-   SUBMIT APPLICATION — atomic endpoint
---------------------------------------------------------------- */
-
-async function submitApplication() {
-    const form    = $('birthApplicationForm');
-    const btn     = $('submitBtn');
-    const spinner = $('submitSpinner');
-
-    // Full client-side validation before hitting the server
-    if (!validateForm(form)) return;
-
-    btn.disabled = true;
-    spinner.style.display = '';
-
-    try {
-        const formData = collectFormData(form);
-        const payload  = { ...formData, action: 'submit' };
-
-        const app = await api.post('/api/bd-registration/birth-applications/', payload);
-
-        // Upload documents if any
-        const fileInput = $('birthDocuments');
-        if (fileInput && fileInput.files.length) {
-            await uploadDocuments(app.id, fileInput);
-        }
-
-        showAlert(
-            `✅ Application submitted successfully! ` +
-            `Application number: <strong>${app.application_number}</strong>`,
-            'success'
-        );
-
-        // Reset form after successful submission
-        form.reset();
+    /**
+     * Client-side validation — returns true if form is valid.
+     * Validates required fields and shows inline messages.
+     */
+    function validateForm(form) {
         clearValidation(form);
-        ulbSel.innerHTML  = '<option value="">Select District first</option>';
-        ulbSel.disabled   = true;
-        wardSel.innerHTML = '<option value="">Select ULB first</option>';
-        wardSel.disabled  = true;
-        $('delayCategory').textContent  = '—';
-        $('applicableFee').textContent  = '—';
-        $('delayAuthority').textContent = '—';
-        $('birthDocumentPreview').innerHTML = '';
+        let valid = true;
 
-    } catch (err) {
-        handleApiError(err, form);
-    } finally {
-        btn.disabled = false;
-        spinner.style.display = 'none';
-    }
-}
-
-
-/* ---------------------------------------------------------------
-   API ERROR HANDLER
---------------------------------------------------------------- */
-
-function handleApiError(err, form) {
-    console.error('API error:', err);
-
-    if (err && err.data && err.data.errors) {
-        // Server returned field-level validation errors
-        const errors = err.data.errors;
-        let first = null;
-
-        Object.entries(errors).forEach(([field, msg]) => {
-            // Try to find matching form element by name
-            const el = form.querySelector(`[name="${field}"]`);
-            if (el) {
-                markInvalid(el, Array.isArray(msg) ? msg.join(' ') : String(msg));
-                if (!first) first = el;
+        const required = form.querySelectorAll('[required]');
+        required.forEach(el => {
+            if (!el.value.trim()) {
+                markInvalid(el, el.dataset.errorMsg || 'This field is required.');
+                valid = false;
+            } else {
+                markValid(el);
             }
         });
 
-        if (first) {
-            first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Extra: date_of_reporting must not be before date_of_birth
+        const dob = form.querySelector('[name="date_of_birth"]');
+        const dor = form.querySelector('[name="date_of_reporting"]');
+        if (dob && dor && dob.value && dor.value) {
+            if (new Date(dor.value) < new Date(dob.value)) {
+                markInvalid(dor, 'Date of reporting cannot be before date of birth.');
+                valid = false;
+            }
         }
 
-        showAlert(
-            `⚠️ Please fix the highlighted errors: ${err.data.detail || ''}`,
-            'danger'
-        );
-    } else {
-        showAlert(
-            `❌ ${err.message || 'An unexpected error occurred. Please try again.'}`,
-            'danger'
-        );
-    }
-}
+        // Extra: date_of_birth must not be in the future
+        if (dob && dob.value) {
+            if (new Date(dob.value) > new Date()) {
+                markInvalid(dob, 'Date of birth cannot be in the future.');
+                valid = false;
+            }
+        }
 
-
-/* ---------------------------------------------------------------
-   FILE PREVIEW
---------------------------------------------------------------- */
-
-const fileInput = $('birthDocuments');
-const preview   = $('birthDocumentPreview');
-
-if (fileInput) {
-    fileInput.addEventListener('change', function () {
-        preview.innerHTML = '';
-        Array.from(this.files).forEach(file => {
-            const div = document.createElement('div');
-            div.className = 'preview-file';
-            div.innerHTML = `📎 ${file.name} <small class="text-muted">(${Math.round(file.size / 1024)} KB)</small>`;
-            preview.appendChild(div);
+        // Aadhaar must be 12 digits if filled
+        form.querySelectorAll('[name$="_aadhaar"]').forEach(el => {
+            if (el.value && !/^[0-9]{12}$/.test(el.value)) {
+                markInvalid(el, 'Aadhaar must be exactly 12 digits.');
+                valid = false;
+            }
         });
+
+        if (!valid) scrollToFirstError(form);
+        return valid;
+    }
+
+    /* ---------------------------------------------------------------
+       DEPENDENT DROPDOWNS
+    --------------------------------------------------------------- */
+
+    const districtSel = $('district');
+    const ulbSel = $('ulb');
+    const wardSel = $('ward');
+
+    async function loadULBs(districtId) {
+        ulbSel.innerHTML = '<option value="">Loading…</option>';
+        ulbSel.disabled = true;
+        wardSel.innerHTML = '<option value="">Select ULB first</option>';
+        wardSel.disabled = true;
+
+        if (!districtId) {
+            ulbSel.innerHTML = '<option value="">Select District first</option>';
+            return;
+        }
+        try {
+            const data = await api.get(
+                `/api/geography/ulbs/?district=${districtId}&is_active=true`
+            );
+            const results = data.results || data;
+            ulbSel.innerHTML = '<option value="">Select ULB</option>' +
+                results.map(u => `<option value="${u.id}">${u.name}</option>`).join('');
+            ulbSel.disabled = false;
+        } catch (err) {
+            ulbSel.innerHTML = '<option value="">Failed to load ULBs</option>';
+            console.error('ULB load error:', err);
+        }
+    }
+
+    async function loadWards(ulbId) {
+        wardSel.innerHTML = '<option value="">Loading…</option>';
+        wardSel.disabled = true;
+
+        if (!ulbId) {
+            wardSel.innerHTML = '<option value="">Select ULB first</option>';
+            return;
+        }
+        try {
+            // Wards are under zones which are under ULBs; fetch zones first,
+            // then wards for all zones of this ULB
+            const zoneData = await api.get(
+                `/api/geography/zones/?ulb=${ulbId}&is_active=true`
+            );
+            const zones = zoneData.results || zoneData;
+
+            if (!zones.length) {
+                wardSel.innerHTML = '<option value="">No wards available</option>';
+                return;
+            }
+
+            // Fetch wards for each zone in parallel
+            const wardPromises = zones.map(z =>
+                api.get(`/api/geography/wards/?zone=${z.id}&is_active=true`)
+            );
+            const allWardData = await Promise.all(wardPromises);
+            const allWards = allWardData.flatMap(d => d.results || d);
+
+            if (!allWards.length) {
+                wardSel.innerHTML = '<option value="">No wards available</option>';
+            } else {
+                wardSel.innerHTML = '<option value="">Select Ward</option>' +
+                    allWards.map(w => `<option value="${w.id}">${w.name}</option>`).join('');
+                wardSel.disabled = false;
+            }
+        } catch (err) {
+            wardSel.innerHTML = '<option value="">Failed to load wards</option>';
+            console.error('Ward load error:', err);
+        }
+    }
+
+    districtSel.addEventListener('change', () => {
+        markValid(districtSel);
+        loadULBs(districtSel.value);
     });
-}
+
+    ulbSel.addEventListener('change', () => {
+        markValid(ulbSel);
+        loadWards(ulbSel.value);
+        // Re-trigger delay check if dates are already set
+        requestDelayCheck();
+    });
 
 
-/* ---------------------------------------------------------------
-   WIRE UP BUTTONS
---------------------------------------------------------------- */
+    /* ---------------------------------------------------------------
+       DELAY CHECK
+    --------------------------------------------------------------- */
 
-$('saveDraftBtn') && $('saveDraftBtn').addEventListener('click', saveDraft);
-$('submitBtn')   && $('submitBtn').addEventListener('click', submitApplication);
+    const dobInput = $('date_of_birth');
+    const dorInput = $('date_of_reporting');
+
+    async function requestDelayCheck() {
+        const dob = dobInput ? dobInput.value : '';
+        const dor = dorInput ? dorInput.value : '';
+        const stateCode = document.querySelector('[name="state_code"]')?.value || 'RJ';
+
+        // Reset panel
+        $('delayCategory').textContent = '—';
+        $('applicableFee').textContent = '—';
+        $('delayAuthority').textContent = '—';
+        $('delayDocuments').style.display = 'none';
+
+        if (!dob || !dor) return;
+        if (new Date(dor) < new Date(dob)) return;
+
+        $('delayLoading').style.display = '';
+        $('delayResult').style.opacity = '0.4';
+
+        try {
+            const result = await api.post('/api/bd-registration/delay-check/', {
+                event_date: dob,
+                date_of_reporting: dor,
+                state_code: stateCode,
+            });
+
+            // Delay category badge
+            let badgeClass = 'badge-normal';
+            if (result.delay_category && result.delay_category !== 'NORMAL') {
+                badgeClass = result.delay_days > 365 ? 'badge-delayed' : 'badge-warning';
+            }
+            $('delayCategory').innerHTML =
+                `<span class="${badgeClass}">${result.delay_category_display || result.delay_category || '—'}</span>
+             <small class="text-muted ms-1">(${result.delay_days} day${result.delay_days !== 1 ? 's' : ''})</small>`;
+
+            // Fee
+            if (result.applicable_fee && parseFloat(result.applicable_fee) > 0) {
+                $('applicableFee').innerHTML =
+                    `<strong>₹ ${result.applicable_fee}</strong>
+                 <small class="text-muted ms-1">${result.fee_code || ''}</small>`;
+            } else {
+                $('applicableFee').textContent = result.is_normal ? 'No fee (Normal)' : '₹ 0.00';
+            }
+
+            // Authority
+            $('delayAuthority').textContent =
+                result.authority_name || (result.requires_authority ? 'Required' : 'Not required');
+
+            // Required documents
+            if (result.required_document_names && result.required_document_names.length) {
+                const docs = result.required_document_names.join(', ');
+                $('delayDocuments').innerHTML =
+                    `<strong>Required documents:</strong> ${docs}`;
+                $('delayDocuments').style.display = '';
+            }
+
+            // Warn if permission order required
+            if (result.requires_permission_order) {
+                showAlert(
+                    '⚠️ This registration is delayed by more than 1 year. ' +
+                    'An order from the prescribed authority (DM/SDM) must be uploaded before submission.',
+                    'warning'
+                );
+            }
+
+        } catch (err) {
+            // Non-blocking — just clear the panel
+            console.warn('Delay check failed:', err.message);
+        } finally {
+            $('delayLoading').style.display = 'none';
+            $('delayResult').style.opacity = '1';
+        }
+    }
+
+    dobInput && dobInput.addEventListener('change', requestDelayCheck);
+    dorInput && dorInput.addEventListener('change', requestDelayCheck);
 
 
-/* ---------------------------------------------------------------
-   CLEAR is-invalid on user interaction
---------------------------------------------------------------- */
+    /* ---------------------------------------------------------------
+       COLLECT FORM DATA → plain object
+    --------------------------------------------------------------- */
 
-document.querySelectorAll('.form-control, .form-select').forEach(el => {
-    el.addEventListener('input',  () => { el.classList.remove('is-invalid'); });
-    el.addEventListener('change', () => { el.classList.remove('is-invalid'); });
-});
+    function collectFormData(form) {
+        const fd = new FormData(form);
+        const obj = {};
+        for (const [key, val] of fd.entries()) {
+            if (key === 'csrfmiddlewaretoken' || key === 'documents') continue;
+            const v = (typeof val === 'string') ? val.trim() : val;
+            if (v !== '') obj[key] = v;
+        }
+
+        // Coerce types
+        if (obj.name_recorded !== undefined) {
+            obj.name_recorded = obj.name_recorded === 'true';
+        } else {
+            obj.name_recorded = true;  // radio default
+        }
+        if (obj.mother_age_at_birth) obj.mother_age_at_birth = parseInt(obj.mother_age_at_birth, 10);
+        if (obj.father_age_at_birth) obj.father_age_at_birth = parseInt(obj.father_age_at_birth, 10);
+
+        // Blank optional FK fields → remove entirely
+        ['ward', 'registration_office'].forEach(k => {
+            if (k in obj && !obj[k]) delete obj[k];
+        });
+
+        return obj;
+    }
+
+
+    /* ---------------------------------------------------------------
+       UPLOAD DOCUMENTS to an existing application
+    --------------------------------------------------------------- */
+
+    async function uploadDocuments(applicationId, fileInput) {
+        const files = fileInput.files;
+        if (!files || !files.length) return;
+
+        const csrf = api.getCsrf();
+        for (const file of files) {
+            const body = new FormData();
+            body.append('file', file);
+            body.append('original_filename', file.name);
+            // Use raw fetch — api.js uses JSON.stringify which breaks FormData
+            await fetch(`/api/bd-registration/applications/${applicationId}/documents/`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'X-CSRFToken': csrf },
+                body,
+            });
+        }
+    }
+
+
+    /* ---------------------------------------------------------------
+       SAVE DRAFT — atomic endpoint
+    --------------------------------------------------------------- */
+
+    async function saveDraft() {
+        const form = $('birthApplicationForm');
+        const btn = $('saveDraftBtn');
+        const spinner = $('draftSpinner');
+
+        // Draft only requires registration_type
+        const rtSel = form.querySelector('[name="registration_type"]');
+        clearValidation(form);
+
+        if (!rtSel || !rtSel.value) {
+            markInvalid(rtSel, 'Registration type is required to save a draft.');
+            scrollToFirstError(form);
+            return;
+        }
+
+        btn.disabled = true;
+        spinner.style.display = '';
+
+        try {
+            const formData = collectFormData(form);
+            const payload = { ...formData, action: 'draft' };
+
+            const app = await api.post('/api/bd-registration/birth-applications/', payload);
+
+            // Upload documents if any were attached
+            const fileInput = $('birthDocuments');
+            if (fileInput && fileInput.files.length) {
+                await uploadDocuments(app.id, fileInput);
+            }
+
+            showAlert(
+                `✅ Draft saved. Application number: <strong>${app.application_number}</strong>`,
+                'success'
+            );
+
+        } catch (err) {
+            handleApiError(err, form);
+        } finally {
+            btn.disabled = false;
+            spinner.style.display = 'none';
+        }
+    }
+
+
+    /* ---------------------------------------------------------------
+       SUBMIT APPLICATION — atomic endpoint
+    --------------------------------------------------------------- */
+
+    async function submitApplication() {
+        const form = $('birthApplicationForm');
+        const btn = $('submitBtn');
+        const spinner = $('submitSpinner');
+
+        // Full client-side validation before hitting the server
+        if (!validateForm(form)) return;
+
+        btn.disabled = true;
+        spinner.style.display = '';
+
+        try {
+            const formData = collectFormData(form);
+            const payload = { ...formData, action: 'submit' };
+
+            const app = await api.post('/api/bd-registration/birth-applications/', payload);
+
+            // Upload documents if any
+            const fileInput = $('birthDocuments');
+            if (fileInput && fileInput.files.length) {
+                await uploadDocuments(app.id, fileInput);
+            }
+
+            if (app.payment_required) {
+                // Fee is due — redirect to the read-only review + payment page.
+                // The application is already saved as PAYMENT_PENDING on the server.
+                window.location.href = `/applications/${app.id}/review/`;
+            } else {
+                // Zero-fee — application went straight to SUBMITTED.
+                showAlert(
+                    `✅ Application submitted! ` +
+                    `Application number: <strong>${app.application_number}</strong>. ` +
+                    `Redirecting to inbox…`,
+                    'success'
+                );
+
+                // Redirect to inbox after 2.5 s so the user sees their
+                // application at Step 1 (Survey Mail).
+                setTimeout(() => {
+                    window.location.href = "{% url 'application_inbox' %}";
+                }, 2500);
+            }
+
+        } catch (err) {
+            handleApiError(err, form);
+        } finally {
+            btn.disabled = false;
+            spinner.style.display = 'none';
+        }
+    }
+
+
+    /* ---------------------------------------------------------------
+       API ERROR HANDLER
+    --------------------------------------------------------------- */
+
+    function handleApiError(err, form) {
+        console.error('API error:', err);
+
+        if (err && err.data && err.data.errors) {
+            // Server returned field-level validation errors
+            const errors = err.data.errors;
+            let first = null;
+
+            Object.entries(errors).forEach(([field, msg]) => {
+                // Try to find matching form element by name
+                const el = form.querySelector(`[name="${field}"]`);
+                if (el) {
+                    markInvalid(el, Array.isArray(msg) ? msg.join(' ') : String(msg));
+                    if (!first) first = el;
+                }
+            });
+
+            if (first) {
+                first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            showAlert(
+                `⚠️ Please fix the highlighted errors: ${err.data.detail || ''}`,
+                'danger'
+            );
+        } else {
+            showAlert(
+                `❌ ${err.message || 'An unexpected error occurred. Please try again.'}`,
+                'danger'
+            );
+        }
+    }
+
+
+    /* ---------------------------------------------------------------
+       FILE PREVIEW
+    --------------------------------------------------------------- */
+
+    const fileInput = $('birthDocuments');
+    const preview = $('birthDocumentPreview');
+
+    if (fileInput) {
+        fileInput.addEventListener('change', function () {
+            preview.innerHTML = '';
+            Array.from(this.files).forEach(file => {
+                const div = document.createElement('div');
+                div.className = 'preview-file';
+                div.innerHTML = `📎 ${file.name} <small class="text-muted">(${Math.round(file.size / 1024)} KB)</small>`;
+                preview.appendChild(div);
+            });
+        });
+    }
+
+
+    /* ---------------------------------------------------------------
+       WIRE UP BUTTONS
+    --------------------------------------------------------------- */
+
+    $('saveDraftBtn') && $('saveDraftBtn').addEventListener('click', saveDraft);
+    $('submitBtn') && $('submitBtn').addEventListener('click', submitApplication);
+
+
+    /* ---------------------------------------------------------------
+       CLEAR is-invalid on user interaction
+    --------------------------------------------------------------- */
+
+    document.querySelectorAll('.form-control, .form-select').forEach(el => {
+        el.addEventListener('input', () => { el.classList.remove('is-invalid'); });
+        el.addEventListener('change', () => { el.classList.remove('is-invalid'); });
+    });
+
+
+    /* ---------------------------------------------------------------
+       PRE-FILL CASCADE — restore ULB + Ward when returning from
+       the review page with ?app=<pk>
+    --------------------------------------------------------------- */
+
+    (async function prefillCascade() {
+        const existingAppEl = document.getElementById('existingAppId');
+        if (!existingAppEl) return;  // blank new form — nothing to restore
+
+        const prefillUlb  = ulbSel.dataset.prefillUlb;
+        const prefillWard = wardSel.dataset.prefillWard;
+        const selectedDistrict = districtSel.value;
+        if (!selectedDistrict) return;
+
+        // Load ULBs for the pre-selected district
+        await loadULBs(selectedDistrict);
+
+        // Restore the previously selected ULB
+        if (prefillUlb) {
+            ulbSel.value = prefillUlb;
+            // Load wards for the restored ULB
+            await loadWards(prefillUlb);
+            // Restore the previously selected ward
+            if (prefillWard) {
+                wardSel.value = prefillWard;
+            }
+        }
+
+        // Trigger delay/fee calculation with the pre-filled dates
+        requestDelayCheck();
+    })();
 
 </script>
 {% endblock %}

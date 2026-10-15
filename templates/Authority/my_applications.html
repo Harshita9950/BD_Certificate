@@ -1,0 +1,246 @@
+﻿{% extends 'Authority/base.html' %}
+{% load static %}
+
+{% block title %}My Applications | BD Portal{% endblock %}
+
+{% block content %}
+<main class="content">
+
+    <section class="page-inner d-flex align-items-left align-items-md-center
+                    flex-column flex-md-row pt-2 pb-3">
+        <div class="page-heading">
+            <h1 class="page-title">My Applications</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item">Birth &amp; Death Registration</li>
+                    <li class="breadcrumb-item active">My Applications</li>
+                </ol>
+            </nav>
+        </div>
+    </section>
+
+    <div class="card border-0 shadow-sm">
+
+        <!-- ── Toolbar ── -->
+        <div class="card-header d-print-none">
+            <p class="text-end pt-2">
+                <button type="button" class="btn btn-xs btn-primary app-open-btn my-1" data-bs-toggle="tooltip"
+                    data-bs-placement="top" title="Print" onclick="printTable('printableArea')">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M17 2C17.5523 2 18 2.44772 18 3V7H21C21.5523 7 22 7.44772 22 8V18C22 18.5523 21.5523 19 21 19H18V21C18 21.5523 17.5523 22 17 22H7C6.44772 22 6 21.5523 6 21V19H3C2.44772 19 2 18.5523 2 18V8C2 7.44772 2.44772 7 3 7H6V3C6 2.44772 6.44772 2 7 2H17ZM16 17H8V20H16V17ZM20 9H4V17H6V16C6 15.4477 6.44772 15 7 15H17C17.5523 15 18 15.4477 18 16V17H20V9ZM8 10V12H5V10H8ZM16 4H8V7H16V4Z" />
+                    </svg>
+                </button>
+                <button type="button" id="downloadBtn" class="btn btn-xs btn-primary app-open-btn my-1 ms-1"
+                    data-bs-toggle="tooltip" data-bs-placement="top" title="Download CSV">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M13 10H18L12 16L6 10H11V3H13V10ZM4 19H20V12H22V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V12H4V19Z" />
+                    </svg>
+                </button>
+            </p>
+        </div>
+
+        <!-- ── Search + Entries ── -->
+        <div class="card-body border-bottom">
+            <div class="row g-3 align-items-center d-print-none">
+
+                <div class="col-xl-3 col-md-4 col-sm-6 col-12">
+                    <div class="d-flex align-items-center gap-2">
+                        <label for="tableSearch" class="form-label mb-0 fw-medium text-nowrap text-secondary">
+                            Search:
+                        </label>
+                        <div class="input-group">
+                            <input type="search" id="tableSearch" class="form-control" placeholder="Search records..."
+                                autocomplete="off" style="border-radius:10px;">
+                            <button type="button" id="clearSearch" class="btn btn-outline-primary d-none"
+                                style="border-radius:50px;margin-left:2px;">Clear</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-9 col-md-8 col-sm-6 col-12">
+                    <div class="d-flex align-items-center justify-content-md-end gap-2">
+                        <label for="entriesSelect" class="form-label mb-0 text-nowrap text-secondary"
+                            style="font-size:15px;font-weight:500;">Show</label>
+                        <select id="entriesSelect" class="form-select" style="width:80px;">
+                            <option value="5">5</option>
+                            <option value="10" selected>10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="-1">All</option>
+                        </select>
+                        <span class="text-secondary text-nowrap">entries</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ── Table ── -->
+        <div class="table-responsive" id="printableArea">
+            <table id="myAppsTable" class="table table-hover table-bordered align-middle mb-0">
+                <thead class="table-primary">
+                    <tr>
+                        <th class="text-center">#</th>
+                        <th>Application No.</th>
+                        <th>Service Type</th>
+                        <th>Registration Type</th>
+                        <th>Event Date</th>
+                        <th>District / ULB</th>
+                        <th>Submitted On</th>
+                        <th class="text-center">Payment</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="myAppsBody">
+                    {% for app in applications %}
+                    <tr>
+                        <td class="text-center">{{ forloop.counter }}</td>
+
+                        <td class="text-nowrap fw-semibold">{{ app.application_number }}</td>
+
+                        <td><small>{{ app.get_service_type_display }}</small></td>
+
+                        <td>
+                            {% if app.registration_type %}{{ app.registration_type.name }}{% else %}—{% endif %}
+                        </td>
+
+                        <td class="text-nowrap">{% if app.birth_registration %}{{ app.birth_registration.date_of_birth|date:"d-m-Y" }}{% elif app.death_registration %}{{ app.death_registration.date_of_death|date:"d-m-Y" }}{% elif app.still_birth_registration %}{{ app.still_birth_registration.date_of_birth|date:"d-m-Y" }}{% elif app.adopted_birth_registration %}{{ app.adopted_birth_registration.date_of_birth|date:"d-m-Y" }}{% else %}&#8212;{% endif %}</td>
+
+                        <td>
+                            {{ app.district.name|default:"—" }}<br>
+                            <small class="text-muted">{{ app.ulb.name|default:"" }}</small>
+                        </td>
+
+                        <td class="text-nowrap">{% if app.birth_registration %}{{ app.birth_registration.date_of_birth|date:"d-m-Y" }}{% elif app.death_registration %}{{ app.death_registration.date_of_death|date:"d-m-Y" }}{% elif app.still_birth_registration %}{{ app.still_birth_registration.date_of_birth|date:"d-m-Y" }}{% elif app.adopted_birth_registration %}{{ app.adopted_birth_registration.date_of_birth|date:"d-m-Y" }}{% else %}&#8212;{% endif %}</td>
+
+                        <td class="text-center">{% with order=app.payment_order %}{% if order %}{% if order.status == 'PAID' %}<span class="badge bg-success">Paid</span><br><small class="text-muted">&#8377;{{ order.amount }}</small>{% elif order.status == 'PENDING' %}<span class="badge bg-warning text-dark">Pending</span>{% else %}<span class="badge bg-secondary">{{ order.status }}</span>{% endif %}{% else %}<span class="text-muted small">&#8212;</span>{% endif %}{% endwith %}</td>
+
+                        <td class="text-center text-nowrap">{% if app.status == 'SUBMITTED' %}<span class="badge text-bg-primary">Submitted</span>{% elif app.status == 'UNDER_SCRUTINY' %}<span class="badge text-bg-info text-dark">Under Scrutiny</span>{% elif app.status == 'PENDING_DOCS' %}<span class="badge text-bg-warning text-dark">Pending Docs</span>{% elif app.status == 'UNDER_PROCESS' %}<span class="badge text-bg-info text-dark">Under Process</span>{% elif app.status == 'APPROVED' %}<span class="badge text-bg-success">Approved</span>{% elif app.status == 'REGISTERED' %}<span class="badge text-bg-success">Registered</span>{% elif app.status == 'REJECTED' %}<span class="badge text-bg-danger">Rejected</span>{% elif app.status == 'CANCELLED' %}<span class="badge text-bg-dark">Cancelled</span>{% elif app.status == 'PAYMENT_PENDING' %}<span class="badge text-bg-warning text-dark">Payment Pending</span>{% else %}<span class="badge text-bg-secondary">{{ app.get_status_display }}</span>{% endif %}</td>
+
+                        <td class="text-center text-nowrap">{% if app.status == 'PAYMENT_PENDING' %}<a href="{% url 'application_review' app.pk %}" class="btn btn-xs btn-warning app-open-btn my-1" title="Pay Now">PAY</a>{% else %}<a href="{% url 'application_detail' app.pk %}" class="btn btn-xs btn-primary app-open-btn my-1" title="View">VIEW</a>{% endif %}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="10" class="text-center text-secondary py-4">
+                            <div class="fw-semibold mb-1">No applications found.</div>
+                            <small>Applications you submit will appear here.</small>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ── Pagination ── -->
+        <div class="card-body d-print-none">
+            <div class="row align-items-center g-3">
+                <div class="col-12 col-md-5">
+                    <div id="tableInfo" class="text-secondary small text-center text-md-start"></div>
+                </div>
+                <div class="col-12 col-md-7">
+                    <nav aria-label="Table pagination" class="d-flex justify-content-center justify-content-md-end">
+                        <ul id="pagination" class="pagination pagination-sm mb-0"></ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        const tbody = document.querySelector('#myAppsTable tbody');
+        const searchInput = document.getElementById('tableSearch');
+        const clearSearch = document.getElementById('clearSearch');
+        const entriesSelect = document.getElementById('entriesSelect');
+        const tableInfo = document.getElementById('tableInfo');
+        const pagination = document.getElementById('pagination');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        const allRows = Array.from(tbody.querySelectorAll('tr')).filter(r => r.cells.length > 1);
+        let filtered = [...allRows];
+        let current = 1;
+        let perPage = Number(entriesSelect.value);
+
+        function render() {
+            const total = filtered.length;
+            const pages = perPage === -1 ? 1 : Math.max(1, Math.ceil(total / perPage));
+            current = Math.min(current, pages);
+
+            const start = perPage === -1 ? 0 : (current - 1) * perPage;
+            const end = perPage === -1 ? total : Math.min(start + perPage, total);
+
+            allRows.forEach(r => r.style.display = 'none');
+            filtered.slice(start, end).forEach(r => r.style.display = '');
+
+            tableInfo.textContent = total
+                ? `Showing ${start + 1} to ${end} of ${total} entries`
+                : 'No matching records found';
+
+            buildPagination(pages);
+        }
+
+        function buildPagination(pages) {
+            pagination.innerHTML = '';
+            if (pages <= 1) return;
+
+            const li = (label, enabled, cb, active) => {
+                const l = document.createElement('li');
+                l.className = 'page-item' + (!enabled ? ' disabled' : '') + (active ? ' active' : '');
+                const b = document.createElement('button');
+                b.type = 'button'; b.className = 'page-link'; b.textContent = label;
+                b.disabled = !enabled;
+                if (enabled) b.addEventListener('click', cb);
+                l.appendChild(b); return l;
+            };
+
+            pagination.appendChild(li('<', current > 1, () => { current--; render(); }));
+            for (let p = 1; p <= pages; p++) {
+                const pg = p;
+                pagination.appendChild(li(p, true, () => { current = pg; render(); }, p === current));
+            }
+            pagination.appendChild(li('>', current < pages, () => { current++; render(); }));
+        }
+
+        searchInput.addEventListener('input', () => {
+            const q = searchInput.value.trim().toLowerCase();
+            clearSearch.classList.toggle('d-none', !q);
+            filtered = allRows.filter(r => r.innerText.toLowerCase().includes(q));
+            current = 1; render();
+        });
+
+        clearSearch.addEventListener('click', () => {
+            searchInput.value = ''; clearSearch.classList.add('d-none');
+            filtered = [...allRows]; current = 1; render(); searchInput.focus();
+        });
+
+        entriesSelect.addEventListener('change', () => {
+            perPage = Number(entriesSelect.value); current = 1; render();
+        });
+
+        downloadBtn.addEventListener('click', () => {
+            const header = ['#', 'Application No.', 'Service Type', 'Registration Type',
+                'Event Date', 'District', 'ULB', 'Submitted On', 'Payment', 'Status'];
+            const rows = [header, ...filtered.map((r, i) => {
+                const cells = Array.from(r.cells).map(c => c.innerText.trim().replace(/\n+/g, ' '));
+                return [i + 1, ...cells.slice(1)];
+            })];
+            const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+            const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+            const a = Object.assign(document.createElement('a'), { href: url, download: 'my_applications.csv' });
+            document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+        });
+
+        render();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends 'Authority/reports/report_base.html' %}
+
+{% block filter_form %}
+<form method="get" class="card border-0 shadow-sm mb-4 d-print-none">
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-2"><label class="form-label small">From Date</label><input type="date" name="date_from" class="form-control form-control-sm" value="{{ filter_params.date_from }}"></div>
+            <div class="col-md-2"><label class="form-label small">To Date</label><input type="date" name="date_to" class="form-control form-control-sm" value="{{ filter_params.date_to }}"></div>
+            <div class="col-md-2"><label class="form-label small">Service Type</label>
+                <select name="service_type" class="form-select form-select-sm">
+                    <option value="">All</option>
+                    {% for val,label in service_types %}<option value="{{ val }}"{% if filter_params.service_type == val %} selected{% endif %}>{{ label }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2"><label class="form-label small">District</label>
+                <select name="district" class="form-select form-select-sm">
+                    <option value="">All</option>
+                    {% for d in districts %}<option value="{{ d.pk }}"{% if filter_params.district == d.pk|stringformat:"s" %} selected{% endif %}>{{ d.name }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2"><label class="form-label small">Status</label>
+                <select name="status" class="form-select form-select-sm">
+                    <option value="">All</option>
+                    {% for val,label in status_choices %}<option value="{{ val }}"{% if filter_params.status == val %} selected{% endif %}>{{ label }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+                <a href="{% url 'report_application_register' %}" class="btn btn-light btn-sm">Reset</a>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block report_table %}
+<table class="table table-hover table-bordered align-middle mb-0">
+    <thead class="table-primary">
+        <tr>
+            <th>#</th><th>Application No.</th><th>Service Type</th><th>Registration Type</th>
+            <th>Informant</th><th>Event Date</th><th>Submitted On</th>
+            <th>District</th><th>ULB</th><th>Ward</th><th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for app in rows %}
+        {% with cr=app.birth_registration|default:app.death_registration|default:app.still_birth_registration|default:app.adopted_birth_registration %}
+        <tr>
+            <td class="text-center">{{ forloop.counter }}</td>
+            <td class="text-nowrap fw-semibold"><a href="{% url 'application_detail' app.pk %}">{{ app.application_number }}</a></td>
+            <td><small>{{ app.get_service_type_display }}</small></td>
+            <td>{{ app.registration_type.name|default:"—" }}</td>
+            <td>{% if app.birth_registration %}{{ app.birth_registration.informant_name|default:"—" }}{% elif app.death_registration %}{{ app.death_registration.informant_name|default:"—" }}{% elif app.still_birth_registration %}{{ app.still_birth_registration.informant_name|default:"—" }}{% else %}—{% endif %}</td>
+            <td class="text-nowrap">{% if app.birth_registration %}{{ app.birth_registration.date_of_birth|date:"d-m-Y" }}{% elif app.death_registration %}{{ app.death_registration.date_of_death|date:"d-m-Y" }}{% elif app.still_birth_registration %}{{ app.still_birth_registration.date_of_birth|date:"d-m-Y" }}{% elif app.adopted_birth_registration %}{{ app.adopted_birth_registration.date_of_birth|date:"d-m-Y" }}{% else %}—{% endif %}</td>
+            <td class="text-nowrap">{{ app.submitted_at|date:"d-m-Y"|default:"—" }}</td>
+            <td>{{ app.district.name|default:"—" }}</td>
+            <td>{{ app.ulb.name|default:"—" }}</td>
+            <td>{% if app.birth_registration %}{{ app.birth_registration.ward.name|default:"—" }}{% elif app.death_registration %}{{ app.death_registration.ward.name|default:"—" }}{% else %}—{% endif %}</td>
+            <td><span class="badge {% if app.status == 'REGISTERED' %}bg-success{% elif app.status == 'REJECTED' or app.status == 'CANCELLED' %}bg-danger{% elif app.status == 'SUBMITTED' %}bg-primary{% else %}bg-warning text-dark{% endif %}">{{ app.get_status_display }}</span></td>
+        </tr>
+        {% endwith %}
+        {% empty %}
+        <tr><td colspan="11" class="text-center text-muted py-4">No records found.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

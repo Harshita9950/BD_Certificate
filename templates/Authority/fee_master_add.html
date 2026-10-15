@@ -1,0 +1,298 @@
+{% extends 'Authority/base.html' %}
+{% load static %}
+
+{% block title %}{% if fee_id %}Edit{% else %}Add{% endif %} Fee Record | BD Portal{% endblock %}
+
+{% block content %}
+<main class="content">
+
+    <section class="page-inner d-flex align-items-left align-items-md-center
+                    flex-column flex-md-row pt-2 pb-3">
+        <div class="page-heading">
+            <h1 class="page-title">
+                {% if fee_id %}Edit Fee Record{% else %}Add Fee Record{% endif %}
+            </h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}">Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'fee_master_page' %}">Fee Master</a>
+                    </li>
+                    <li class="breadcrumb-item active">
+                        {% if fee_id %}Edit{% else %}Add{% endif %}
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </section>
+
+    <div id="feeAlertArea" class="mb-3" style="display:none;"></div>
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header">
+            <h5 class="mb-0">Fee Record Details</h5>
+        </div>
+
+        <div class="card-body">
+            <form id="feeForm" novalidate>
+
+                <div class="row g-3">
+
+                    <!-- Fee Code -->
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            Fee Code <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" id="feeCode" class="form-control"
+                               placeholder="e.g. BD.LATE_30"
+                               maxlength="60" required>
+                        <div class="invalid-feedback">Fee code is required.</div>
+                        <div class="form-text">Machine-readable identifier. Must be unique per scope.</div>
+                    </div>
+
+                    <!-- Fee Name -->
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            Fee Name <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" id="feeName" class="form-control"
+                               placeholder="e.g. Delayed Registration (21–30 days)"
+                               maxlength="200" required>
+                        <div class="invalid-feedback">Fee name is required.</div>
+                    </div>
+
+                    <!-- Service Type -->
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            Service Type <span class="text-danger">*</span>
+                        </label>
+                        <select id="feeServiceType" class="form-select" required>
+                            <option value="">Select Service Type</option>
+                            {% for st in service_type_choices %}
+                                <option value="{{ st.value }}">{{ st.display }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="invalid-feedback">Please select a service type.</div>
+                    </div>
+
+                    <!-- Calculation Type -->
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            Calculation Type <span class="text-danger">*</span>
+                        </label>
+                        <select id="feeCalcType" class="form-select" required>
+                            <option value="">Select Calculation Type</option>
+                            {% for ct in calculation_type_choices %}
+                                <option value="{{ ct.value }}">{{ ct.display }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="invalid-feedback">Please select a calculation type.</div>
+                    </div>
+
+                    <!-- Amount -->
+                    <div class="col-md-4">
+                        <label class="form-label">
+                            Amount (₹) <span class="text-danger">*</span>
+                        </label>
+                        <input type="number" id="feeAmount" class="form-control"
+                               placeholder="0.00" min="0" step="0.01" required>
+                        <div class="invalid-feedback">Enter a valid amount (≥ 0).</div>
+                        <div class="form-text">Set to 0.00 for FREE services.</div>
+                    </div>
+
+                    <!-- Currency -->
+                    <div class="col-md-2">
+                        <label class="form-label">Currency</label>
+                        <input type="text" id="feeCurrency" class="form-control"
+                               value="INR" maxlength="3">
+                    </div>
+
+                    <!-- State Code -->
+                    <div class="col-md-6">
+                        <label class="form-label">State Code</label>
+                        <input type="text" id="feeStateCode" class="form-control"
+                               placeholder="e.g. RJ  (leave blank for global)"
+                               maxlength="10">
+                        <div class="form-text">
+                            Leave blank for a global rate.
+                            ULB/District overrides can be set via the API.
+                        </div>
+                    </div>
+
+                    <!-- Effective From -->
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            Effective From <span class="text-danger">*</span>
+                        </label>
+                        <input type="date" id="feeEffectiveFrom" class="form-control" required>
+                        <div class="invalid-feedback">Effective from date is required.</div>
+                    </div>
+
+                    <!-- Effective To -->
+                    <div class="col-md-6">
+                        <label class="form-label">Effective To</label>
+                        <input type="date" id="feeEffectiveTo" class="form-control">
+                        <div class="form-text">
+                            Leave blank for an open-ended / current rate.
+                            Do not overwrite old records — set an end date and create a new one.
+                        </div>
+                    </div>
+
+                    <!-- Rule Reference -->
+                    <div class="col-12">
+                        <label class="form-label">Rule Reference</label>
+                        <input type="text" id="feeRuleRef" class="form-control"
+                               maxlength="300"
+                               placeholder="e.g. Rajasthan RBD Amendment Rules, 2025, Rule 9(i)">
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="col-12">
+                        <label class="form-label">Notes</label>
+                        <textarea id="feeNotes" class="form-control" rows="2"
+                                  placeholder="Optional internal notes about this fee"></textarea>
+                    </div>
+
+                    <!-- Active -->
+                    <div class="col-12">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox"
+                                   id="feeIsActive" checked>
+                            <label class="form-check-label" for="feeIsActive">
+                                Active
+                            </label>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Buttons -->
+                <div class="mt-4">
+                    <a href="{% url 'fee_master_page' %}" class="btn btn-secondary btn-sm">
+                        Back
+                    </a>
+                    <button type="submit" class="btn btn-primary btn-sm ms-2" id="saveBtn">
+                        <span id="saveSpinner"
+                              class="spinner-border spinner-border-sm me-1"
+                              style="display:none;"></span>
+                        Save
+                    </button>
+                </div>
+
+            </form>
+        </div>
+
+    </div>
+
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script type="module">
+import api from "{% static 'js/api.js' %}";
+
+const FEE_ID = "{{ fee_id|default:'' }}";
+
+/* ── helpers ──────────────────────────────────────────────── */
+function showAlert(msg, type = 'danger') {
+    const area = document.getElementById('feeAlertArea');
+    area.innerHTML = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${msg}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>`;
+    area.style.display = '';
+    area.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function val(id)     { return document.getElementById(id).value.trim(); }
+function setVal(id,v){ document.getElementById(id).value = v ?? ''; }
+function checked(id) { return document.getElementById(id).checked; }
+
+/* ── if editing, pre-fill form ───────────────────────────── */
+if (FEE_ID) {
+    try {
+        const rec = await api.get(`/api/fee-master/${FEE_ID}/`);
+        setVal('feeCode',         rec.fee_code);
+        setVal('feeName',         rec.fee_name);
+        setVal('feeServiceType',  rec.service_type);
+        setVal('feeCalcType',     rec.calculation_type);
+        setVal('feeAmount',       rec.amount);
+        setVal('feeCurrency',     rec.currency || 'INR');
+        setVal('feeStateCode',    rec.state_code || '');
+        setVal('feeEffectiveFrom', rec.effective_from || '');
+        setVal('feeEffectiveTo',   rec.effective_to  || '');
+        setVal('feeRuleRef',       rec.rule_reference || '');
+        setVal('feeNotes',         rec.notes || '');
+        document.getElementById('feeIsActive').checked = rec.is_active;
+    } catch (err) {
+        showAlert('Failed to load fee record: ' + err.message);
+    }
+}
+
+/* ── submit ───────────────────────────────────────────────── */
+document.getElementById('feeForm').addEventListener('submit', async e => {
+    e.preventDefault();
+
+    const form = e.target;
+    let valid  = true;
+
+    form.querySelectorAll('[required]').forEach(el => {
+        if (!el.value.trim()) {
+            el.classList.add('is-invalid'); valid = false;
+        } else {
+            el.classList.remove('is-invalid');
+        }
+    });
+    if (!valid) {
+        const first = form.querySelector('.is-invalid');
+        first?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+    }
+
+    const payload = {
+        fee_code:         val('feeCode'),
+        fee_name:         val('feeName'),
+        service_type:     val('feeServiceType'),
+        calculation_type: val('feeCalcType'),
+        amount:           val('feeAmount'),
+        currency:         val('feeCurrency') || 'INR',
+        state_code:       val('feeStateCode'),
+        effective_from:   val('feeEffectiveFrom'),
+        effective_to:     val('feeEffectiveTo')   || null,
+        rule_reference:   val('feeRuleRef'),
+        notes:            val('feeNotes'),
+        is_active:        checked('feeIsActive'),
+    };
+
+    const btn     = document.getElementById('saveBtn');
+    const spinner = document.getElementById('saveSpinner');
+    btn.disabled          = true;
+    spinner.style.display = '';
+
+    try {
+        if (FEE_ID) {
+            await api.patch(`/api/fee-master/${FEE_ID}/`, payload);
+            showAlert('✅ Fee record updated successfully.', 'success');
+        } else {
+            await api.post('/api/fee-master/', payload);
+            showAlert('✅ Fee record created successfully.', 'success');
+            document.getElementById('feeForm').reset();
+            document.getElementById('feeIsActive').checked = true;
+        }
+    } catch (err) {
+        const errors = err.data?.errors || err.data || {};
+        const msgs   = Object.entries(errors)
+            .map(([f, v]) => `<strong>${f}</strong>: ${Array.isArray(v) ? v.join(', ') : v}`)
+            .join('<br>');
+        showAlert(`❌ ${msgs || err.message}`);
+    } finally {
+        btn.disabled          = false;
+        spinner.style.display = 'none';
+    }
+});
+</script>
+{% endblock %}

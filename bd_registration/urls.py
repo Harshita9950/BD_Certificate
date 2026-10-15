@@ -8,6 +8,8 @@ Routes
 GET/POST         /api/bd-registration/applications/
 GET/PUT/PATCH    /api/bd-registration/applications/<pk>/
 POST             /api/bd-registration/applications/<pk>/submit/
+POST             /api/bd-registration/applications/<pk>/confirm-payment/
+POST             /api/bd-registration/applications/<pk>/forward/
 POST             /api/bd-registration/applications/<pk>/approve/
 POST             /api/bd-registration/applications/<pk>/reject/
 POST             /api/bd-registration/applications/<pk>/cancel/
@@ -21,6 +23,7 @@ GET/POST         /api/bd-registration/deaths/
 GET/POST         /api/bd-registration/still-births/
 GET/POST         /api/bd-registration/adopted-births/
 POST             /api/bd-registration/delay-check/
+POST             /api/bd-registration/birth-applications/
 """
 
 from django.urls import include, path

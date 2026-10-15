@@ -39,15 +39,16 @@ from bd_master.models import TimestampMixin
 # ─── Application Status ───────────────────────────────────────────────────────
 
 class ApplicationStatus(models.TextChoices):
-    DRAFT          = 'DRAFT',          _('Draft')
-    SUBMITTED      = 'SUBMITTED',      _('Submitted')
-    UNDER_SCRUTINY = 'UNDER_SCRUTINY', _('Under Scrutiny')
-    PENDING_DOCS   = 'PENDING_DOCS',   _('Pending Documents')
-    UNDER_PROCESS  = 'UNDER_PROCESS',  _('Under Process')
-    APPROVED       = 'APPROVED',       _('Approved')
-    REJECTED       = 'REJECTED',       _('Rejected')
-    REGISTERED     = 'REGISTERED',     _('Registered')
-    CANCELLED      = 'CANCELLED',      _('Cancelled')
+    DRAFT           = 'DRAFT',           _('Draft')
+    PAYMENT_PENDING = 'PAYMENT_PENDING', _('Payment Pending')
+    SUBMITTED       = 'SUBMITTED',       _('Submitted')
+    UNDER_SCRUTINY  = 'UNDER_SCRUTINY',  _('Under Scrutiny')
+    PENDING_DOCS    = 'PENDING_DOCS',    _('Pending Documents')
+    UNDER_PROCESS   = 'UNDER_PROCESS',   _('Under Process')
+    APPROVED        = 'APPROVED',        _('Approved')
+    REJECTED        = 'REJECTED',        _('Rejected')
+    REGISTERED      = 'REGISTERED',      _('Registered')
+    CANCELLED       = 'CANCELLED',       _('Cancelled')
 
 
 # ─── Sex choices (used across multiple registration models) ───────────────────

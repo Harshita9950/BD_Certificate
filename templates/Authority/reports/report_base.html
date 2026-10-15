@@ -1,0 +1,97 @@
+{% extends 'Authority/base.html' %}
+{% load static %}
+
+{% block title %}{{ report_title }} | BD Portal{% endblock %}
+
+{% block content %}
+<main class="content">
+
+    <!-- BREADCRUMB -->
+    <section class="page-inner d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-3">
+        <div class="page-heading">
+            <h1 class="page-title">{{ report_title }}</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item">Reports</li>
+                    <li class="breadcrumb-item active">{{ report_title }}</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="ms-auto d-print-none d-flex gap-2">
+            <button onclick="window.print()" class="btn btn-outline-secondary btn-sm"><i class="ri-printer-line me-1"></i> Print</button>
+            <a href="?{% for k,v in filter_params.items %}{% if k != 'page' and k != 'print' and k != 'export' %}{{ k }}={{ v }}&{% endif %}{% endfor %}export=csv" class="btn btn-success btn-sm"><i class="ri-file-excel-line me-1"></i> Export CSV</a>
+        </div>
+    </section>
+
+    <!-- FILTER FORM -->
+    {% block filter_form %}{% endblock %}
+
+    <!-- TABLE -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header d-print-none">
+            <div class="row g-3 align-items-center">
+                <div class="col-xl-3 col-md-4">
+                    <div class="d-flex align-items-center gap-2">
+                        <label for="tableSearch" class="form-label mb-0 fw-medium text-nowrap text-secondary">Search:</label>
+                        <input type="search" id="tableSearch" class="form-control" placeholder="Search records…" autocomplete="off" style="border-radius:10px;">
+                    </div>
+                </div>
+                <div class="col-xl-9 col-md-8">
+                    <div class="d-flex align-items-center justify-content-md-end gap-2">
+                        <span class="text-secondary small">{{ total }} record{{ total|pluralize }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-responsive" id="printableArea">
+            {% block report_table %}{% endblock %}
+        </div>
+
+        <!-- Pagination -->
+        {% if not is_print %}
+        <div class="card-body d-print-none">
+            <div class="row align-items-center g-3">
+                <div class="col-12 col-md-5">
+                    <div id="tableInfo" class="text-secondary small text-center text-md-start"></div>
+                </div>
+                <div class="col-12 col-md-7">
+                    <nav class="d-flex justify-content-center justify-content-md-end">
+                        <ul class="pagination pagination-sm mb-0">
+                            {% if current_page > 1 %}
+                            <li class="page-item"><a class="page-link" href="?{% for k,v in filter_params.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ current_page|add:"-1" }}">‹ Prev</a></li>
+                            {% endif %}
+                            {% for p in total_pages|rjust:"1" %}{% endfor %}
+                            {% if current_page < total_pages %}
+                            <li class="page-item"><a class="page-link" href="?{% for k,v in filter_params.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ current_page|add:"1" }}">Next ›</a></li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+</main>
+
+<style>
+@media print { .d-print-none { display:none!important; } .card { box-shadow:none!important; } }
+</style>
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const search = document.getElementById('tableSearch');
+    if (!search) return;
+    const table  = document.querySelector('#printableArea table tbody');
+    if (!table)  return;
+    const allRows = Array.from(table.querySelectorAll('tr'));
+    search.addEventListener('input', function() {
+        const q = this.value.toLowerCase();
+        allRows.forEach(r => { r.style.display = r.innerText.toLowerCase().includes(q) ? '' : 'none'; });
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}

@@ -54,6 +54,7 @@ from .serializers import (
     StillBirthRegistrationSerializer,
 )
 from .services import DelayCalculationService
+from .workflow_service import assign_workflow, advance_workflow
 
 logger = logging.getLogger(__name__)
 
@@ -63,15 +64,20 @@ logger = logging.getLogger(__name__)
 # ═══════════════════════════════════════════════════════════════════════════════
 
 _ALLOWED_TRANSITIONS = {
-    'submit':   {ApplicationStatus.DRAFT},
-    'scrutiny': {ApplicationStatus.SUBMITTED},
-    'process':  {ApplicationStatus.UNDER_SCRUTINY, ApplicationStatus.PENDING_DOCS},
-    'approve':  {ApplicationStatus.UNDER_PROCESS, ApplicationStatus.UNDER_SCRUTINY},
-    'reject':   {ApplicationStatus.UNDER_SCRUTINY, ApplicationStatus.UNDER_PROCESS, ApplicationStatus.SUBMITTED},
-    'cancel':   {ApplicationStatus.DRAFT, ApplicationStatus.SUBMITTED,
-                 ApplicationStatus.UNDER_SCRUTINY, ApplicationStatus.PENDING_DOCS, ApplicationStatus.UNDER_PROCESS},
-    'register': {ApplicationStatus.APPROVED},
-    'pending_docs': {ApplicationStatus.UNDER_SCRUTINY},
+    # DRAFT → PAYMENT_PENDING (fee required) or DRAFT → SUBMITTED (fee-free)
+    # Both source states handled by the submit action below.
+    'submit':          {ApplicationStatus.DRAFT},
+    # PAYMENT_PENDING → SUBMITTED (payment confirmed by payments app)
+    'confirm_payment': {ApplicationStatus.PAYMENT_PENDING},
+    'scrutiny':        {ApplicationStatus.SUBMITTED},
+    'process':         {ApplicationStatus.UNDER_SCRUTINY, ApplicationStatus.PENDING_DOCS},
+    'approve':         {ApplicationStatus.UNDER_PROCESS, ApplicationStatus.UNDER_SCRUTINY},
+    'reject':          {ApplicationStatus.UNDER_SCRUTINY, ApplicationStatus.UNDER_PROCESS, ApplicationStatus.SUBMITTED},
+    'cancel':          {ApplicationStatus.DRAFT, ApplicationStatus.PAYMENT_PENDING,
+                        ApplicationStatus.SUBMITTED, ApplicationStatus.UNDER_SCRUTINY,
+                        ApplicationStatus.PENDING_DOCS, ApplicationStatus.UNDER_PROCESS},
+    'register':        {ApplicationStatus.APPROVED},
+    'pending_docs':    {ApplicationStatus.UNDER_SCRUTINY},
 }
 
 
@@ -104,12 +110,33 @@ def _get_master_context():
 # ═══════════════════════════════════════════════════════════════════════════════
 
 class BirthRegistrationPageView(LoginRequiredMixin, View):
-    """GET /birth-registration/ → renders the birth application form."""
+    """
+    GET /birth-registration/          → blank new form
+    GET /birth-registration/?app=<pk> → pre-filled editable form for a
+                                        PAYMENT_PENDING application
+    """
     login_url = '/login/'
 
     def get(self, request):
         ctx = _get_master_context()
-        ctx['application'] = None
+        ctx['application']       = None
+        ctx['birth_registration'] = None
+
+        app_pk = request.GET.get('app')
+        if app_pk:
+            try:
+                app = Application.objects.select_related(
+                    'registration_type', 'district', 'ulb',
+                ).get(pk=app_pk, status=ApplicationStatus.PAYMENT_PENDING)
+                try:
+                    br = app.birth_registration
+                except Exception:
+                    br = None
+                ctx['application']       = app
+                ctx['birth_registration'] = br
+            except Application.DoesNotExist:
+                pass   # silently fall through to a blank form
+
         return render(request, 'Authority/birth_application_form.html', ctx)
 
 
@@ -141,6 +168,68 @@ class AdoptedBirthRegistrationPageView(LoginRequiredMixin, View):
         ctx = _get_master_context()
         ctx['application'] = None
         return render(request, 'Authority/adopted_birth_application_form.html', ctx)
+
+
+class ApplicationInboxView(LoginRequiredMixin, View):
+    """
+    GET /mailbox/inbox/
+
+    Shows applications the authenticated user is responsible for processing
+    at their current workflow step.
+
+    Filtering rules (server-side, never frontend):
+    1. Exclude DRAFT and PAYMENT_PENDING (not yet in the workflow).
+    2. Scope to the authenticated user's ULB (user.ulb_fk).
+    3. Scope to applications whose current_step.role_code matches the
+       authenticated user's role — so a DA sees only DA-step applications,
+       a HEALTH_OFFICER sees only HEALTH_OFFICER-step applications, etc.
+    4. ADMIN users bypass role/ULB filtering and see all non-draft apps.
+    5. Applications with no workflow assigned (workflow=None) are excluded
+       because they have not entered the processing pipeline yet.
+
+    Ward-level scoping: WorkflowStep has no ward field. If finer ward
+    isolation is needed, set user.ward_fk on officers; this view can then
+    be extended to filter via birth_registration__ward=user.ward_fk.
+    """
+    login_url = '/login/'
+
+    def get(self, request):
+        user = request.user
+
+        base_qs = Application.objects.select_related(
+            'registration_type', 'district', 'ulb',
+            'submitted_by',
+            'birth_registration',
+            'death_registration',
+            'still_birth_registration',
+            'adopted_birth_registration',
+            'current_step',
+        ).exclude(
+            status__in=(ApplicationStatus.DRAFT, ApplicationStatus.PAYMENT_PENDING)
+        )
+
+        # ADMINs and superusers see everything
+        from users.models import UserRole
+        if user.is_superuser or getattr(user, 'role', None) == UserRole.ADMIN:
+            qs = base_qs.order_by('-created_at')
+        else:
+            # Must have a workflow assigned
+            qs = base_qs.filter(workflow__isnull=False)
+
+            # Scope to applications at a step whose role_code matches this user
+            if getattr(user, 'role', None):
+                qs = qs.filter(current_step__role_code=user.role)
+
+            # Scope to this user's ULB
+            if getattr(user, 'ulb_fk_id', None):
+                qs = qs.filter(ulb=user.ulb_fk)
+
+            qs = qs.order_by('-created_at')
+
+        return render(request, 'Authority/application_inbox.html', {
+            'applications': qs,
+            'inbox_title':  'Application Inbox',
+        })
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -254,7 +343,17 @@ class ApplicationViewSet(
                 status=http_status.HTTP_400_BAD_REQUEST,
             )
 
-        # Delay-rule validation using the existing service
+        # ── Fee gate ──────────────────────────────────────────────────────────
+        # Run delay calculation to determine the applicable fee.
+        # If fee > 0  → transition DRAFT → PAYMENT_PENDING (payment required first).
+        # If fee == 0 → transition DRAFT → SUBMITTED directly (free registration).
+        #
+        # Amount is NEVER taken from the request. DelayCalculationService is the
+        # sole authority. Frontend-supplied amounts are silently ignored.
+
+        fee_required = False
+        delay_result = None
+
         if app.date_of_reporting and event_date:
             state_code = app.state_code or ''
             delay_result = DelayCalculationService.calculate(
@@ -262,17 +361,17 @@ class ApplicationViewSet(
                 date_of_reporting=app.date_of_reporting,
                 state_code=state_code,
             )
-            # Hard date-validation errors (future event, reporting before event)
-            # produce an empty delay_category — reject those.
-            # Missing rule configuration (no DelayRule seeded) is a warning only
-            # and must not block valid submissions.
+
+            # Hard date-validation errors produce delay_category == '' — block.
+            # Missing DelayRule seed data is a non-fatal warning — do not block.
             if delay_result.error and delay_result.delay_category == '':
                 return Response(
                     {'detail': delay_result.error, 'code': 'delay_validation_error'},
                     status=http_status.HTTP_400_BAD_REQUEST,
                 )
-            # If >1 year AND a rule is configured that requires a permission order,
-            # enforce document upload before submission.
+
+            # Enforce document upload for applications delayed >1 year that
+            # require a permission order.
             if delay_result.requires_permission_order and not app.documents.exists():
                 return Response(
                     {
@@ -288,20 +387,191 @@ class ApplicationViewSet(
                     status=http_status.HTTP_400_BAD_REQUEST,
                 )
 
+            from decimal import Decimal
+            fee_required = (
+                delay_result.applicable_fee is not None
+                and delay_result.applicable_fee > Decimal('0.00')
+            )
+
         old_status = app.status
-        app.status = ApplicationStatus.SUBMITTED
+
+        if fee_required:
+            # Transition to PAYMENT_PENDING — the payments app will move the
+            # application to SUBMITTED once payment is confirmed.
+            app.status = ApplicationStatus.PAYMENT_PENDING
+            if not app.submitted_by:
+                app.submitted_by = request.user
+            app.save(update_fields=['status', 'submitted_by'])
+
+            _record_transition(app, old_status, ApplicationStatus.PAYMENT_PENDING,
+                               'PAYMENT_PENDING', request.user,
+                               request.data.get('remarks', ''))
+
+            response_data = ApplicationSerializer(app).data
+            response_data['payment_required']  = True
+            response_data['applicable_fee']    = str(delay_result.applicable_fee)
+            response_data['fee_code']          = delay_result.fee_code
+            response_data['currency']          = delay_result.currency
+            response_data['delay_category']    = delay_result.delay_category
+            return Response(response_data, status=http_status.HTTP_200_OK)
+
+        else:
+            # Zero-fee (FREE) registration — go straight to SUBMITTED.
+            app.status = ApplicationStatus.SUBMITTED
+            app.submitted_at = timezone.now()
+            if not app.submitted_by:
+                app.submitted_by = request.user
+            app.save(update_fields=['status', 'submitted_at', 'submitted_by'])
+
+            _record_transition(app, old_status, ApplicationStatus.SUBMITTED,
+                               'SUBMITTED', request.user,
+                               request.data.get('remarks', ''))
+
+            # Assign workflow now that the application is SUBMITTED.
+            # A missing workflow configuration is non-fatal — logs a warning.
+            assign_workflow(app)
+
+            response_data = ApplicationSerializer(app).data
+            response_data['payment_required'] = False
+            return Response(response_data, status=http_status.HTTP_200_OK)
+
+    # ── Confirm Payment (PAYMENT_PENDING → SUBMITTED) ────────────────────────
+
+    @action(detail=True, methods=['post'], url_path='confirm-payment')
+    def confirm_payment(self, request, pk=None):
+        """
+        POST .../confirm-payment/
+
+        Called exclusively by the payments app (PaymentOrderViewSet) after a
+        PaymentOrder is confirmed PAID — either cash collected or Razorpay
+        signature verified server-side.
+
+        Transitions PAYMENT_PENDING → SUBMITTED.
+
+        Security rules:
+        - Only callable when status == PAYMENT_PENDING.
+        - Requires a verified PaymentOrder (status=PAID) linked to this application.
+          The frontend cannot call this directly and manufacture a paid state —
+          the PaymentOrder must have been marked PAID by the payments app via
+          server-side verification (cash officer or Razorpay HMAC).
+        - Amount is never read from request.data.
+        """
+        app = self.get_object()
+
+        if app.status not in _ALLOWED_TRANSITIONS['confirm_payment']:
+            return Response(
+                {'detail': (
+                    f'Cannot confirm payment for an application with '
+                    f'status "{app.status}". Expected PAYMENT_PENDING.'
+                ),
+                 'code': 'invalid_transition'},
+                status=http_status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Verify a PAID PaymentOrder exists for this application.
+        # This is the guard that prevents frontend abuse — the order can only
+        # reach PAID status via server-side payment verification in payments/views.py.
+        from payments.models import PaymentOrder, PaymentOrderStatus
+        try:
+            order = app.payment_order
+        except PaymentOrder.DoesNotExist:
+            return Response(
+                {'detail': 'No payment order found for this application.',
+                 'code': 'payment_order_missing'},
+                status=http_status.HTTP_400_BAD_REQUEST,
+            )
+
+        if order.status != PaymentOrderStatus.PAID:
+            return Response(
+                {'detail': (
+                    f'Payment order is not confirmed (status: {order.status}). '
+                    'Complete payment before confirming.'
+                ),
+                 'code': 'payment_not_confirmed'},
+                status=http_status.HTTP_400_BAD_REQUEST,
+            )
+
+        old_status = app.status
+        app.status       = ApplicationStatus.SUBMITTED
         app.submitted_at = timezone.now()
-        if not app.submitted_by:
-            app.submitted_by = request.user
-        app.save(update_fields=['status', 'submitted_at', 'submitted_by'])
+        app.save(update_fields=['status', 'submitted_at'])
 
-        _record_transition(app, old_status, ApplicationStatus.SUBMITTED,
-                           'SUBMITTED', request.user,
-                           request.data.get('remarks', ''))
+        _record_transition(
+            app, old_status, ApplicationStatus.SUBMITTED,
+            'PAYMENT_CONFIRMED', request.user,
+            f'Payment confirmed. Order ref: {order.reference}',
+        )
 
-        return Response(ApplicationSerializer(app).data, status=http_status.HTTP_200_OK)
+        logger.info(
+            'Application %s: PAYMENT_PENDING → SUBMITTED (order %s, user %s)',
+            app.application_number, order.reference, request.user,
+        )
+
+        # Assign workflow now that the application is SUBMITTED.
+        assign_workflow(app)
+
+        response_data = ApplicationSerializer(app).data
+        response_data['payment_confirmed'] = True
+        return Response(response_data, status=http_status.HTTP_200_OK)
 
     # ── Approve ───────────────────────────────────────────────────────────────
+
+    @action(detail=True, methods=['post'], url_path='forward')
+    def forward(self, request, pk=None):
+        """
+        POST .../forward/
+
+        Forwards the application to the next workflow step AND advances
+        the application status to the next stage.
+
+        SUBMITTED           → UNDER_SCRUTINY  (Step 1 DA forwards to Step 2 DA)
+        UNDER_SCRUTINY      → UNDER_PROCESS   (Step 2 DA forwards to Step 3 HEALTH_OFFICER)
+        PENDING_DOCS        → UNDER_PROCESS   (resubmit after docs added)
+
+        Also advances current_step to the next WorkflowStep so that the
+        application appears in the next officer's inbox.
+        """
+        app = self.get_object()
+
+        # Determine target status from current
+        status_map = {
+            ApplicationStatus.SUBMITTED:      ApplicationStatus.UNDER_SCRUTINY,
+            ApplicationStatus.UNDER_SCRUTINY: ApplicationStatus.UNDER_PROCESS,
+            ApplicationStatus.PENDING_DOCS:   ApplicationStatus.UNDER_PROCESS,
+        }
+
+        if app.status not in status_map:
+            return Response(
+                {'detail': (
+                    f'Cannot forward an application with status "{app.status}". '
+                    f'Only SUBMITTED, UNDER_SCRUTINY, or PENDING_DOCS applications '
+                    f'can be forwarded.'
+                ),
+                 'code': 'invalid_transition'},
+                status=http_status.HTTP_400_BAD_REQUEST,
+            )
+
+        old_status    = app.status
+        target_status = status_map[app.status]
+
+        app.status = target_status
+        app.save(update_fields=['status'])
+
+        _record_transition(
+            app, old_status, target_status,
+            'FORWARDED', request.user,
+            request.data.get('remarks', ''),
+        )
+
+        # Advance workflow step so the next officer's inbox is updated
+        advance_workflow(app, request.user)
+
+        logger.info(
+            'Application %s forwarded: %s → %s by %s.',
+            app.application_number, old_status, target_status, request.user,
+        )
+
+        return Response(ApplicationSerializer(app).data, status=http_status.HTTP_200_OK)
 
     @action(detail=True, methods=['post'], url_path='approve')
     def approve(self, request, pk=None):
@@ -796,7 +1066,7 @@ class BirthApplicationCreateView(APIView):
                     **birth_data,
                 )
 
-                # If action is submit, run the submit transition
+                # If action is submit, run the submit transition with fee gate
                 if action == 'submit':
                     errors = {}
                     if not app.date_of_reporting:
@@ -809,8 +1079,8 @@ class BirthApplicationCreateView(APIView):
                     if errors:
                         raise ValueError(errors)
 
-                    # Delay rule validation
-                    state_code = app.state_code or ''
+                    # Delay rule + fee calculation
+                    state_code   = app.state_code or ''
                     delay_result = DelayCalculationService.calculate(
                         event_date=event_date,
                         date_of_reporting=app.date_of_reporting,
@@ -829,18 +1099,44 @@ class BirthApplicationCreateView(APIView):
                             )
                         })
 
-                    app.status      = ApplicationStatus.SUBMITTED
-                    app.submitted_at = timezone.now()
-                    app.save(update_fields=['status', 'submitted_at'])
-
-                    _record_transition(
-                        application=app,
-                        old_status=ApplicationStatus.DRAFT,
-                        new_status=ApplicationStatus.SUBMITTED,
-                        action_code='SUBMITTED',
-                        user=request.user,
-                        remarks=app_data.get('remarks', ''),
+                    # Fee gate — amount from backend only, never from frontend.
+                    from decimal import Decimal
+                    fee_required = (
+                        delay_result.applicable_fee is not None
+                        and delay_result.applicable_fee > Decimal('0.00')
                     )
+
+                    if fee_required:
+                        # Halt at PAYMENT_PENDING.
+                        app.status = ApplicationStatus.PAYMENT_PENDING
+                        app.save(update_fields=['status'])
+                        _record_transition(
+                            application=app,
+                            old_status=ApplicationStatus.DRAFT,
+                            new_status=ApplicationStatus.PAYMENT_PENDING,
+                            action_code='PAYMENT_PENDING',
+                            user=request.user,
+                            remarks=app_data.get('remarks', ''),
+                        )
+                        app._fee_required = True
+                        app._delay_result = delay_result
+                    else:
+                        # Zero-fee — go straight to SUBMITTED.
+                        app.status       = ApplicationStatus.SUBMITTED
+                        app.submitted_at = timezone.now()
+                        app.save(update_fields=['status', 'submitted_at'])
+                        _record_transition(
+                            application=app,
+                            old_status=ApplicationStatus.DRAFT,
+                            new_status=ApplicationStatus.SUBMITTED,
+                            action_code='SUBMITTED',
+                            user=request.user,
+                            remarks=app_data.get('remarks', ''),
+                        )
+                        # Assign workflow immediately — fee-free path goes
+                        # straight to SUBMITTED without a payment step.
+                        assign_workflow(app)
+                        app._fee_required = False
 
         except ValueError as exc:
             errs = exc.args[0] if exc.args else {}
@@ -856,6 +1152,876 @@ class BirthApplicationCreateView(APIView):
             )
 
         return Response(
-            ApplicationSerializer(app, context={'request': request}).data,
+            {
+                **ApplicationSerializer(app, context={'request': request}).data,
+                'payment_required': getattr(app, '_fee_required', False),
+                **(
+                    {
+                        'applicable_fee':  str(app._delay_result.applicable_fee),
+                        'fee_code':        app._delay_result.fee_code,
+                        'currency':        app._delay_result.currency,
+                        'delay_category':  app._delay_result.delay_category,
+                    }
+                    if getattr(app, '_fee_required', False) else {}
+                ),
+            },
             status=http_status.HTTP_201_CREATED,
         )
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# APPLICATION REVIEW PAGE VIEW
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class ApplicationReviewView(LoginRequiredMixin, View):
+    """
+    GET /applications/<pk>/review/
+
+    Renders a read-only review page for an application that is in
+    PAYMENT_PENDING status.  Recalculates the fee server-side so the
+    displayed amount is always authoritative — never trusts the URL or
+    any session value.
+
+    Redirects to the inbox if the application does not exist, does not
+    belong to the current user's ULB, or is not in PAYMENT_PENDING status
+    (e.g. already paid and SUBMITTED).
+    """
+    login_url = '/login/'
+
+    def get(self, request, pk):
+        from django.shortcuts import get_object_or_404
+        from decimal import Decimal
+
+        app = get_object_or_404(
+            Application.objects.select_related(
+                'registration_type', 'district', 'ulb',
+                'submitted_by',
+                'birth_registration',
+                'death_registration',
+                'still_birth_registration',
+                'adopted_birth_registration',
+            ),
+            pk=pk,
+        )
+
+        # Only PAYMENT_PENDING applications need the review/payment page.
+        # Any other status means payment is already handled or not needed.
+        if app.status != ApplicationStatus.PAYMENT_PENDING:
+            from django.contrib import messages as django_messages
+            if app.status == ApplicationStatus.SUBMITTED:
+                django_messages.info(
+                    request,
+                    f'Application {app.application_number} has already been submitted.'
+                )
+            return redirect('application_inbox')
+
+        # Re-derive the event date and recalculate fee authoritatively.
+        event_date = _get_event_date(app)
+        delay_result = None
+        fee_amount = Decimal('0.00')
+        fee_code   = ''
+        currency   = 'INR'
+        delay_days = 0
+        delay_category_display = 'Normal (within 21 days)'
+
+        if event_date and app.date_of_reporting:
+            delay_result = DelayCalculationService.calculate(
+                event_date=event_date,
+                date_of_reporting=app.date_of_reporting,
+                state_code=app.state_code or '',
+            )
+            if delay_result and not delay_result.error:
+                fee_amount             = delay_result.applicable_fee or Decimal('0.00')
+                fee_code               = delay_result.fee_code
+                currency               = delay_result.currency
+                delay_days             = delay_result.delay_days
+                from bd_master.models import DelayCategory
+                display_map            = dict(DelayCategory.choices)
+                delay_category_display = display_map.get(
+                    delay_result.delay_category, delay_result.delay_category
+                )
+
+        # Resolve child registration record for display
+        child_record = None
+        service_label = app.get_service_type_display()
+        for rel in ('birth_registration', 'death_registration',
+                    'still_birth_registration', 'adopted_birth_registration'):
+            try:
+                child_record = getattr(app, rel)
+                break
+            except Exception:
+                continue
+
+        # Razorpay key_id is safe to expose to the browser
+        from django.conf import settings as django_settings
+        razorpay_key_id = getattr(django_settings, 'RAZORPAY_KEY_ID', '')
+
+        ctx = {
+            'app':                    app,
+            'child_record':           child_record,
+            'service_label':          service_label,
+            'event_date':             event_date,
+            'delay_days':             delay_days,
+            'delay_category_display': delay_category_display,
+            'fee_amount':             fee_amount,
+            'fee_code':               fee_code,
+            'currency':               currency,
+            'is_free':                fee_amount == Decimal('0.00'),
+            'razorpay_key_id':        razorpay_key_id,
+            'today':                  timezone.localdate(),
+        }
+        return render(request, 'Authority/application_review.html', ctx)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# APPLICATION DETAIL PAGE VIEW
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class ApplicationDetailView(LoginRequiredMixin, View):
+    """
+    GET /applications/<pk>/
+
+    Read-only detail page for any application regardless of status.
+    PAYMENT_PENDING applications are redirected to the review/payment page.
+
+    Shows:
+    - Full application + child registration data (read-only)
+    - Current status, workflow step
+    - Fee / delay information (recalculated from backend)
+    - Payment order status if one exists
+    - Status history timeline
+    """
+    login_url = '/login/'
+
+    def get(self, request, pk):
+        from django.shortcuts import get_object_or_404
+        from decimal import Decimal
+
+        app = get_object_or_404(
+            Application.objects.select_related(
+                'registration_type', 'district', 'ulb',
+                'submitted_by', 'assigned_to',
+                'workflow', 'current_step',
+                'birth_registration',
+                'death_registration',
+                'still_birth_registration',
+                'adopted_birth_registration',
+            ),
+            pk=pk,
+        )
+
+        # PAYMENT_PENDING → redirect to the dedicated review/payment page
+        if app.status == ApplicationStatus.PAYMENT_PENDING:
+            return redirect('application_review', pk=app.pk)
+
+        # Resolve child record
+        child_record = None
+        for rel in ('birth_registration', 'death_registration',
+                    'still_birth_registration', 'adopted_birth_registration'):
+            try:
+                child_record = getattr(app, rel)
+                break
+            except Exception:
+                continue
+
+        # Fee info (recalculated — never trust stored values for display)
+        event_date             = _get_event_date(app)
+        fee_amount             = Decimal('0.00')
+        fee_code               = ''
+        currency               = 'INR'
+        delay_days             = 0
+        delay_category_display = '—'
+        delay_result           = None
+
+        if event_date and app.date_of_reporting:
+            delay_result = DelayCalculationService.calculate(
+                event_date=event_date,
+                date_of_reporting=app.date_of_reporting,
+                state_code=app.state_code or '',
+            )
+            if delay_result and not delay_result.error:
+                fee_amount             = delay_result.applicable_fee or Decimal('0.00')
+                fee_code               = delay_result.fee_code
+                currency               = delay_result.currency
+                delay_days             = delay_result.delay_days
+                from bd_master.models import DelayCategory
+                display_map            = dict(DelayCategory.choices)
+                delay_category_display = display_map.get(
+                    delay_result.delay_category, delay_result.delay_category
+                )
+
+        # Payment order (if any)
+        payment_order = None
+        try:
+            payment_order = app.payment_order
+        except Exception:
+            pass
+
+        # Status history (remarks history — with remarks only)
+        history = app.status_history.select_related('changed_by').filter(
+            remarks__gt=''
+        ).order_by('changed_at')
+
+        # Uploaded documents
+        documents = app.documents.select_related(
+            'document_type', 'uploaded_by'
+        ).order_by('created_at')
+
+        ctx = {
+            'app':                    app,
+            'child_record':           child_record,
+            'service_label':          app.get_service_type_display(),
+            'event_date':             event_date,
+            'delay_days':             delay_days,
+            'delay_category_display': delay_category_display,
+            'fee_amount':             fee_amount,
+            'fee_code':               fee_code,
+            'currency':               currency,
+            'is_free':                fee_amount == Decimal('0.00'),
+            'payment_order':          payment_order,
+            'history':                history,
+            'documents':              documents,
+        }
+        return render(request, 'Authority/application_detail.html', ctx)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# MY APPLICATIONS PAGE VIEW
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class MyApplicationsView(LoginRequiredMixin, View):
+    """
+    GET /my-applications/
+    Shows all applications submitted by the currently logged-in user,
+    excluding drafts.
+    """
+    login_url = '/login/'
+
+    def get(self, request):
+        qs = Application.objects.select_related(
+            'registration_type', 'district', 'ulb',
+            'birth_registration',
+            'death_registration',
+            'still_birth_registration',
+            'adopted_birth_registration',
+        ).prefetch_related(
+            'payment_order',
+        ).filter(
+            submitted_by=request.user,
+        ).exclude(
+            status=ApplicationStatus.DRAFT,
+        ).order_by('-created_at')
+
+        return render(request, 'Authority/my_applications.html', {
+            'applications': qs,
+        })
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# REPORTS MODULE  (6 reports)
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# All report views share the same security model:
+#   - LoginRequired — no unauthenticated access
+#   - ADMIN + superuser see all ULBs
+#   - Other roles scoped to user.ulb_fk and optionally user.ward_fk
+#   - cause_of_death never included in any queryset or template
+#
+# All reports support:
+#   - GET  → HTML page with filter form + paginated table
+#   - GET  ?export=csv  → streaming CSV download
+#   - GET  ?print=1     → print-optimised context flag (all rows, no pagination)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+import csv
+from datetime import datetime, timedelta
+from django.http import StreamingHttpResponse
+
+from geography.models import District, ULB, Ward
+
+
+def _report_base_qs(request):
+    """
+    Return the base Application queryset scoped to the authenticated user.
+    ADMIN / superuser → all records.
+    Others            → their ULB only.
+    Excludes DRAFT and PAYMENT_PENDING by default (not yet in the system).
+    """
+    from users.models import UserRole
+    user = request.user
+    qs = Application.objects.select_related(
+        'registration_type', 'district', 'ulb',
+        'submitted_by', 'assigned_to', 'current_step',
+        'birth_registration', 'death_registration',
+        'still_birth_registration', 'adopted_birth_registration',
+    ).exclude(
+        status__in=(ApplicationStatus.DRAFT, ApplicationStatus.PAYMENT_PENDING)
+    )
+    if not (user.is_superuser or getattr(user, 'role', None) == UserRole.ADMIN):
+        if getattr(user, 'ulb_fk_id', None):
+            qs = qs.filter(ulb=user.ulb_fk)
+    return qs
+
+
+def _apply_common_filters(qs, params):
+    """Apply date-range, service-type, district, ULB, ward, status filters."""
+    date_from = params.get('date_from', '').strip()
+    date_to   = params.get('date_to', '').strip()
+    stype     = params.get('service_type', '').strip()
+    district  = params.get('district', '').strip()
+    ulb       = params.get('ulb', '').strip()
+    ward      = params.get('ward', '').strip()
+    status    = params.get('status', '').strip()
+
+    if date_from:
+        try:
+            qs = qs.filter(submitted_at__date__gte=datetime.strptime(date_from, '%Y-%m-%d').date())
+        except ValueError:
+            pass
+    if date_to:
+        try:
+            qs = qs.filter(submitted_at__date__lte=datetime.strptime(date_to, '%Y-%m-%d').date())
+        except ValueError:
+            pass
+    if stype:
+        qs = qs.filter(service_type=stype)
+    if district:
+        qs = qs.filter(district_id=district)
+    if ulb:
+        qs = qs.filter(ulb_id=ulb)
+    if ward:
+        qs = qs.filter(
+            birth_registration__ward_id=ward
+        ) | qs.filter(
+            death_registration__ward_id=ward
+        ) | qs.filter(
+            still_birth_registration__ward_id=ward
+        )
+    if status:
+        qs = qs.filter(status=status)
+    return qs
+
+
+def _get_child_record(app):
+    """Return the first available child/deceased record for an application."""
+    for rel in ('birth_registration', 'death_registration',
+                'still_birth_registration', 'adopted_birth_registration'):
+        try:
+            return getattr(app, rel)
+        except Exception:
+            pass
+    return None
+
+
+def _get_event_info(app):
+    """Return (event_date, ward) from the child record."""
+    cr = _get_child_record(app)
+    if cr is None:
+        return None, None
+    event_date = getattr(cr, 'date_of_birth', None) or getattr(cr, 'date_of_death', None)
+    ward       = getattr(cr, 'ward', None)
+    return event_date, ward
+
+
+def _report_filter_context(request):
+    """Shared filter options for all report templates."""
+    from users.models import UserRole
+    user = request.user
+    districts_qs = District.objects.filter(is_active=True).order_by('name')
+    ulbs_qs      = ULB.objects.filter(is_active=True).order_by('name')
+    wards_qs     = Ward.objects.filter(is_active=True).order_by('name')
+
+    if not (user.is_superuser or getattr(user, 'role', None) == UserRole.ADMIN):
+        if getattr(user, 'ulb_fk_id', None):
+            ulbs_qs  = ulbs_qs.filter(pk=user.ulb_fk_id)
+            wards_qs = wards_qs.filter(zone__ulb_id=user.ulb_fk_id)
+
+    from bd_registration.models import ServiceType
+    return {
+        'districts':      districts_qs,
+        'ulbs':           ulbs_qs,
+        'wards':          wards_qs,
+        'service_types':  ServiceType.choices,
+        'status_choices': ApplicationStatus.choices,
+        'filter_params':  request.GET,
+    }
+
+
+def _paginate(qs, page, per_page=25):
+    """Simple manual pagination; returns (page_items, total, total_pages, page)."""
+    total       = qs.count()
+    total_pages = max(1, (total + per_page - 1) // per_page)
+    page        = max(1, min(page, total_pages))
+    start       = (page - 1) * per_page
+    return list(qs[start:start + per_page]), total, total_pages, page
+
+
+# ── 1. Application Register ───────────────────────────────────────────────────
+
+class ReportApplicationRegisterView(LoginRequiredMixin, View):
+    """
+    GET /reports/application-register/
+    Shows all applications with application number, service type,
+    applicant/informant, event date, submission date, district, ULB,
+    ward, status.
+    """
+    login_url = '/login/'
+
+    def get(self, request):
+        qs = _apply_common_filters(_report_base_qs(request), request.GET)
+        qs = qs.order_by('-submitted_at', '-created_at')
+
+        export = request.GET.get('export', '')
+        if export == 'csv':
+            return self._csv(qs)
+
+        is_print = request.GET.get('print', '') == '1'
+        if is_print:
+            rows, total, total_pages, page = list(qs), qs.count(), 1, 1
+        else:
+            rows, total, total_pages, page = _paginate(qs, int(request.GET.get('page', 1)))
+
+        ctx = _report_filter_context(request)
+        ctx.update({
+            'report_title': 'Application Register',
+            'rows':          rows,
+            'total':         total,
+            'total_pages':   total_pages,
+            'current_page':  page,
+            'is_print':      is_print,
+        })
+        return render(request, 'Authority/reports/application_register.html', ctx)
+
+    @staticmethod
+    def _csv(qs):
+        def rows():
+            yield ['Application No.', 'Service Type', 'Registration Type',
+                   'Informant Name', 'Event Date', 'Submitted On',
+                   'District', 'ULB', 'Ward', 'Status']
+            for app in qs.iterator(chunk_size=200):
+                event_date, ward = _get_event_info(app)
+                cr = _get_child_record(app)
+                yield [
+                    app.application_number,
+                    app.get_service_type_display(),
+                    app.registration_type.name if app.registration_type else '',
+                    getattr(cr, 'informant_name', ''),
+                    event_date.strftime('%d-%m-%Y') if event_date else '',
+                    app.submitted_at.strftime('%d-%m-%Y') if app.submitted_at else '',
+                    app.district.name if app.district else '',
+                    app.ulb.name if app.ulb else '',
+                    ward.name if ward else '',
+                    app.get_status_display(),
+                ]
+
+        response = StreamingHttpResponse(
+            (_csv_line(r) for r in rows()),
+            content_type='text/csv',
+        )
+        response['Content-Disposition'] = 'attachment; filename="application_register.csv"'
+        return response
+
+
+# ── 2. Pending Applications & Workflow ───────────────────────────────────────
+
+class ReportPendingApplicationsView(LoginRequiredMixin, View):
+    """
+    GET /reports/pending-applications/
+    Applications not yet REGISTERED/CANCELLED, with current step and
+    pending-days calculation.
+    """
+    login_url = '/login/'
+
+    def get(self, request):
+        qs = _apply_common_filters(_report_base_qs(request), request.GET)
+        qs = qs.exclude(
+            status__in=(ApplicationStatus.REGISTERED, ApplicationStatus.CANCELLED)
+        ).select_related('current_step', 'assigned_to').order_by('-submitted_at')
+
+        export = request.GET.get('export', '')
+        if export == 'csv':
+            return self._csv(qs)
+
+        is_print = request.GET.get('print', '') == '1'
+        today    = timezone.localdate()
+
+        rows_raw, total, total_pages, page = (
+            (list(qs), qs.count(), 1, 1)
+            if is_print
+            else _paginate(qs, int(request.GET.get('page', 1)))
+        )
+
+        rows = []
+        for app in rows_raw:
+            pending_since = app.submitted_at.date() if app.submitted_at else app.created_at.date()
+            rows.append({
+                'app':          app,
+                'pending_days': (today - pending_since).days,
+            })
+
+        ctx = _report_filter_context(request)
+        ctx.update({
+            'report_title': 'Pending Applications & Workflow',
+            'rows':          rows,
+            'total':         total,
+            'total_pages':   total_pages,
+            'current_page':  page,
+            'is_print':      is_print,
+        })
+        return render(request, 'Authority/reports/pending_applications.html', ctx)
+
+    @staticmethod
+    def _csv(qs):
+        today = timezone.localdate()
+
+        def rows():
+            yield ['Application No.', 'Service Type', 'Current Step',
+                   'Assigned Officer', 'Pending Days', 'Status', 'Remarks']
+            for app in qs.iterator(chunk_size=200):
+                since = app.submitted_at.date() if app.submitted_at else app.created_at.date()
+                yield [
+                    app.application_number,
+                    app.get_service_type_display(),
+                    app.current_step.name if app.current_step else '',
+                    app.assigned_to.get_full_name() if app.assigned_to else '',
+                    (today - since).days,
+                    app.get_status_display(),
+                    app.remarks,
+                ]
+
+        response = StreamingHttpResponse(
+            (_csv_line(r) for r in rows()),
+            content_type='text/csv',
+        )
+        response['Content-Disposition'] = 'attachment; filename="pending_applications.csv"'
+        return response
+
+
+# ── 3. Registration Register ──────────────────────────────────────────────────
+
+class ReportRegistrationRegisterView(LoginRequiredMixin, View):
+    """
+    GET /reports/registration-register/
+    Only REGISTERED applications — shows registration numbers, person
+    details, event date, registration date, location.
+    """
+    login_url = '/login/'
+
+    def get(self, request):
+        qs = _apply_common_filters(_report_base_qs(request), request.GET)
+        qs = qs.filter(status=ApplicationStatus.REGISTERED).order_by('-created_at')
+
+        # Date filter by registration date (event-based)
+        reg_from = request.GET.get('reg_date_from', '').strip()
+        reg_to   = request.GET.get('reg_date_to', '').strip()
+        if reg_from:
+            try:
+                d = datetime.strptime(reg_from, '%Y-%m-%d').date()
+                qs = qs.filter(
+                    birth_registration__date_of_registration__gte=d
+                ) | qs.filter(
+                    death_registration__date_of_registration__gte=d
+                ) | qs.filter(
+                    still_birth_registration__date_of_registration__gte=d
+                )
+            except ValueError:
+                pass
+
+        export = request.GET.get('export', '')
+        if export == 'csv':
+            return self._csv(qs)
+
+        is_print = request.GET.get('print', '') == '1'
+        rows, total, total_pages, page = (
+            (list(qs), qs.count(), 1, 1)
+            if is_print
+            else _paginate(qs, int(request.GET.get('page', 1)))
+        )
+
+        ctx = _report_filter_context(request)
+        ctx.update({
+            'report_title': 'Registration Register',
+            'rows':          rows,
+            'total':         total,
+            'total_pages':   total_pages,
+            'current_page':  page,
+            'is_print':      is_print,
+        })
+        return render(request, 'Authority/reports/registration_register.html', ctx)
+
+    @staticmethod
+    def _csv(qs):
+        def rows():
+            yield ['Registration No.', 'Application No.', 'Service Type',
+                   'Person Name', 'Sex', 'Event Date', 'Registration Date',
+                   'Ward', 'ULB', 'District']
+            for app in qs.iterator(chunk_size=200):
+                cr = _get_child_record(app)
+                if cr is None:
+                    continue
+                reg_no   = getattr(cr, 'registration_number', '')
+                reg_date = getattr(cr, 'date_of_registration', None)
+                event    = getattr(cr, 'date_of_birth', None) or getattr(cr, 'date_of_death', None)
+                name     = (getattr(cr, 'child_first_name', '') or
+                            getattr(cr, 'deceased_first_name', '') or '')
+                sex      = getattr(cr, 'get_sex_display', lambda: '')()
+                ward     = getattr(cr, 'ward', None)
+                yield [
+                    reg_no,
+                    app.application_number,
+                    app.get_service_type_display(),
+                    name,
+                    sex,
+                    event.strftime('%d-%m-%Y') if event else '',
+                    reg_date.strftime('%d-%m-%Y') if reg_date else '',
+                    ward.name if ward else '',
+                    app.ulb.name if app.ulb else '',
+                    app.district.name if app.district else '',
+                ]
+
+        response = StreamingHttpResponse(
+            (_csv_line(r) for r in rows()),
+            content_type='text/csv',
+        )
+        response['Content-Disposition'] = 'attachment; filename="registration_register.csv"'
+        return response
+
+
+# ── 4. Registration Summary ───────────────────────────────────────────────────
+
+class ReportRegistrationSummaryView(LoginRequiredMixin, View):
+    """
+    GET /reports/registration-summary/
+    Aggregated counts by service type, status, district, ULB.
+    Supports daily / monthly grouping.
+    """
+    login_url = '/login/'
+
+    def get(self, request):
+        from django.db.models import Count
+        from django.db.models.functions import TruncMonth, TruncDate
+
+        qs = _apply_common_filters(_report_base_qs(request), request.GET)
+        group_by = request.GET.get('group_by', 'monthly')
+
+        trunc = TruncMonth if group_by == 'monthly' else TruncDate
+
+        # Service-type summary
+        by_service = (
+            qs.values('service_type')
+            .annotate(count=Count('id'))
+            .order_by('service_type')
+        )
+
+        # Status-wise summary
+        by_status = (
+            qs.values('status')
+            .annotate(count=Count('id'))
+            .order_by('status')
+        )
+
+        # District-wise summary
+        by_district = (
+            qs.values('district__name')
+            .annotate(count=Count('id'))
+            .order_by('-count')
+        )
+
+        # Time series
+        time_series = (
+            qs.annotate(period=trunc('submitted_at'))
+            .values('period', 'service_type')
+            .annotate(count=Count('id'))
+            .order_by('period', 'service_type')
+        )
+
+        export = request.GET.get('export', '')
+        if export == 'csv':
+            def rows():
+                yield ['Period', 'Service Type', 'Count']
+                for r in time_series:
+                    yield [
+                        r['period'].strftime('%Y-%m') if r['period'] else '',
+                        r['service_type'],
+                        r['count'],
+                    ]
+            response = StreamingHttpResponse(
+                (_csv_line(r) for r in rows()), content_type='text/csv'
+            )
+            response['Content-Disposition'] = 'attachment; filename="registration_summary.csv"'
+            return response
+
+        ctx = _report_filter_context(request)
+        ctx.update({
+            'report_title':  'Registration Summary',
+            'by_service':    list(by_service),
+            'by_status':     list(by_status),
+            'by_district':   list(by_district)[:20],
+            'time_series':   list(time_series),
+            'group_by':      group_by,
+            'total':         qs.count(),
+        })
+        return render(request, 'Authority/reports/registration_summary.html', ctx)
+
+
+# ── 5. Fee & Payment Register ─────────────────────────────────────────────────
+
+class ReportFeePaymentRegisterView(LoginRequiredMixin, View):
+    """
+    GET /reports/fee-payment-register/
+    Joins Application → PaymentOrder → PaymentTransaction.
+    """
+    login_url = '/login/'
+
+    def get(self, request):
+        from payments.models import PaymentOrder, PaymentOrderStatus
+
+        app_qs = _apply_common_filters(_report_base_qs(request), request.GET)
+
+        # Payment-specific filters
+        pay_status = request.GET.get('payment_status', '').strip()
+        pay_method = request.GET.get('payment_method', '').strip()
+
+        order_qs = PaymentOrder.objects.select_related(
+            'application', 'application__district', 'application__ulb',
+            'application__registration_type',
+        ).prefetch_related('transactions').filter(
+            application__in=app_qs
+        ).order_by('-created_at')
+
+        if pay_status:
+            order_qs = order_qs.filter(status=pay_status)
+        if pay_method:
+            order_qs = order_qs.filter(payment_method=pay_method)
+
+        export = request.GET.get('export', '')
+        if export == 'csv':
+            return self._csv(order_qs)
+
+        is_print = request.GET.get('print', '') == '1'
+        total    = order_qs.count()
+        if is_print:
+            rows, total_pages, page = list(order_qs), 1, 1
+        else:
+            rows, total, total_pages, page = _paginate(order_qs, int(request.GET.get('page', 1)))
+
+        from payments.models import PaymentMethod, PaymentOrderStatus
+        ctx = _report_filter_context(request)
+        ctx.update({
+            'report_title':     'Fee & Payment Register',
+            'rows':              rows,
+            'total':             total,
+            'total_pages':       total_pages,
+            'current_page':      page,
+            'is_print':          is_print,
+            'pay_status_choices': PaymentOrderStatus.choices,
+            'pay_method_choices': PaymentMethod.choices,
+        })
+        return render(request, 'Authority/reports/fee_payment_register.html', ctx)
+
+    @staticmethod
+    def _csv(order_qs):
+        def rows():
+            yield ['Application No.', 'Service Type', 'Fee Code',
+                   'Payable Amount', 'Paid Amount', 'Payment Mode',
+                   'Receipt No.', 'Payment Date', 'Payment Status']
+            for order in order_qs.iterator(chunk_size=200):
+                txn = order.transactions.filter(status='CAPTURED').first()
+                yield [
+                    order.application.application_number,
+                    order.application.get_service_type_display(),
+                    order.fee_code,
+                    str(order.amount),
+                    str(txn.amount) if txn else '',
+                    order.get_payment_method_display(),
+                    txn.receipt_number if txn else '',
+                    txn.completed_at.strftime('%d-%m-%Y') if (txn and txn.completed_at) else '',
+                    order.get_status_display(),
+                ]
+
+        response = StreamingHttpResponse(
+            (_csv_line(r) for r in rows()),
+            content_type='text/csv',
+        )
+        response['Content-Disposition'] = 'attachment; filename="fee_payment_register.csv"'
+        return response
+
+
+# ── 6. Certificate & History Register ────────────────────────────────────────
+
+class ReportCertificateHistoryView(LoginRequiredMixin, View):
+    """
+    GET /reports/certificate-history/
+    REGISTERED applications with full status history (excluding cause_of_death).
+    """
+    login_url = '/login/'
+
+    def get(self, request):
+        qs = _apply_common_filters(_report_base_qs(request), request.GET)
+        qs = qs.filter(status=ApplicationStatus.REGISTERED).prefetch_related(
+            'status_history__changed_by'
+        ).order_by('-created_at')
+
+        export = request.GET.get('export', '')
+        if export == 'csv':
+            return self._csv(qs)
+
+        is_print = request.GET.get('print', '') == '1'
+        rows, total, total_pages, page = (
+            (list(qs), qs.count(), 1, 1)
+            if is_print
+            else _paginate(qs, int(request.GET.get('page', 1)))
+        )
+
+        ctx = _report_filter_context(request)
+        ctx.update({
+            'report_title': 'Certificate & History Register',
+            'rows':          rows,
+            'total':         total,
+            'total_pages':   total_pages,
+            'current_page':  page,
+            'is_print':      is_print,
+        })
+        return render(request, 'Authority/reports/certificate_history.html', ctx)
+
+    @staticmethod
+    def _csv(qs):
+        def rows():
+            yield ['Registration No.', 'Application No.', 'Service Type',
+                   'Issue Date', 'Action', 'Officer', 'Action At', 'Remarks']
+            for app in qs.iterator(chunk_size=200):
+                cr = _get_child_record(app)
+                reg_no   = getattr(cr, 'registration_number', '') if cr else ''
+                reg_date = getattr(cr, 'date_of_registration', None) if cr else None
+                first    = True
+                for h in app.status_history.order_by('changed_at'):
+                    officer = h.changed_by.get_full_name() if h.changed_by else ''
+                    yield [
+                        reg_no if first else '',
+                        app.application_number if first else '',
+                        app.get_service_type_display() if first else '',
+                        reg_date.strftime('%d-%m-%Y') if (first and reg_date) else '',
+                        h.action,
+                        officer,
+                        h.changed_at.strftime('%d-%m-%Y %H:%M'),
+                        h.remarks,
+                    ]
+                    first = False
+
+        response = StreamingHttpResponse(
+            (_csv_line(r) for r in rows()),
+            content_type='text/csv',
+        )
+        response['Content-Disposition'] = 'attachment; filename="certificate_history.csv"'
+        return response
+
+
+# ── Shared CSV helper ─────────────────────────────────────────────────────────
+
+def _csv_line(row):
+    """Convert a list to a CSV-encoded bytes line."""
+    import io
+    buf = io.StringIO()
+    w = csv.writer(buf)
+    w.writerow(row)
+    return buf.getvalue().encode('utf-8')

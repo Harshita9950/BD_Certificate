@@ -1,0 +1,75 @@
+{% extends 'Authority/reports/report_base.html' %}
+
+{% block filter_form %}
+<form method="get" class="card border-0 shadow-sm mb-4 d-print-none">
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-2"><label class="form-label small">From Date</label><input type="date" name="date_from" class="form-control form-control-sm" value="{{ filter_params.date_from }}"></div>
+            <div class="col-md-2"><label class="form-label small">To Date</label><input type="date" name="date_to" class="form-control form-control-sm" value="{{ filter_params.date_to }}"></div>
+            <div class="col-md-2"><label class="form-label small">Service Type</label>
+                <select name="service_type" class="form-select form-select-sm">
+                    <option value="">All</option>
+                    {% for val,label in service_types %}<option value="{{ val }}"{% if filter_params.service_type == val %} selected{% endif %}>{{ label }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2"><label class="form-label small">District</label>
+                <select name="district" class="form-select form-select-sm">
+                    <option value="">All</option>
+                    {% for d in districts %}<option value="{{ d.pk }}"{% if filter_params.district == d.pk|stringformat:"s" %} selected{% endif %}>{{ d.name }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+                <a href="{% url 'report_certificate_history' %}" class="btn btn-light btn-sm">Reset</a>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block report_table %}
+<table class="table table-hover table-bordered align-middle mb-0">
+    <thead class="table-primary">
+        <tr><th>#</th><th>Reg. No.</th><th>Application No.</th><th>Service Type</th><th>Issue Date</th><th>Action History</th></tr>
+    </thead>
+    <tbody>
+        {% for app in rows %}
+        <tr>
+            <td class="text-center align-top">{{ forloop.counter }}</td>
+            <td class="fw-semibold text-success text-nowrap align-top">
+                {% if app.birth_registration %}{{ app.birth_registration.registration_number|default:"—" }}
+                {% elif app.death_registration %}{{ app.death_registration.registration_number|default:"—" }}
+                {% elif app.still_birth_registration %}{{ app.still_birth_registration.registration_number|default:"—" }}
+                {% else %}—{% endif %}
+            </td>
+            <td class="text-nowrap align-top"><a href="{% url 'application_detail' app.pk %}">{{ app.application_number }}</a></td>
+            <td class="align-top"><small>{{ app.get_service_type_display }}</small></td>
+            <td class="text-nowrap align-top">
+                {% if app.birth_registration %}{{ app.birth_registration.date_of_registration|date:"d-m-Y"|default:"—" }}
+                {% elif app.death_registration %}{{ app.death_registration.date_of_registration|date:"d-m-Y"|default:"—" }}
+                {% else %}—{% endif %}
+            </td>
+            <td>
+                <table class="table table-sm mb-0">
+                    <thead><tr><th>Action</th><th>Officer</th><th>At</th><th>Remarks</th></tr></thead>
+                    <tbody>
+                        {% for h in app.status_history.all %}
+                        <tr>
+                            <td><code class="small">{{ h.action }}</code></td>
+                            <td><small>{% if h.changed_by %}{{ h.changed_by.get_full_name|default:h.changed_by.username }}{% else %}—{% endif %}</small></td>
+                            <td class="text-nowrap"><small>{{ h.changed_at|date:"d-m-Y H:i" }}</small></td>
+                            <td><small>{{ h.remarks|default:"—"|truncatechars:50 }}</small></td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" class="text-muted text-center">No history.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="text-center text-muted py-4">No registered applications found.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

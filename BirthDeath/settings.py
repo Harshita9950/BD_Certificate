@@ -53,6 +53,7 @@ LOCAL_APPS = [
     'bd_registration', # Birth & Death registration
     'workflow_master',
     'fee_master',
+    'payments',       # Payment orders and transactions (cash + Razorpay)
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -336,3 +337,22 @@ CENTRAL_PORTAL_LOGIN_URL        = os.getenv('CENTRAL_PORTAL_LOGIN_URL',        '
 CENTRAL_PORTAL_CALLBACK_URL     = os.getenv('CENTRAL_PORTAL_CALLBACK_URL',     '')
 CENTRAL_PORTAL_LOGOUT_URL       = os.getenv('CENTRAL_PORTAL_LOGOUT_URL',       '')
 CENTRAL_PORTAL_PROPAGATE_LOGOUT = os.getenv('CENTRAL_PORTAL_PROPAGATE_LOGOUT', 'False') == 'True'
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# RAZORPAY PAYMENT GATEWAY
+# ══════════════════════════════════════════════════════════════════════════════
+# Keys are loaded exclusively from .env — never hard-coded.
+# RAZORPAY_KEY_ID   is safe to expose to the browser (used in checkout.js).
+# RAZORPAY_KEY_SECRET must NEVER leave the server — used only for server-side
+#   HMAC-SHA256 signature verification in payments/views.py.
+#
+# To activate online payments:
+#   1. Set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in .env
+#   2. Set RAZORPAY_CURRENCY if not INR
+#   3. No other file needs to change — views.py reads these settings.
+# ──────────────────────────────────────────────────────────────────────────────
+
+RAZORPAY_KEY_ID     = os.getenv('RAZORPAY_KEY_ID',     '')
+RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_KEY_SECRET', '')
+RAZORPAY_CURRENCY   = os.getenv('RAZORPAY_CURRENCY',   'INR')
