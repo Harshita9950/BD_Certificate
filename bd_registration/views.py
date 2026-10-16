@@ -229,6 +229,7 @@ class ApplicationInboxView(LoginRequiredMixin, View):
         return render(request, 'Authority/application_inbox.html', {
             'applications': qs,
             'inbox_title':  'Application Inbox',
+            'from_param':   'inbox',
         })
 
 
@@ -1367,6 +1368,17 @@ class ApplicationDetailView(LoginRequiredMixin, View):
             'document_type', 'uploaded_by'
         ).order_by('created_at')
 
+        # Determine if current step is the last active step in the workflow
+        is_last_step = False
+        if app.current_step_id and app.workflow_id:
+            from workflow_master.models import WorkflowStep
+            has_next = WorkflowStep.objects.filter(
+                workflow_id=app.workflow_id,
+                is_active=True,
+                step_number__gt=app.current_step.step_number,
+            ).exists()
+            is_last_step = not has_next
+
         ctx = {
             'app':                    app,
             'child_record':           child_record,
@@ -1381,6 +1393,7 @@ class ApplicationDetailView(LoginRequiredMixin, View):
             'payment_order':          payment_order,
             'history':                history,
             'documents':              documents,
+            'is_last_step':           is_last_step,
         }
         return render(request, 'Authority/application_detail.html', ctx)
 
@@ -2025,3 +2038,49 @@ def _csv_line(row):
     w = csv.writer(buf)
     w.writerow(row)
     return buf.getvalue().encode('utf-8')
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# APPLICATION SENTBOX VIEW
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class ApplicationSentboxView(LoginRequiredMixin, View):
+    """
+    GET /mailbox/sentbox/
+
+    Shows all applications that the authenticated user has forwarded to the
+    next step. Fetches distinct applications from ApplicationStatusHistory
+    where action='FORWARDED' and changed_by=request.user.
+
+    Read-only view — no action buttons on detail pages when ?from=sentbox.
+    """
+    login_url = '/login/'
+
+    def get(self, request):
+        from bd_registration.models import ApplicationStatusHistory
+        user = request.user
+
+        # Get all distinct application IDs this user has forwarded
+        fwd_app_ids = ApplicationStatusHistory.objects.filter(
+            changed_by=user,
+            action='FORWARDED',
+        ).values_list('application_id', flat=True).distinct()
+
+        # Fetch those applications with full relations
+        qs = Application.objects.filter(
+            pk__in=fwd_app_ids
+        ).select_related(
+            'registration_type', 'district', 'ulb',
+            'submitted_by',
+            'birth_registration',
+            'death_registration',
+            'still_birth_registration',
+            'adopted_birth_registration',
+            'current_step',
+        ).order_by('-updated_at')
+
+        return render(request, 'Authority/application_inbox.html', {
+            'applications': qs,
+            'inbox_title':  'Sentbox — Forwarded Applications',
+            'from_param':   'sentbox',
+        })

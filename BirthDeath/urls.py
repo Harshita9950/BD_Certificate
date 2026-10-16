@@ -29,6 +29,7 @@ from bd_registration.views import (
     StillBirthRegistrationPageView,
     AdoptedBirthRegistrationPageView,
     ApplicationInboxView,
+    ApplicationSentboxView,
     ApplicationReviewView,
     ApplicationDetailView,
     MyApplicationsView,
@@ -199,7 +200,8 @@ urlpatterns = [
     path('adopted-birth-registration/', AdoptedBirthRegistrationPageView.as_view(), name='adopted_birth_registration'),
 
     # ── Mailbox ───────────────────────────────────────────────────────────────
-    path('mailbox/inbox/',  ApplicationInboxView.as_view(), name='application_inbox'),
+    path('mailbox/inbox/',    ApplicationInboxView.as_view(),    name='application_inbox'),
+    path('mailbox/sentbox/',  ApplicationSentboxView.as_view(),  name='application_sentbox'),
 
     # ── My Applications (current user's submitted applications) ───────────────
     path('my-applications/', MyApplicationsView.as_view(), name='my_applications'),

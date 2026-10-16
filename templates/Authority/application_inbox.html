@@ -157,14 +157,14 @@
 
                                 <td class="text-center text-nowrap">
                                     {% if app.status == "PAYMENT_PENDING" %}
-                                        <a href="{% url 'application_review' app.pk %}"
+                                        <a href="{% url 'application_review' app.pk %}?from={{ from_param|default:'inbox' }}"
                                            class="btn btn-warning btn-sm rounded-circle"
                                            title="Pay Now"
                                            aria-label="Pay Now">
                                             <i class="ri-secure-payment-line"></i>
                                         </a>
                                     {% else %}
-                                        <a href="{% url 'application_detail' app.pk %}"
+                                        <a href="{% url 'application_detail' app.pk %}?from={{ from_param|default:'inbox' }}"
                                            class="btn btn-primary btn-sm rounded-circle"
                                            title="View Application"
                                            aria-label="View Application">
