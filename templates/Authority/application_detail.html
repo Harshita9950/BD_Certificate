@@ -150,7 +150,7 @@
     <div class="row g-3 d-print-none">
       <div class="col-md-6"><label class="form-label small text-muted mb-1">Upload Document <span class="text-muted">(optional)</span></label><input type="file" id="docFileInput" class="form-control form-control-sm" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"><div class="form-text">PDF, image, or Word document. Max 10 MB.</div></div>
       <div class="col-md-6"><label class="form-label small text-muted mb-1">Remark <span class="text-muted">(optional)</span></label><textarea id="officerRemark" rows="3" class="form-control form-control-sm" placeholder="Add remark for the next officer..."></textarea></div>
-      <div class="col-12"><button type="button" id="btnSaveAction" class="btn btn-primary btn-sm"><span id="saveSpinner" class="spinner-border spinner-border-sm me-1" style="display:none;"></span><i class="ri-save-line me-1" id="saveIcon"></i> Save</button></div>
+      <!-- Save button removed: auto-saved when Forward is clicked -->
     </div>
     {% endif %}{% endif %}
 
@@ -178,7 +178,7 @@
   <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
     <div class="modal-header"><h5 class="modal-title"><i class="ri-share-forward-line me-2 text-success"></i>Forward Application</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
     <div class="modal-body">
-      <p class="mb-3 text-muted small">This will forward <strong>{{ app.application_number }}</strong> to the next step officer's inbox. Once forwarded, you will no longer see it in your inbox.</p>
+      <p class="mb-3 text-muted small">Forward <strong>{{ app.application_number }}</strong>?</p>
       <label class="form-label small text-muted mb-1">Forwarding Remark <span class="text-muted">(optional)</span></label>
       <textarea id="forwardRemark" rows="3" class="form-control form-control-sm" placeholder="Add a note for the next officer..."></textarea>
     </div>
@@ -265,6 +265,18 @@
       var remark=document.getElementById('forwardRemark').value.trim();
       btnCFwd.disabled=true;document.getElementById('fwdModalSpinner').style.display='';
       try{
+        // Auto-save any document/remark before forwarding
+        var docInput=document.getElementById('docFileInput');
+        var remarkArea=document.getElementById('officerRemark');
+        var docFile=docInput?docInput.files[0]:null;
+        var officerRemark=remarkArea?remarkArea.value.trim():'';
+        if(docFile){
+          var fd=new FormData();fd.append('file',docFile);
+          await fetch('/api/bd-registration/applications/'+APP_ID+'/documents/',{method:'POST',headers:{'X-CSRFToken':getCsrf()},credentials:'include',body:fd});
+        }
+        if(officerRemark){
+          await api.patch('/api/bd-registration/applications/'+APP_ID+'/',{remarks:officerRemark});
+        }
         await api.post('/api/bd-registration/applications/'+APP_ID+'/forward/',{remarks:remark});
         Swal.fire({icon:'success',title:'Forwarded!',text:'Application forwarded to the next step officer inbox.',confirmButtonText:'Go to Inbox',confirmButtonColor:'#1572e8',allowOutsideClick:false})
           .then(function(){window.location.href="{% url 'application_inbox' %}";});
