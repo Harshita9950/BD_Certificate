@@ -1,39 +1,34 @@
 ﻿{% extends 'Authority/base.html' %}
 {% load static %}
-
-{% block title %}Review &amp; Pay — {{ app.application_number }}{% endblock %}
+{% block title %}Review & Pay — {{ app.application_number }}{% endblock %}
 
 {% block content %}
 <main class="content">
 
-    <!-- BREADCRUMB -->
     <section class="page-inner d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-3">
         <div class="page-heading">
             <h1 class="page-title">Review &amp; Payment</h1>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="{% url 'application_inbox' %}">Inbox</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'my_applications' %}">My Applications</a></li>
                     <li class="breadcrumb-item active">Review &amp; Pay</li>
                 </ol>
             </nav>
         </div>
     </section>
 
-    <!-- ALERT AREA -->
     <div id="reviewAlertArea" class="mb-3" style="display:none;"></div>
 
-    <div class="row g-4">
+    <div class="row g-0 g-lg-4">
 
-        <!-- LEFT COL -->
+        <!-- ══ LEFT COLUMN ══ -->
         <div class="col-lg-7">
 
             <!-- Application Details -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0 fw-bold">Application Details</h5>
-                </div>
-                <div class="card-body">
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3 pb-2 border-bottom">Application Details</h5>
                     <div class="row g-3">
                         <div class="col-sm-6">
                             <p class="text-muted small mb-1">Application Number</p>
@@ -74,16 +69,22 @@
 
             <!-- Child / Deceased Details -->
             {% if child_record %}
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0 fw-bold">{% if app.service_type == 'DEATH_REGISTRATION' %}Deceased Details{% else %}Child Details{% endif %}</h5>
-                </div>
-                <div class="card-body">
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3 pb-2 border-bottom">{% if app.service_type == 'DEATH_REGISTRATION' %}Deceased Details{% else %}Child Details{% endif %}</h5>
                     <div class="row g-3">
-                        {% if child_record.child_first_name %}<div class="col-sm-6">
+                        {% if child_record.child_first_name %}
+                        <div class="col-sm-6">
                             <p class="text-muted small mb-1">Name</p>
                             <p class="fw-semibold mb-0">{{ child_record.child_first_name }}{% if child_record.child_middle_name %} {{ child_record.child_middle_name }}{% endif %} {{ child_record.child_last_name }}</p>
-                        </div>{% endif %}
+                        </div>
+                        {% endif %}
+                        {% if child_record.deceased_first_name %}
+                        <div class="col-sm-6">
+                            <p class="text-muted small mb-1">Name</p>
+                            <p class="fw-semibold mb-0">{{ child_record.deceased_first_name }}{% if child_record.deceased_middle_name %} {{ child_record.deceased_middle_name }}{% endif %}{% if child_record.deceased_last_name %} {{ child_record.deceased_last_name }}{% endif %}</p>
+                        </div>
+                        {% endif %}
                         {% if child_record.date_of_birth %}<div class="col-sm-6">
                             <p class="text-muted small mb-1">Date of Birth</p>
                             <p class="fw-semibold mb-0">{{ child_record.date_of_birth|date:"d-m-Y" }}</p>
@@ -104,17 +105,24 @@
                             <p class="text-muted small mb-1">Father's Name</p>
                             <p class="fw-semibold mb-0">{{ child_record.father_name }}</p>
                         </div>{% endif %}
+                        {% if child_record.spouse_name %}<div class="col-sm-6">
+                            <p class="text-muted small mb-1">Spouse's Name</p>
+                            <p class="fw-semibold mb-0">{{ child_record.spouse_name }}</p>
+                        </div>{% endif %}
+                        {% if child_record.place_of_death_address %}<div class="col-sm-12">
+                            <p class="text-muted small mb-1">Place of Death</p>
+                            <p class="fw-semibold mb-0">{% if child_record.institution_name %}{{ child_record.institution_name }}, {% endif %}{{ child_record.place_of_death_address }}
+                            </p>
+                        </div>{% endif %}
                     </div>
                 </div>
             </div>
             {% endif %}
 
             <!-- Delay Information -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0 fw-bold">Delay Information</h5>
-                </div>
-                <div class="card-body">
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3 pb-2 border-bottom">Delay Information</h5>
                     <div class="row g-3">
                         <div class="col-sm-4">
                             <p class="text-muted small mb-1">Delay Days</p>
@@ -128,17 +136,15 @@
                 </div>
             </div>
 
-        </div>
+        </div><!-- /left col -->
 
-        <!-- RIGHT COL -->
+        <!-- ══ RIGHT COLUMN ══ -->
         <div class="col-lg-5">
 
             <!-- Fee Summary -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0 fw-bold">Fee Summary</h5>
-                </div>
-                <div class="card-body p-0">
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3 pb-2 border-bottom">Fee Summary</h5>
                     <table class="table table-bordered mb-0">
                         <thead class="table-light">
                             <tr>
@@ -157,7 +163,8 @@
                         <tfoot class="table-light">
                             <tr>
                                 <th>Total Payable</th>
-                                <th class="text-end fs-5">{% if is_free %}<span class="text-success">&#8377; 0.00</span>{% else %}<span class="text-primary">&#8377; {{ fee_amount }}</span>{% endif %}</th>
+                                <th class="text-end fs-5">{% if is_free %}<span class="text-success">&#8377;
+                                        0.00</span>{% else %}<span class="text-primary">&#8377; {{ fee_amount }}</span>{% endif %}</th>
                             </tr>
                         </tfoot>
                     </table>
@@ -166,29 +173,23 @@
 
             <!-- Payment Mode -->
             {% if not is_free %}
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0 fw-bold">Select Payment Mode</h5>
-                </div>
-                <div class="card-body">
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3 pb-2 border-bottom">Select Payment Mode</h5>
 
                     <div class="d-flex gap-3 mb-4">
                         <button type="button" id="btnCash"
-                            class="btn btn-outline-primary w-50 payment-mode-btn active-mode" data-mode="cash">
-                            <i class="ri-money-rupee-circle-line me-1"></i> Cash
-                        </button>
-                        <button type="button" id="btnOnline" class="btn btn-outline-primary w-50 payment-mode-btn"
-                            data-mode="online">
-                            <i class="ri-bank-card-line me-1"></i> Online
-                        </button>
+                            class="btn btn-outline-primary w-50 payment-mode-btn active-mode"><i
+                                class="ri-money-rupee-circle-line me-1"></i> Cash</button>
+                        <button type="button" id="btnOnline" class="btn btn-outline-primary w-50 payment-mode-btn"><i
+                                class="ri-bank-card-line me-1"></i> Online</button>
                     </div>
 
                     <!-- CASH PANEL -->
                     <div id="cashPanel">
-                        <div class="alert alert-info py-2 small mb-3">
-                            <i class="ri-information-line me-1"></i> Cash collected at the registration counter. Fill in
-                            the receipt details once the amount is collected.
-                        </div>
+                        <div class="alert alert-info py-2 small mb-3"><i class="ri-information-line me-1"></i> Cash
+                            collected at the registration counter. Fill in the receipt details once the amount is
+                            collected.</div>
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Amount Received (&#8377;) <span
                                     class="text-danger">*</span></label>
@@ -229,22 +230,15 @@
 
                     <!-- ONLINE PANEL -->
                     <div id="onlinePanel" style="display:none;">
-                        <div class="alert alert-info py-2 small mb-3">
-                            <i class="ri-information-line me-1"></i> You will be redirected to the secure Razorpay
-                            payment gateway. Do not refresh or close this page during payment.
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Application Number</label>
-                            <input type="text" class="form-control" value="{{ app.application_number }}" readonly>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Amount Payable (&#8377;)</label>
-                            <input type="text" class="form-control fw-bold" value="{{ fee_amount }}" readonly>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Currency</label>
-                            <input type="text" class="form-control" value="{{ currency }}" readonly>
-                        </div>
+                        <div class="alert alert-info py-2 small mb-3"><i class="ri-information-line me-1"></i> You will
+                            be redirected to the secure Razorpay payment gateway. Do not refresh or close this page
+                            during payment.</div>
+                        <div class="mb-3"><label class="form-label fw-semibold">Application Number</label><input
+                                type="text" class="form-control" value="{{ app.application_number }}" readonly></div>
+                        <div class="mb-3"><label class="form-label fw-semibold">Amount Payable (&#8377;)</label><input
+                                type="text" class="form-control fw-bold" value="{{ fee_amount }}" readonly></div>
+                        <div class="mb-3"><label class="form-label fw-semibold">Currency</label><input type="text"
+                                class="form-control" value="{{ currency }}" readonly></div>
                         {% if razorpay_key_id %}
                         <button type="button" class="btn btn-primary w-100" id="btnProceedOnline">
                             <span id="onlineSpinner" class="spinner-border spinner-border-sm me-1"
@@ -252,10 +246,8 @@
                             <i class="ri-bank-card-2-line me-1"></i> Pay Online via Razorpay
                         </button>
                         {% else %}
-                        <div class="alert alert-warning py-2 small">
-                            <i class="ri-error-warning-line me-1"></i> Online payment is not configured. Please use
-                            Cash.
-                        </div>
+                        <div class="alert alert-warning py-2 small"><i class="ri-error-warning-line me-1"></i> Online
+                            payment is not configured. Please use Cash.</div>
                         {% endif %}
                     </div>
 
@@ -263,28 +255,39 @@
             </div>
             {% endif %}
 
-            <!-- Back to Application Form -->
-            <a href="{% url 'birth_registration' %}?app={{ app.pk }}" class="btn btn-light w-100">
+            <!-- Back button -->
+            <a href="{% if app.service_type == 'DEATH_REGISTRATION' %}{% url 'death_registration' %}?app={{ app.pk }}{% else %}{% url 'birth_registration' %}?app={{ app.pk }}{% endif %}"
+                class="btn btn-light w-100">
                 <i class="ri-arrow-left-line me-1"></i> Back to Application Form
             </a>
 
-        </div>
+        </div><!-- /right col -->
 
-    </div>
+    </div><!-- /row -->
 
 </main>
 
 <style>
     .payment-mode-btn.active-mode {
-        background-color: var(--primary-color, #1572e8);
+        background-color: #1572e8;
         color: #fff;
-        border-color: var(--primary-color, #1572e8);
+        border-color: #1572e8;
     }
 
     .payment-mode-btn:not(.active-mode) {
         background-color: transparent;
     }
+
+    /* Remove grey body background gaps between cards */
+    .content {
+        background: #f5f6fa;
+    }
+
+    .card {
+        background: #fff;
+    }
 </style>
+
 {% endblock %}
 
 {% block extra_js %}
@@ -292,7 +295,6 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script type="module">
     import api from "{% static 'js/api.js' %}";
-
     const APP_ID = {{ app.pk }};
     const RZP_KEY = "{{ razorpay_key_id|escapejs }}";
 
@@ -302,7 +304,6 @@
         area.style.display = '';
         area.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-
     function setLoading(btn, spinnerId, loading) {
         btn.disabled = loading;
         document.getElementById(spinnerId).style.display = loading ? '' : 'none';
@@ -313,7 +314,6 @@
     const btnOnline = document.getElementById('btnOnline');
     const cashPanel = document.getElementById('cashPanel');
     const onlinePanel = document.getElementById('onlinePanel');
-
     if (btnCash && btnOnline) {
         btnCash.addEventListener('click', () => { btnCash.classList.add('active-mode'); btnOnline.classList.remove('active-mode'); cashPanel.style.display = ''; onlinePanel.style.display = 'none'; });
         btnOnline.addEventListener('click', () => { btnOnline.classList.add('active-mode'); btnCash.classList.remove('active-mode'); onlinePanel.style.display = ''; cashPanel.style.display = 'none'; });
@@ -348,9 +348,25 @@
                 setLoading(btnProceedCash, 'cashSpinner', false);
                 Swal.fire({
                     icon: 'success', title: 'Payment Successful!',
-                    html: `<p class="mb-2">Cash payment recorded successfully.</p><table class="table table-sm table-bordered mt-2 text-start"><tr><th>Receipt No.</th><td><strong>${collectResp.receipt_number}</strong></td></tr><tr><th>Amount Paid</th><td>&#8377; ${collectResp.amount}</td></tr><tr><th>Application No.</th><td>${collectResp.application_number}</td></tr><tr><th>Status</th><td><span class="badge bg-success">Submitted</span></td></tr></table><p class="text-muted small mt-2 mb-0">Application submitted to Survey Mail (Step 1).</p>`,
-                    confirmButtonText: 'View My Applications', confirmButtonColor: '#1572e8', allowOutsideClick: false,
-                }).then(() => { window.location.href = "{% url 'my_applications' %}"; });
+                    html: `<p class="mb-2">Cash payment recorded successfully.</p>
+                 <table class="table table-sm table-bordered mt-2 text-start">
+                   <tr><th>Receipt No.</th><td><strong>${collectResp.receipt_number}</strong></td></tr>
+                   <tr><th>Amount Paid</th><td>&#8377; ${collectResp.amount}</td></tr>
+                   <tr><th>Application No.</th><td>${collectResp.application_number}</td></tr>
+                   <tr><th>Status</th><td><span class="badge bg-success">Submitted</span></td></tr>
+                 </table>
+                 <p class="text-muted small mt-2 mb-0">Application submitted to workflow Step 1.</p>`,
+                    showDenyButton: true,
+                    confirmButtonText: 'View Receipt', confirmButtonColor: '#198754',
+                    denyButtonText: 'My Applications', denyButtonColor: '#1572e8',
+                    allowOutsideClick: false,
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '/payments/receipt/' + collectResp.id + '/';
+                    } else {
+                        window.location.href = "{% url 'my_applications' %}";
+                    }
+                });
             } catch (err) {
                 showAlert(`❌ ${err?.data?.detail || err?.message || 'Unexpected error.'}`);
                 setLoading(btnProceedCash, 'cashSpinner', false);
@@ -384,7 +400,9 @@
                         setLoading(btnProceedOnline, 'onlineSpinner', true);
                         try {
                             await api.post(`/api/payments/orders/${order.id}/verify-payment/`, {
-                                razorpay_payment_id: response.razorpay_payment_id, razorpay_order_id: response.razorpay_order_id, razorpay_signature: response.razorpay_signature,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_signature: response.razorpay_signature,
                             });
                             showAlert('✅ Payment verified! Redirecting…', 'success');
                             setTimeout(() => { window.location.href = "{% url 'application_inbox' %}"; }, 2500);

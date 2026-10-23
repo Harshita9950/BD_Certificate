@@ -263,20 +263,6 @@
 
                     <div class="collapse" id="sidebarMasters">
                         <div class="submenu">
-                            <a href="{% url 'users' %}" class="sidebar-link">
-                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                    <path
-                                        d="M12 12C14.21 12 16 10.21 16 8S14.21 4 12 4 8 5.79 8 8 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z" />
-                                </svg>
-                                <span class="sidebar-label">Users</span>
-                            </a>
-                            <a href="{% url 'roles' %}" class="sidebar-link">
-                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                    <path
-                                        d="M12 1L3 5V11C3 16.55 6.84 21.74 12 23C17.16 21.74 21 16.55 21 11V5L12 1ZM10 16L6 12L7.41 10.59L10 13.17L16.59 6.58L18 8L10 16Z" />
-                                </svg>
-                                <span class="sidebar-label">Roles</span>
-                            </a>
                             <a href="{% url 'district_master' %}" class="sidebar-link">
                                 <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                     <path
@@ -302,6 +288,20 @@
                                     <path d="M4 4H20V20H4V4ZM6 6V18H18V6H6ZM8 8H16V10H8V8ZM8 12H16V14H8V12Z" />
                                 </svg>
                                 <span class="sidebar-label">Ward</span>
+                            </a>
+                            <a href="{% url 'roles' %}" class="sidebar-link">
+                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path
+                                        d="M12 1L3 5V11C3 16.55 6.84 21.74 12 23C17.16 21.74 21 16.55 21 11V5L12 1ZM10 16L6 12L7.41 10.59L10 13.17L16.59 6.58L18 8L10 16Z" />
+                                </svg>
+                                <span class="sidebar-label">Roles</span>
+                            </a>
+                            <a href="{% url 'users' %}" class="sidebar-link">
+                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path
+                                        d="M12 12C14.21 12 16 10.21 16 8S14.21 4 12 4 8 5.79 8 8 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z" />
+                                </svg>
+                                <span class="sidebar-label">Users</span>
                             </a>
                             <a href="{% url 'workflows' %}" class="sidebar-link">
                                 <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -356,20 +356,6 @@
                                         d="M12 2C7.03 2 3 6.03 3 11C3 14.31 4.81 17.19 7.5 18.63V22H16.5V18.63C19.19 17.19 21 14.31 21 11C21 6.03 16.97 2 12 2ZM14.5 20H9.5V18H14.5V20ZM11 7H13V10H16V12H13V15H11V12H8V10H11V7Z" />
                                 </svg>
                                 <span class="sidebar-label">Death Registration</span>
-                            </a>
-                            <a href="{% url 'still_birth_registration' %}" class="sidebar-link">
-                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                    <path
-                                        d="M12 2C8.69 2 6 4.69 6 8V10H4C2.9 10 2 10.9 2 12V19C2 20.1 2.9 21 4 21H20C21.1 21 22 20.1 22 19V12C22 10.9 21.1 10 20 10H18V8C18 4.69 15.31 2 12 2ZM8 8C8 5.79 9.79 4 12 4C14.21 4 16 5.79 16 8V10H8V8ZM20 19H4V12H20V19Z" />
-                                </svg>
-                                <span class="sidebar-label">Still Birth Registration</span>
-                            </a>
-                            <a href="{% url 'adopted_birth_registration' %}" class="sidebar-link">
-                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                    <path
-                                        d="M12 21C12 21 4 16.5 4 10C4 6.69 6.69 4 10 4C11.54 4 12.94 4.58 14 5.54C15.06 4.58 16.46 4 18 4C21.31 4 24 6.69 24 10C24 16.5 16 21 16 21H12Z" />
-                                </svg>
-                                <span class="sidebar-label">Adopted Birth Registration</span>
                             </a>
                             <a href="{% url 'my_applications' %}" class="sidebar-link">
                                 <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">

@@ -1,538 +1,226 @@
-{% extends 'Authority/base.html' %}
+﻿{% extends 'Authority/base.html' %}
 {% load static %}
-
 {% block title %}Death Registration Application{% endblock %}
 
 {% block content %}
-
 <main class="content">
 
-    <section class="page-inner d-flex align-items-left align-items-md-center
-                    flex-column flex-md-row pt-2 pb-3">
-
+    <section class="page-inner d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-3">
         <div class="page-heading">
-
             <h1 class="page-title">Death Registration</h1>
-
             <nav aria-label="breadcrumb">
-
                 <ol class="breadcrumb">
-
-                    <li class="breadcrumb-item">
-                        <a href="{% url 'dashboard' %}">
-                            Dashboard
-                        </a>
-                    </li>
-
-                    <li class="breadcrumb-item">
-                        Death Registration
-                    </li>
-
-                    <li class="breadcrumb-item active">
-                        New Application
-                    </li>
-
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item">Death Registration</li>
+                    <li class="breadcrumb-item active">New Application</li>
                 </ol>
-
             </nav>
-
         </div>
-
     </section>
 
+    <div id="formAlertArea" class="mb-3" style="display:none;"></div>
 
     <section class="mb-4">
-
         <div class="card">
-
             <div class="card-body p-4">
-
                 <div class="section-heading mb-4">
-
-                    <h4 class="fw-bold">
-                        Death Registration Application
-                    </h4>
-
-                    <p class="text-muted mb-0">
-                        Fields marked with
-                        <span class="star-required">*</span>
-                        are required.
-                    </p>
-
+                    <h4 class="fw-bold">Death Registration Application</h4>
+                    <p class="text-muted mb-0">Fields marked with <span class="star-required">*</span> are required.</p>
                 </div>
 
-
-                <form id="deathApplicationForm"
-                      method="POST"
-                      enctype="multipart/form-data"
-                      class="needs-validation"
-                      novalidate>
-
+                <form id="deathApplicationForm" enctype="multipart/form-data" autocomplete="off" novalidate>
                     {% csrf_token %}
+                    <input type="hidden" name="service_type" value="DEATH_REGISTRATION">
 
-
-                    <!-- ================= APPLICATION ================= -->
-
+                    <!-- APPLICATION DETAILS -->
                     <div class="form-section">
-
                         <h5>Application Details</h5>
-
                         <div class="row g-4">
-
-                            <div class="col-md-4">
-
-                                <label class="form-label">
-                                    Service Type
-                                    <span class="star-required">*</span>
-                                </label>
-
-                                <select class="form-select"
-                                        name="service_type"
-                                        required>
-
-                                    <option value="">
-                                        Select Service
-                                    </option>
-
-                                    <option value="DEATH_REGISTRATION">Death Registration</option>
-
-                                </select>
-
-                            </div>
-
-
-                            <div class="col-md-4">
-
-                                <label class="form-label">
-                                    Registration Type
-                                    <span class="star-required">*</span>
-                                </label>
-
-                                <select class="form-select"
-                                        name="registration_type"
-                                        required>
-
-                                    <option value="">
-                                        Select Registration Type
-                                    </option>
-
-                                    {% for registration_type in registration_types %}
-                                        <option value="{{ registration_type.pk }}">
-                                            {{ registration_type.name }}
-                                        </option>
+                            <div class="col-xl-4 col-lg-4 col-md-6 col-12">
+                                <label class="form-label">Registration Type <span class="star-required">*</span></label>
+                                <select class="form-select" name="registration_type" id="registration_type" required>
+                                    <option value="">Select Registration Type</option>
+                                    {% for rt in registration_types %}<option value="{{ rt.pk }}">{{ rt.name }}</option>
                                     {% endfor %}
-
                                 </select>
-
+                                <div class="invalid-feedback">Please select a registration type.</div>
                             </div>
-
-
-                            <div class="col-md-4">
-
-                                <label class="form-label">
-                                    Date of Reporting
-                                    <span class="star-required">*</span>
-                                </label>
-
-                                <input type="date"
-                                       class="form-control"
-                                       id="date_of_reporting"
-                                       name="date_of_reporting"
-                                       required>
-
+                            <div class="col-xl-4 col-lg-4 col-md-6 col-12">
+                                <label class="form-label">Date of Reporting <span class="star-required">*</span></label>
+                                <input type="date" class="form-control" id="date_of_reporting" name="date_of_reporting"
+                                    required>
+                                <div class="invalid-feedback">Date of reporting is required.</div>
                             </div>
-
                         </div>
-
                     </div>
 
-
-                    <!-- ================= DECEASED ================= -->
-
+                    <!-- REGISTRATION JURISDICTION -->
                     <div class="form-section">
-
-                        <h5>Deceased Person Details</h5>
-
+                        <h5>Registration Jurisdiction</h5>
                         <div class="row g-4">
-
-                            <div class="col-md-4">
-
-                                <label class="form-label">
-                                    First Name
-                                    <span class="star-required">*</span>
-                                </label>
-
-                                <input type="text"
-                                       class="form-control"
-                                       name="deceased_first_name"
-                                       maxlength="100"
-                                       required>
-
+                            <div class="col-xl-4 col-lg-4 col-md-6 col-12">
+                                <label class="form-label">State <span class="star-required">*</span></label>
+                                <select class="form-select" name="state_code" id="state_code" required>
+                                    <option value="RJ" selected>Rajasthan</option>
+                                </select>
                             </div>
-
-
-                            <div class="col-md-4">
-
-                                <label class="form-label">
-                                    Middle Name
-                                </label>
-
-                                <input type="text"
-                                       class="form-control"
-                                       name="deceased_middle_name"
-                                       maxlength="100">
-
+                            <div class="col-xl-4 col-lg-4 col-md-6 col-12">
+                                <label class="form-label">District <span class="star-required">*</span></label>
+                                <select class="form-select" name="district" id="district" required>
+                                    <option value="">Select District</option>
+                                    {% for d in districts %}<option value="{{ d.pk }}">{{ d.name }}</option>{% endfor %}
+                                </select>
+                                <div class="invalid-feedback">Please select a district.</div>
                             </div>
-
-
-                            <div class="col-md-4">
-
-                                <label class="form-label">
-                                    Last Name
-                                </label>
-
-                                <input type="text"
-                                       class="form-control"
-                                       name="deceased_last_name"
-                                       maxlength="100">
-
+                            <div class="col-xl-4 col-lg-4 col-md-6 col-12">
+                                <label class="form-label">ULB <span class="star-required">*</span></label>
+                                <select class="form-select" name="ulb" id="ulb" required disabled>
+                                    <option value="">Select District first</option>
+                                </select>
+                                <div class="invalid-feedback">Please select a ULB.</div>
                             </div>
+                        </div>
+                    </div>
 
-
+                    <!-- DECEASED PERSON DETAILS -->
+                    <div class="form-section">
+                        <h5>Deceased Person Details</h5>
+                        <div class="row g-4">
                             <div class="col-md-4">
-
-                                <label class="form-label">
-                                    Sex
-                                    <span class="star-required">*</span>
-                                </label>
-
-                                <select class="form-select"
-                                        name="sex"
-                                        required>
-
-                                    <option value="">
-                                        Select Sex
-                                    </option>
-
+                                <label class="form-label">First Name <span class="star-required">*</span></label>
+                                <input type="text" class="form-control" name="deceased_first_name" maxlength="100"
+                                    required>
+                                <div class="invalid-feedback">First name is required.</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Middle Name</label>
+                                <input type="text" class="form-control" name="deceased_middle_name" maxlength="100">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Last Name</label>
+                                <input type="text" class="form-control" name="deceased_last_name" maxlength="100">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Sex <span class="star-required">*</span></label>
+                                <select class="form-select" name="sex" id="sex" required>
+                                    <option value="">Select Sex</option>
                                     <option value="MALE">Male</option>
                                     <option value="FEMALE">Female</option>
                                     <option value="OTHER">Other / Intersex</option>
                                     <option value="UNKNOWN">Unknown / Not Determined</option>
-
                                 </select>
-
+                                <div class="invalid-feedback">Please select sex.</div>
                             </div>
-
-
                             <div class="col-md-4">
-
-                                <label class="form-label">
-                                    Date of Birth
-                                </label>
-
-                                <input type="date"
-                                       class="form-control"
-                                       name="date_of_birth_of_deceased">
-
+                                <label class="form-label">Date of Birth (of Deceased)</label>
+                                <input type="date" class="form-control" name="date_of_birth_of_deceased">
                             </div>
-
-
                             <div class="col-md-4">
-
-                                <label class="form-label">
-                                    Nationality
-                                </label>
-
-                                <input type="text"
-                                       class="form-control"
-                                       name="nationality"
-                                       value="Indian"
-                                       maxlength="100">
-
+                                <label class="form-label">Nationality</label>
+                                <input type="text" class="form-control" name="nationality" value="Indian"
+                                    maxlength="100">
                             </div>
-
-
                             <div class="col-md-4">
-
-                                <label class="form-label">
-                                    Date of Death
-                                    <span class="star-required">*</span>
-                                </label>
-
-                                <input type="date"
-                                       class="form-control"
-                                       id="date_of_death"
-                                       name="date_of_death"
-                                       required>
-
+                                <label class="form-label">Date of Death <span class="star-required">*</span></label>
+                                <input type="date" class="form-control" id="date_of_death" name="date_of_death"
+                                    required>
+                                <div class="invalid-feedback">Date of death is required.</div>
                             </div>
-
-
                             <div class="col-md-4">
-
-                                <label class="form-label">
-                                    Time of Death
-                                </label>
-
-                                <input type="time"
-                                       class="form-control"
-                                       name="time_of_death">
-
+                                <label class="form-label">Time of Death</label>
+                                <input type="time" class="form-control" name="time_of_death">
                             </div>
-
                         </div>
-
                     </div>
 
-
-                    <!-- ================= AGE ================= -->
-
+                    <!-- AGE AT DEATH -->
                     <div class="form-section">
-
                         <h5>Age at Death</h5>
-
                         <div class="row g-4">
-
                             <div class="col-md-4">
-
-                                <label class="form-label">
-                                    Years
-                                </label>
-
-                                <input type="number"
-                                       class="form-control"
-                                       name="age_at_death_years"
-                                       min="0">
-
+                                <label class="form-label">Years</label>
+                                <input type="number" class="form-control" name="age_at_death_years" min="0">
                             </div>
-
-
                             <div class="col-md-4">
-
-                                <label class="form-label">
-                                    Months
-                                </label>
-
-                                <input type="number"
-                                       class="form-control"
-                                       name="age_at_death_months"
-                                       min="0"
-                                       max="11">
-
+                                <label class="form-label">Months</label>
+                                <input type="number" class="form-control" name="age_at_death_months" min="0" max="11">
                             </div>
-
-
                             <div class="col-md-4">
-
-                                <label class="form-label">
-                                    Days
-                                </label>
-
-                                <input type="number"
-                                       class="form-control"
-                                       name="age_at_death_days"
-                                       min="0"
-                                       max="30">
-
+                                <label class="form-label">Days</label>
+                                <input type="number" class="form-control" name="age_at_death_days" min="0" max="30">
                             </div>
-
                         </div>
-
                     </div>
 
-
-                    <!-- ================= PLACE ================= -->
-
+                    <!-- PLACE OF DEATH -->
                     <div class="form-section">
-
                         <h5>Place of Death</h5>
-
                         <div class="row g-4">
-
                             <div class="col-md-4">
-
-                                <label class="form-label">
-                                    Event Location Type
-                                </label>
-
-                                <select class="form-select"
-                                        name="event_location_type">
-
-                                    <option value="">
-                                        Select Location Type
-                                    </option>
-
+                                <label class="form-label">Location Type</label>
+                                <select class="form-select" name="event_location_type">
+                                    <option value="">Select Location Type</option>
                                     <option value="HOME">Home</option>
                                     <option value="HOSPITAL">Hospital</option>
                                     <option value="OTHER_INSTITUTION">Other Institution</option>
                                     <option value="OTHER">Other</option>
-
                                 </select>
-
                             </div>
-
-
                             <div class="col-md-4">
-
-                                <label class="form-label">
-                                    Institution
-                                </label>
-
-                                <input type="text"
-                                       class="form-control"
-                                       name="institution_name"
-                                       maxlength="250"
-                                       placeholder="Enter hospital/institution name (if applicable)">
-
+                                <label class="form-label">Institution Name</label>
+                                <input type="text" class="form-control" name="institution_name" maxlength="250">
                             </div>
-
-
                             <div class="col-md-4">
-
-                                <label class="form-label">
-                                    Ward
-                                </label>
-
-                                <select class="form-select"
-                                        name="ward">
-
-                                    <option value="">
-                                        Select Ward
-                                    </option>
-
-                                    {% for ward in wards %}
-                                        <option value="{{ ward.pk }}">
-                                            {{ ward.name }}
-                                        </option>
-                                    {% endfor %}
-
+                                <label class="form-label">Ward</label>
+                                <select class="form-select" name="ward" id="ward" disabled>
+                                    <option value="">Select ULB first</option>
                                 </select>
-
                             </div>
-
-
                             <div class="col-12">
-
-                                <label class="form-label">
-                                    Place of Death Address
-                                </label>
-
-                                <textarea class="form-control"
-                                          name="place_of_death_address"
-                                          maxlength="1000"
-                                          rows="3"></textarea>
-
+                                <label class="form-label">Place of Death Address</label>
+                                <textarea class="form-control" name="place_of_death_address" rows="3"></textarea>
                             </div>
-
                         </div>
-
                     </div>
 
-
-                    <!-- ================= RESIDENCE ================= -->
-
+                    <!-- LAST USUAL RESIDENCE -->
                     <div class="form-section">
-
                         <h5>Last Usual Residence</h5>
-
-                        <textarea class="form-control"
-                                  name="last_residence_address"
-                                  maxlength="1000"
-                                  rows="3"
-                                  placeholder="Enter last usual residence address"></textarea>
-
+                        <textarea class="form-control" name="last_residence_address" rows="3"
+                            placeholder="Enter last usual residence address"></textarea>
                     </div>
 
-
-                    <!-- ================= RELATIVES ================= -->
-
+                    <!-- PARENTS / SPOUSE DETAILS -->
                     <div class="form-section">
-
                         <h5>Parents / Spouse Details</h5>
-
                         <div class="row g-4">
-
                             <div class="col-md-4">
-
-                                <label class="form-label">
-                                    Father's Name
-                                </label>
-
-                                <input type="text"
-                                       class="form-control"
-                                       name="father_name"
-                                       maxlength="150">
-
+                                <label class="form-label">Father's Name</label>
+                                <input type="text" class="form-control" name="father_name" maxlength="150">
                             </div>
-
-
                             <div class="col-md-4">
-
-                                <label class="form-label">
-                                    Mother's Name
-                                </label>
-
-                                <input type="text"
-                                       class="form-control"
-                                       name="mother_name"
-                                       maxlength="150">
-
+                                <label class="form-label">Mother's Name</label>
+                                <input type="text" class="form-control" name="mother_name" maxlength="150">
                             </div>
-
-
                             <div class="col-md-4">
-
-                                <label class="form-label">
-                                    Spouse's Name
-                                </label>
-
-                                <input type="text"
-                                       class="form-control"
-                                       name="spouse_name"
-                                       maxlength="150">
-
+                                <label class="form-label">Spouse's Name</label>
+                                <input type="text" class="form-control" name="spouse_name" maxlength="150">
                             </div>
-
                         </div>
-
                     </div>
 
-
-                    <!-- ================= INFORMANT ================= -->
-
+                    <!-- INFORMANT DETAILS -->
                     <div class="form-section">
-
                         <h5>Informant Details</h5>
-
                         <div class="row g-4">
-
                             <div class="col-md-4">
-
-                                <label class="form-label">
-                                    Informant Name
-                                </label>
-
-                                <input type="text"
-                                       class="form-control"
-                                       name="informant_name"
-                                       maxlength="150">
-
+                                <label class="form-label">Informant Name</label>
+                                <input type="text" class="form-control" name="informant_name" maxlength="150">
                             </div>
-
-
                             <div class="col-md-4">
-
-                                <label class="form-label">
-                                    Informant Relation
-                                </label>
-
-                                <select class="form-select"
-                                        name="informant_relation">
-
-                                    <option value="">
-                                        Select Relation
-                                    </option>
-
+                                <label class="form-label">Informant Relation</label>
+                                <select class="form-select" name="informant_relation">
+                                    <option value="">Select Relation</option>
                                     <option value="FATHER">Father</option>
                                     <option value="MOTHER">Mother</option>
                                     <option value="SPOUSE">Spouse</option>
@@ -543,255 +231,387 @@
                                     <option value="RELATIVE">Other Relative</option>
                                     <option value="NEIGHBOUR">Neighbour</option>
                                     <option value="OTHER">Other</option>
-
                                 </select>
-
                             </div>
-
-
                             <div class="col-md-4">
-
-                                <label class="form-label">
-                                    Informant Mobile
-                                </label>
-
-                                <input type="tel"
-                                       class="form-control"
-                                       name="informant_mobile"
-                                       maxlength="15">
-
+                                <label class="form-label">Informant Mobile</label>
+                                <input type="tel" class="form-control" name="informant_mobile" maxlength="15">
                             </div>
-
-
                             <div class="col-12">
-
-                                <label class="form-label">
-                                    Informant Address
-                                </label>
-
-                                <textarea class="form-control"
-                                          name="informant_address"
-                                          maxlength="1000"
-                                          rows="3"></textarea>
-
+                                <label class="form-label">Informant Address</label>
+                                <textarea class="form-control" name="informant_address" rows="3"></textarea>
                             </div>
-
                         </div>
-
                     </div>
 
-
-                    <!-- ================= DELAY ================= -->
-
+                    <!-- DELAY & FEE INFO -->
                     <div class="form-section">
-
-                        <h5>Registration Fee & Delay Information</h5>
-
+                        <h5>Registration Fee &amp; Delay Information</h5>
                         <div class="alert alert-light border">
-
-                            <div class="row g-3">
-
-                                <div class="col-md-4">
+                            <div id="delayLoading" style="display:none;" class="text-center py-2">
+                                <span class="spinner-border spinner-border-sm me-2"></span> Calculating…
+                            </div>
+                            <div id="delayResult" class="row g-3">
+                                <div class="col-md-3">
                                     <strong>Delay Category</strong>
                                     <div id="delayCategory">—</div>
                                 </div>
-
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <strong>Applicable Fee</strong>
                                     <div id="applicableFee">—</div>
                                 </div>
-
-                                <div class="col-md-4">
-                                    <strong>Authority</strong>
+                                <div class="col-md-3">
+                                    <strong>Authority Required</strong>
                                     <div id="delayAuthority">—</div>
                                 </div>
-
+                                <div class="col-md-3">
+                                    <div id="delayDocuments" style="display:none;"></div>
+                                </div>
                             </div>
-
                         </div>
-
                     </div>
 
-
-                    <!-- ================= DOCUMENTS ================= -->
-
+                    <!-- SUPPORTING DOCUMENTS -->
                     <div class="form-section">
-
                         <h5>Supporting Documents</h5>
-
-                        <div class="file-upload">
-
-                            <input type="file"
-                                   id="deathDocuments"
-                                   name="documents"
-                                   class="visually-hidden"
-                                   multiple
-                                   accept=".jpg,.jpeg,.png,.pdf">
-
-                            <label for="deathDocuments"
-                                   class="drop-zone">
-
-                                <div class="upload-icon">
-                                    📤
-                                </div>
-
-                                <div class="drop-zone-title">
-                                    Drag & drop files here
-                                </div>
-
-                                <div class="drop-zone-text">
-                                    or click to browse files
-                                    <br>
-                                    PDF, PNG, JPG, JPEG
-                                </div>
-
-                            </label>
-
-                            <div id="deathDocumentPreview"
-                                 class="preview mt-2"></div>
-
+                        <div class="drop-zone" onclick="document.getElementById('deathDocuments').click()">
+                            <input type="file" id="deathDocuments" name="documents" class="visually-hidden" multiple
+                                accept=".jpg,.jpeg,.png,.pdf">
+                            <div style="font-size:2rem;">📤</div>
+                            <div class="drop-zone-title">Drag &amp; drop files here</div>
+                            <div class="drop-zone-text">or click to browse files<br>PDF, PNG, JPG, JPEG</div>
                         </div>
-
+                        <div id="deathDocumentPreview" class="mt-2"></div>
+                        <div id="deathDocumentsError" class="invalid-feedback" style="display:none;">Please upload at
+                            least one supporting document.</div>
                     </div>
 
-
-                    <!-- ================= REMARKS ================= -->
-
+                    <!-- REMARKS -->
                     <div class="form-section">
-
                         <h5>Remarks</h5>
-
-                        <textarea class="form-control"
-                                  name="remarks"
-                                  maxlength="2000"
-                                  rows="3"></textarea>
-
+                        <textarea class="form-control" name="remarks" rows="3"></textarea>
                     </div>
 
-
-                    <!-- ================= BUTTONS ================= -->
-
+                    <!-- BUTTONS -->
                     <div class="d-print-none">
-
                         <p class="text-center pt-4">
-
-                            <button type="button"
-                                    class="btn btn-secondary btn-sm">
+                            <button type="button" class="btn btn-secondary btn-sm" id="saveDraftBtn">
+                                <span id="draftSpinner" class="spinner-border spinner-border-sm me-1"
+                                    style="display:none;"></span>
                                 Save Draft
                             </button>
-
-                            <button type="submit"
-                                    class="btn btn-primary btn-sm">
+                            <button type="button" class="btn btn-primary btn-sm" id="submitBtn">
+                                <span id="submitSpinner" class="spinner-border spinner-border-sm me-1"
+                                    style="display:none;"></span>
                                 Submit Application
                             </button>
-
-                            <button type="button"
-                                    class="btn btn-light btn-sm"
-                                    onclick="history.back()">
-                                Back
-                            </button>
-
+                            <button type="button" class="btn btn-light btn-sm" onclick="history.back()">Back</button>
                         </p>
-
                     </div>
-
                 </form>
-
             </div>
-
         </div>
-
     </section>
-
 </main>
 
-
 <style>
-
-.form-section {
-    border-bottom: 1px solid #eee;
-    padding-bottom: 24px;
-    margin-bottom: 28px;
-}
-
-.form-section h5 {
-    font-size: 17px;
-    font-weight: 600;
-    margin-bottom: 20px;
-}
-
-.star-required {
-    color: #dc3545;
-    font-weight: 600;
-}
-
-.drop-zone {
-    border: 2px dashed #d8d8d8;
-    border-radius: 8px;
-    padding: 30px;
-    text-align: center;
-    cursor: pointer;
-    display: block;
-}
-
-.drop-zone:hover {
-    border-color: #1572e8;
-    background: #f8fbff;
-}
-
-.drop-zone-title {
-    font-weight: 600;
-    margin-top: 8px;
-}
-
-.drop-zone-text {
-    color: #777;
-    font-size: 13px;
-}
-
-</style>
-
-
-<script>
-
-document.addEventListener("DOMContentLoaded", function () {
-
-    const fileInput =
-        document.getElementById("deathDocuments");
-
-    const preview =
-        document.getElementById("deathDocumentPreview");
-
-    if (fileInput) {
-
-        fileInput.addEventListener("change", function () {
-
-            preview.innerHTML = "";
-
-            Array.from(this.files).forEach(function (file) {
-
-                const div =
-                    document.createElement("div");
-
-                div.className = "preview-file";
-
-                div.innerHTML =
-                    "📎 " +
-                    file.name +
-                    " (" +
-                    Math.round(file.size / 1024) +
-                    " KB)";
-
-                preview.appendChild(div);
-
-            });
-
-        });
-
+    .form-section {
+        border-bottom: 1px solid #eee;
+        padding-bottom: 24px;
+        margin-bottom: 28px;
     }
 
-});
+    .form-section:last-child {
+        border-bottom: none;
+    }
 
+    .form-section h5 {
+        font-size: 17px;
+        font-weight: 600;
+        margin-bottom: 20px;
+    }
+
+    .star-required {
+        color: #dc3545;
+        font-weight: 600;
+    }
+
+    .drop-zone {
+        border: 2px dashed #d8d8d8;
+        border-radius: 8px;
+        padding: 30px;
+        text-align: center;
+        cursor: pointer;
+        display: block;
+        transition: all .2s ease;
+    }
+
+    .drop-zone:hover {
+        border-color: #1572e8;
+        background: #f8fbff;
+    }
+
+    .drop-zone-title {
+        font-weight: 600;
+        margin-top: 8px;
+    }
+
+    .drop-zone-text {
+        color: #777;
+        font-size: 13px;
+        margin-top: 5px;
+    }
+
+    .preview-file {
+        padding: 8px 12px;
+        background: #f7f7f7;
+        border-radius: 5px;
+        margin-top: 6px;
+        font-size: 13px;
+    }
+
+    .badge-normal {
+        background: #198754;
+        color: #fff;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 13px;
+    }
+
+    .badge-delayed {
+        background: #dc3545;
+        color: #fff;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 13px;
+    }
+
+    .badge-warning {
+        background: #ffc107;
+        color: #000;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 13px;
+    }
+</style>
+
+{% block extra_js %}
+<script type="module">
+    import api from "{% static 'js/api.js' %}";
+
+    const $ = id => document.getElementById(id);
+
+    function showAlert(msg, type = 'danger') {
+        const area = $('formAlertArea');
+        area.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">${msg}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>`;
+        area.style.display = '';
+        area.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    function markInvalid(el, msg) {
+        el.classList.add('is-invalid'); el.classList.remove('is-valid');
+        const fb = el.nextElementSibling;
+        if (fb && fb.classList.contains('invalid-feedback')) fb.textContent = msg;
+    }
+    function markValid(el) { el.classList.remove('is-invalid'); el.classList.add('is-valid'); }
+    function clearValidation(form) {
+        form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        form.querySelectorAll('.is-valid').forEach(el => el.classList.remove('is-valid'));
+    }
+    function scrollToFirstError(form) {
+        const first = form.querySelector('.is-invalid');
+        if (first) { first.scrollIntoView({ behavior: 'smooth', block: 'center' }); try { first.focus(); } catch (_) { } }
+    }
+
+    function validateForm(form) {
+        clearValidation(form);
+        let valid = true;
+        form.querySelectorAll('[required]').forEach(el => {
+            if (!el.value.trim()) { markInvalid(el, el.dataset.errorMsg || 'This field is required.'); valid = false; }
+            else markValid(el);
+        });
+        const dod = form.querySelector('[name="date_of_death"]');
+        const dor = form.querySelector('[name="date_of_reporting"]');
+        if (dod && dod.value && new Date(dod.value) > new Date()) { markInvalid(dod, 'Date of death cannot be in the future.'); valid = false; }
+        if (dod && dor && dod.value && dor.value && new Date(dor.value) < new Date(dod.value)) { markInvalid(dor, 'Date of reporting cannot be before date of death.'); valid = false; }
+        const docInput = $('deathDocuments');
+        const docError = $('deathDocumentsError');
+        if (docInput && docInput.files.length === 0) { docError.style.display = 'block'; docInput.classList.add('is-invalid'); valid = false; }
+        else if (docInput) { docInput.classList.remove('is-invalid'); if (docError) docError.style.display = 'none'; }
+        if (!valid) scrollToFirstError(form);
+        return valid;
+    }
+
+    /* ── Dependent Dropdowns ── */
+    const districtSel = $('district');
+    const ulbSel = $('ulb');
+    const wardSel = $('ward');
+
+    async function loadULBs(districtId) {
+        ulbSel.innerHTML = '<option value="">Loading…</option>'; ulbSel.disabled = true;
+        wardSel.innerHTML = '<option value="">Select ULB first</option>'; wardSel.disabled = true;
+        if (!districtId) { ulbSel.innerHTML = '<option value="">Select District first</option>'; return; }
+        try {
+            const data = await api.get(`/api/geography/ulbs/?district=${districtId}&is_active=true`);
+            const results = data.results || data;
+            ulbSel.innerHTML = '<option value="">Select ULB</option>' + results.map(u => `<option value="${u.id}">${u.name}</option>`).join('');
+            ulbSel.disabled = false;
+        } catch (err) { ulbSel.innerHTML = '<option value="">Failed to load ULBs</option>'; }
+    }
+
+    async function loadWards(ulbId) {
+        wardSel.innerHTML = '<option value="">Loading…</option>'; wardSel.disabled = true;
+        if (!ulbId) { wardSel.innerHTML = '<option value="">Select ULB first</option>'; return; }
+        try {
+            const zoneData = await api.get(`/api/geography/zones/?ulb=${ulbId}&is_active=true`);
+            const zones = zoneData.results || zoneData;
+            if (!zones.length) { wardSel.innerHTML = '<option value="">No wards available</option>'; return; }
+            const allWardData = await Promise.all(zones.map(z => api.get(`/api/geography/wards/?zone=${z.id}&is_active=true`)));
+            const allWards = allWardData.flatMap(d => d.results || d);
+            wardSel.innerHTML = allWards.length
+                ? '<option value="">Select Ward</option>' + allWards.map(w => `<option value="${w.id}">${w.name}</option>`).join('')
+                : '<option value="">No wards available</option>';
+            if (allWards.length) wardSel.disabled = false;
+        } catch (err) { wardSel.innerHTML = '<option value="">Failed to load wards</option>'; }
+    }
+
+    districtSel.addEventListener('change', () => { markValid(districtSel); loadULBs(districtSel.value); });
+    ulbSel.addEventListener('change', () => { markValid(ulbSel); loadWards(ulbSel.value); requestDelayCheck(); });
+
+    /* ── Delay Check ── */
+    const dodInput = $('date_of_death');
+    const dorInput = $('date_of_reporting');
+
+    async function requestDelayCheck() {
+        const dod = dodInput ? dodInput.value : '';
+        const dor = dorInput ? dorInput.value : '';
+        const stateCode = document.querySelector('[name="state_code"]')?.value || 'RJ';
+        $('delayCategory').textContent = '—'; $('applicableFee').textContent = '—'; $('delayAuthority').textContent = '—'; $('delayDocuments').style.display = 'none';
+        if (!dod || !dor || new Date(dor) < new Date(dod)) return;
+        $('delayLoading').style.display = ''; $('delayResult').style.opacity = '0.4';
+        try {
+            const result = await api.post('/api/bd-registration/delay-check/', { event_date: dod, date_of_reporting: dor, state_code: stateCode });
+            let badgeClass = 'badge-normal';
+            if (result.delay_category && result.delay_category !== 'NORMAL') badgeClass = result.delay_days > 365 ? 'badge-delayed' : 'badge-warning';
+            $('delayCategory').innerHTML = `<span class="${badgeClass}">${result.delay_category_display || result.delay_category || '—'}</span><small class="text-muted ms-1">(${result.delay_days} day${result.delay_days !== 1 ? 's' : ''})</small>`;
+            $('applicableFee').innerHTML = (result.applicable_fee && parseFloat(result.applicable_fee) > 0)
+                ? `<strong>₹ ${result.applicable_fee}</strong><small class="text-muted ms-1">${result.fee_code || ''}</small>`
+                : (result.is_normal ? 'No fee (Normal)' : '₹ 0.00');
+            $('delayAuthority').textContent = result.authority_name || (result.requires_authority ? 'Required' : 'Not required');
+            if (result.required_document_names && result.required_document_names.length) {
+                $('delayDocuments').innerHTML = `<strong>Required documents:</strong> ${result.required_document_names.join(', ')}`;
+                $('delayDocuments').style.display = '';
+            }
+            if (result.requires_permission_order) showAlert('⚠ This registration is delayed by more than 1 year. An order from the prescribed authority (DM/SDM) must be uploaded before submission.', 'warning');
+        } catch (err) { console.warn('Delay check failed:', err.message); }
+        finally { $('delayLoading').style.display = 'none'; $('delayResult').style.opacity = '1'; }
+    }
+
+    dodInput && dodInput.addEventListener('change', requestDelayCheck);
+    dorInput && dorInput.addEventListener('change', requestDelayCheck);
+
+    /* ── Collect Form Data ── */
+    function collectFormData(form) {
+        const fd = new FormData(form);
+        const obj = {};
+        for (const [key, val] of fd.entries()) {
+            if (key === 'csrfmiddlewaretoken' || key === 'documents') continue;
+            const v = (typeof val === 'string') ? val.trim() : val;
+            if (v !== '') obj[key] = v;
+        }
+        // Disabled <select> elements (ulb, ward) are excluded from FormData — read explicitly
+        ['district', 'ulb', 'ward'].forEach(function(k) {
+            var el = form.querySelector('[name="' + k + '"]');
+            if (el && el.value) obj[k] = el.value;
+        });
+        ['age_at_death_years', 'age_at_death_months', 'age_at_death_days'].forEach(k => { if (obj[k]) obj[k] = parseInt(obj[k], 10); });
+        ['ward'].forEach(k => { if (k in obj && !obj[k]) delete obj[k]; });
+        return obj;
+    }
+
+    /* ── Upload Documents ── */
+    async function uploadDocuments(applicationId, fileInput) {
+        if (!fileInput || !fileInput.files.length) return;
+        const csrf = api.getCsrf();
+        for (const file of fileInput.files) {
+            const body = new FormData();
+            body.append('file', file); body.append('original_filename', file.name);
+            await fetch(`/api/bd-registration/applications/${applicationId}/documents/`, { method: 'POST', credentials: 'include', headers: { 'X-CSRFToken': csrf }, body });
+        }
+    }
+
+    /* ── Save Draft ── */
+    async function saveDraft() {
+        const form = $('deathApplicationForm');
+        const btn = $('saveDraftBtn'); const spinner = $('draftSpinner');
+        const rtSel = form.querySelector('[name="registration_type"]');
+        clearValidation(form);
+        if (!rtSel || !rtSel.value) { markInvalid(rtSel, 'Registration type is required to save a draft.'); scrollToFirstError(form); return; }
+        btn.disabled = true; spinner.style.display = '';
+        try {
+            const payload = { ...collectFormData(form), action: 'draft' };
+            const app = await api.post('/api/bd-registration/death-applications/', payload);
+            const fileInput = $('deathDocuments');
+            if (fileInput && fileInput.files.length) await uploadDocuments(app.id, fileInput);
+            showAlert(`✅ Draft saved. Application number: <strong>${app.application_number}</strong>`, 'success');
+        } catch (err) { handleApiError(err, form); }
+        finally { btn.disabled = false; spinner.style.display = 'none'; }
+    }
+
+    /* ── Submit Application ── */
+    async function submitApplication() {
+        const form = $('deathApplicationForm');
+        const btn = $('submitBtn'); const spinner = $('submitSpinner');
+        if (!validateForm(form)) return;
+        btn.disabled = true; spinner.style.display = '';
+        try {
+            const payload = { ...collectFormData(form), action: 'submit' };
+            const app = await api.post('/api/bd-registration/death-applications/', payload);
+            const fileInput = $('deathDocuments');
+            if (fileInput && fileInput.files.length) await uploadDocuments(app.id, fileInput);
+            if (app.payment_required) {
+                window.location.href = `/applications/${app.id}/review/`;
+            } else {
+                showAlert(`✅ Application submitted! Application number: <strong>${app.application_number}</strong>. Redirecting to inbox…`, 'success');
+                setTimeout(() => { window.location.href = "{% url 'application_inbox' %}"; }, 2500);
+            }
+        } catch (err) { handleApiError(err, form); }
+        finally { btn.disabled = false; spinner.style.display = 'none'; }
+    }
+
+    /* ── API Error Handler ── */
+    function handleApiError(err, form) {
+        if (err && err.data && err.data.errors) {
+            const errors = err.data.errors;
+            let first = null;
+            Object.entries(errors).forEach(([field, msg]) => {
+                const el = form.querySelector(`[name="${field}"]`);
+                if (el) { markInvalid(el, Array.isArray(msg) ? msg.join(' ') : String(msg)); if (!first) first = el; }
+            });
+            if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            showAlert(`⚠ Please fix the highlighted errors: ${err.data.detail || ''}`, 'danger');
+        } else {
+            showAlert(`❌ ${err.message || 'An unexpected error occurred. Please try again.'}`, 'danger');
+        }
+    }
+
+    /* ── Wire Buttons ── */
+    $('saveDraftBtn').addEventListener('click', saveDraft);
+    $('submitBtn').addEventListener('click', submitApplication);
+
+    /* ── File Preview ── */
+    const fileInput = $('deathDocuments');
+    const preview = $('deathDocumentPreview');
+    if (fileInput) {
+        fileInput.addEventListener('change', function () {
+            preview.innerHTML = '';
+            Array.from(this.files).forEach(file => {
+                const div = document.createElement('div');
+                div.className = 'preview-file';
+                div.innerHTML = `📎 ${file.name} <small class="text-muted">(${Math.round(file.size / 1024)} KB)</small>`;
+                preview.appendChild(div);
+            });
+        });
+    }
 </script>
-
+{% endblock %}
 {% endblock %}

@@ -247,36 +247,40 @@
                         <div class="row g-4">
 
                             <div class="col-xl-4 col-lg-4 col-md-6 col-12">
-                                <label class="form-label">Event Location Type</label>
-                                <select class="form-select" name="event_location_type" id="event_location_type">
+                                <label class="form-label">Event Location Type <span class="star-required">*</span></label>
+                                <select class="form-select" name="event_location_type" id="event_location_type" required>
                                     <option value="">Select Location Type</option>
                                     <option value="HOME"{% if birth_registration and birth_registration.event_location_type == 'HOME' %} selected{% endif %}>Home</option>
                                     <option value="HOSPITAL"{% if birth_registration and birth_registration.event_location_type == 'HOSPITAL' %} selected{% endif %}>Hospital</option>
                                     <option value="OTHER_INSTITUTION"{% if birth_registration and birth_registration.event_location_type == 'OTHER_INSTITUTION' %} selected{% endif %}>Other Institution</option>
                                     <option value="OTHER"{% if birth_registration and birth_registration.event_location_type == 'OTHER' %} selected{% endif %}>Other</option>
                                 </select>
+                                <div class="invalid-feedback">Please select an event location type.</div>
                             </div>
 
                             <div class="col-xl-4 col-lg-4 col-md-6 col-12">
-                                <label class="form-label">Institution Name</label>
+                                <label class="form-label">Institution Name <span class="star-required">*</span></label>
                                 <input type="text" class="form-control" name="institution_name" maxlength="250"
                                     placeholder="Enter hospital/institution name (if applicable)"
-                                    value="{% if birth_registration %}{{ birth_registration.institution_name }}{% endif %}">
+                                    value="{% if birth_registration %}{{ birth_registration.institution_name }}{% endif %}" required>
+                                    <div class="invalid-feedback">Institution name is required.</div>
                             </div>
 
                             <!-- Ward (filtered by ULB via AJAX) -->
                             <div class="col-xl-4 col-lg-4 col-md-6 col-12">
-                                <label class="form-label">Ward</label>
-                                <select class="form-select" name="ward" id="ward" disabled
+                                <label class="form-label">Ward <span class="star-required">*</span></label>
+                                <select class="form-select" name="ward" id="ward" required disabled
                                     data-prefill-ward="{% if birth_registration %}{{ birth_registration.ward_id }}{% endif %}">
                                     <option value="">Select ULB first</option>
                                 </select>
+                                <div class="invalid-feedback">Please select a ward.</div>
                             </div>
 
                             <div class="col-12">
-                                <label class="form-label">Place of Birth Address</label>
+                                <label class="form-label">Place of Birth Address <span class="star-required">*</span></label>
                                 <textarea class="form-control" name="place_of_birth_address" maxlength="1000" rows="3"
-                                    placeholder="Enter complete place of birth address">{% if birth_registration %}{{ birth_registration.place_of_birth_address }}{% endif %}</textarea>
+                                    placeholder="Enter complete place of birth address" required>{% if birth_registration %}{{ birth_registration.place_of_birth_address }}{% endif %}</textarea>
+                                    <div class="invalid-feedback">Place of birth address is required.</div>
                             </div>
 
                         </div>
@@ -292,9 +296,10 @@
                         <div class="row g-4">
 
                             <div class="col-md-4">
-                                <label class="form-label">Mother's Name</label>
+                                <label class="form-label">Mother's Name <span class="star-required">*</span></label>
                                 <input type="text" class="form-control" name="mother_name" maxlength="150"
-                                    value="{% if birth_registration %}{{ birth_registration.mother_name }}{% endif %}">
+                                    value="{% if birth_registration %}{{ birth_registration.mother_name }}{% endif %}" required>
+                                    <div class="invalid-feedback">Mother's name is required.</div>
                             </div>
 
                             <div class="col-md-4">
@@ -330,10 +335,10 @@
                             </div>
 
                             <div class="col-md-4">
-                                <label class="form-label">Aadhaar Number</label>
+                                <label class="form-label">Aadhaar Number  <span class="star-required">*</span></label>
                                 <input type="text" class="form-control" name="mother_aadhaar" maxlength="12"
                                     inputmode="numeric" pattern="[0-9]{12}" title="12-digit Aadhaar number"
-                                    value="{% if birth_registration %}{{ birth_registration.mother_aadhaar }}{% endif %}">
+                                    value="{% if birth_registration %}{{ birth_registration.mother_aadhaar }}{% endif %}" required>
                                 <div class="invalid-feedback">Aadhaar must be exactly 12 digits.</div>
                             </div>
 
@@ -350,15 +355,17 @@
                         <div class="row g-4">
 
                             <div class="col-md-4">
-                                <label class="form-label">Father's Name</label>
+                                <label class="form-label">Father's Name <span class="star-required">*</span></label>
                                 <input type="text" class="form-control" name="father_name" maxlength="150"
-                                    value="{% if birth_registration %}{{ birth_registration.father_name }}{% endif %}">
+                                    value="{% if birth_registration %}{{ birth_registration.father_name }}{% endif %}" required>
+                                    <div class="invalid-feedback"> Father's name is required.</div>
                             </div>
 
                             <div class="col-md-4">
-                                <label class="form-label">Father's Age at Birth</label>
+                                <label class="form-label">Father's Age at Birth <span class="star-required">*</span></label>
                                 <input type="number" class="form-control" name="father_age_at_birth" min="10" max="100"
-                                    value="{% if birth_registration and birth_registration.father_age_at_birth %}{{ birth_registration.father_age_at_birth }}{% endif %}">
+                                    value="{% if birth_registration and birth_registration.father_age_at_birth %}{{ birth_registration.father_age_at_birth }}{% endif %}" required>
+                                    <div class="invalid-feedback">Father's age at birth is required.</div>
                             </div>
 
                             <div class="col-md-4">
@@ -388,10 +395,10 @@
                             </div>
 
                             <div class="col-md-4">
-                                <label class="form-label">Aadhaar Number</label>
+                                <label class="form-label">Aadhaar Number  <span class="star-required">*</span></label>
                                 <input type="text" class="form-control" name="father_aadhaar" maxlength="12"
                                     inputmode="numeric" pattern="[0-9]{12}" title="12-digit Aadhaar number"
-                                    value="{% if birth_registration %}{{ birth_registration.father_aadhaar }}{% endif %}">
+                                    value="{% if birth_registration %}{{ birth_registration.father_aadhaar }}{% endif %}" required>
                                 <div class="invalid-feedback">Aadhaar must be exactly 12 digits.</div>
                             </div>
 
@@ -407,9 +414,10 @@
                         <h5>Permanent Address</h5>
                         <div class="row g-4">
                             <div class="col-12">
-                                <label class="form-label">Permanent Address</label>
+                                <label class="form-label">Permanent Address <span class="star-required">*</span></label>
                                 <textarea class="form-control" name="permanent_address" maxlength="1000" rows="3"
-                                    placeholder="Enter permanent address">{% if birth_registration %}{{ birth_registration.permanent_address }}{% endif %}</textarea>
+                                    placeholder="Enter permanent address" required>{% if birth_registration %}{{ birth_registration.permanent_address }}{% endif %}</textarea>
+                                    <div class="invalid-feedback">Permanent address is required.</div>
                             </div>
                         </div>
                     </div>
@@ -424,14 +432,15 @@
                         <div class="row g-4">
 
                             <div class="col-md-4">
-                                <label class="form-label">Informant Name</label>
+                                <label class="form-label">Informant Name <span class="star-required">*</span></label>
                                 <input type="text" class="form-control" name="informant_name" maxlength="150"
-                                    value="{% if birth_registration %}{{ birth_registration.informant_name }}{% endif %}">
+                                    value="{% if birth_registration %}{{ birth_registration.informant_name }}{% endif %}" required>
+                                    <div class="invalid-feedback">Informant Name is required.</div>
                             </div>
 
                             <div class="col-md-4">
-                                <label class="form-label">Informant Relation</label>
-                                <select class="form-select" name="informant_relation">
+                                <label class="form-label">Informant Relation <span class="star-required">*</span></label>
+                                <select class="form-select" name="informant_relation" required>
                                     <option value="">Select Relation</option>
                                     <option value="FATHER"{% if birth_registration and birth_registration.informant_relation == 'FATHER' %} selected{% endif %}>Father</option>
                                     <option value="MOTHER"{% if birth_registration and birth_registration.informant_relation == 'MOTHER' %} selected{% endif %}>Mother</option>
@@ -444,6 +453,7 @@
                                     <option value="NEIGHBOUR"{% if birth_registration and birth_registration.informant_relation == 'NEIGHBOUR' %} selected{% endif %}>Neighbour</option>
                                     <option value="OTHER"{% if birth_registration and birth_registration.informant_relation == 'OTHER' %} selected{% endif %}>Other</option>
                                 </select>
+                                <div class="invalid-feedback">Please select the informant relation.</div>
                             </div>
 
                             <div class="col-md-4">
@@ -453,8 +463,9 @@
                             </div>
 
                             <div class="col-12">
-                                <label class="form-label">Informant Address</label>
-                                <textarea class="form-control" name="informant_address" maxlength="1000" rows="3">{% if birth_registration %}{{ birth_registration.informant_address }}{% endif %}</textarea>
+                                <label class="form-label">Informant Address <span class="star-required">*</span></label>
+                                <textarea class="form-control" name="informant_address" maxlength="1000" rows="3" required>{% if birth_registration %}{{ birth_registration.informant_address }}{% endif %}</textarea>
+                                <div class="invalid-feedback">Informant address is required.</div>
                             </div>
 
                         </div>
@@ -502,7 +513,7 @@
                     <!-- ================================================= -->
 
                     <div class="form-section">
-                        <h5>Supporting Documents</h5>
+                        <h5>Supporting Documents<span class="star-required">*</span></h5>
                         <div class="file-upload">
                             <input type="file" id="birthDocuments" name="documents" class="visually-hidden" multiple
                                 accept=".jpg,.jpeg,.png,.pdf">
@@ -514,6 +525,7 @@
                                 </div>
                             </label>
                             <div id="birthDocumentPreview" class="preview mt-2"></div>
+                            <div id="birthDocumentsError" class="text-danger small mt-2" style="display:none;">Please upload at least one supporting document.</div>
                         </div>
                     </div>
 
@@ -754,6 +766,25 @@
                 valid = false;
             }
         });
+
+        // Supporting documents are mandatory for submission.
+const documentInput = $('birthDocuments');
+const documentError = $('birthDocumentsError');
+
+if (documentInput && documentInput.files.length === 0) {
+    documentError.textContent =
+        'Please upload at least one supporting document.';
+    documentError.style.display = 'block';
+
+    documentInput.classList.add('is-invalid');
+    valid = false;
+} else if (documentInput) {
+    documentInput.classList.remove('is-invalid');
+
+    if (documentError) {
+        documentError.style.display = 'none';
+    }
+}
 
         if (!valid) scrollToFirstError(form);
         return valid;
@@ -1158,9 +1189,31 @@
     --------------------------------------------------------------- */
 
     document.querySelectorAll('.form-control, .form-select').forEach(el => {
-        el.addEventListener('input', () => { el.classList.remove('is-invalid'); });
-        el.addEventListener('change', () => { el.classList.remove('is-invalid'); });
+    const clearError = () => {
+        if (el.value.trim()) {
+            el.classList.remove('is-invalid');
+        }
+    };
+
+    el.addEventListener('input', clearError);
+    el.addEventListener('change', clearError);
+});
+
+const birthDocuments = $('birthDocuments');
+
+if (birthDocuments) {
+    birthDocuments.addEventListener('change', () => {
+        const error = $('birthDocumentsError');
+
+        if (birthDocuments.files.length > 0) {
+            birthDocuments.classList.remove('is-invalid');
+
+            if (error) {
+                error.style.display = 'none';
+            }
+        }
     });
+}
 
 
     /* ---------------------------------------------------------------

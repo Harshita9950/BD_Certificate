@@ -32,10 +32,6 @@
 
     <div class="card border-0 shadow-sm">
 
-        <div class="card-header">
-            <h5 class="mb-0">Fee Record Details</h5>
-        </div>
-
         <div class="card-body">
             <form id="feeForm" novalidate>
 
@@ -171,17 +167,17 @@
 
                 <!-- Buttons -->
                 <div class="mt-4">
-                    <a href="{% url 'fee_master_page' %}" class="btn btn-secondary btn-sm">
-                        Back
-                    </a>
-                    <button type="submit" class="btn btn-primary btn-sm ms-2" id="saveBtn">
+                    <button type="submit" class="btn btn-primary btn-sm" id="saveBtn">
                         <span id="saveSpinner"
                               class="spinner-border spinner-border-sm me-1"
                               style="display:none;"></span>
-                        Save
+                         Submit
                     </button>
-                </div>
 
+                    <a href="{% url 'fee_master_page' %}" class="btn btn-secondary btn-sm ms-1">
+                        Back
+                    </a>
+                </div>
             </form>
         </div>
 

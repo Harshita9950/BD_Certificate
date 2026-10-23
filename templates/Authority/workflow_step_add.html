@@ -4,6 +4,24 @@
 {% block title %}BD Portal{% endblock %}
 
 {% block content %}
+<style>
+    .form-control.is-invalid,
+    .form-select.is-invalid {
+        border: 1px solid #dc3545 !important;
+        box-shadow: 0 0 0 0.15rem rgba(220, 53, 69, 0.12);
+    }
+
+    .field-error {
+        display: none;
+        color: #dc3545;
+        font-size: 13px;
+        margin-top: 5px;
+    }
+
+    .field-error.show {
+        display: block;
+    }
+</style>
 <main class="content">
 
     <section class="page-inner d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-3">
@@ -37,16 +55,10 @@
 
     <div class="card border-0 shadow-sm">
 
-        <div class="card-header">
-            <h4 class="card-title mb-0">
-                Add Workflow Step
-            </h4>
-        </div>
-
 
         <div class="card-body">
 
-            <form id="workflowStepForm">
+            <form id="workflowStepForm" novalidate>
 
                 <div class="row g-3">
 
@@ -66,6 +78,10 @@
                             </option>
                         </select>
 
+                        <div class="field-error" id="workflowError">
+                           Please select a Workflow.
+                        </div>
+
                     </div>
 
 
@@ -82,6 +98,9 @@
                             min="1"
                             required
                         >
+                        <div class="field-error" id="step_numberError">
+                           Step Number is required.
+                        </div>
 
                     </div>
 
@@ -100,6 +119,10 @@
                             required
                         >
 
+                        <div class="field-error" id="codeError">
+                           Step Code is required.
+                        </div>
+
                     </div>
 
 
@@ -116,6 +139,9 @@
                             maxlength="150"
                             required
                         >
+                        <div class="field-error" id="nameError">
+                           Step Name is required.
+                        </div>
 
                     </div>
 
@@ -135,6 +161,9 @@
                                 Select Role
                             </option>
                         </select>
+                        <div class="field-error" id="role_codeError">
+                           Please select a Role.
+                        </div>
 
                     </div>
 
@@ -178,24 +207,21 @@
 
 
                 <div class="mt-4">
-
                     <button
                         type="submit"
-                        class="btn btn-primary"
+                        class="btn btn-primary btn-sm"
                         id="saveButton"
                     >
-                        Save
+                        Submit
                     </button>
 
                     <a
                         href="{% url 'workflow_steps' %}"
-                        class="btn btn-secondary ms-2"
+                        class="btn btn-secondary btn-sm"
                     >
-                        Cancel
+                        Back
                     </a>
-
                 </div>
-
             </form>
 
         </div>
@@ -206,185 +232,198 @@
 {% endblock %}
 
 
+
 {% block extra_js %}
-
 <script type="module">
-
     import api from "{% static 'js/api.js' %}";
 
+    const workflowSelect = document.getElementById("workflow");
+    const roleSelect = document.getElementById("role_code");
+    const form = document.getElementById("workflowStepForm");
+    const saveButton = document.getElementById("saveButton");
 
-    const workflowSelect =
-        document.getElementById("workflow");
+    const requiredFields = [
+        {
+            id: "workflow",
+            errorId: "workflowError",
+            message: "Please select a Workflow."
+        },
+        {
+            id: "step_number",
+            errorId: "step_numberError",
+            message: "Step Number is required."
+        },
+        {
+            id: "code",
+            errorId: "codeError",
+            message: "Step Code is required."
+        },
+        {
+            id: "name",
+            errorId: "nameError",
+            message: "Step Name is required."
+        },
+        {
+            id: "role_code",
+            errorId: "role_codeError",
+            message: "Please select a Role."
+        }
+    ];
 
-    const roleSelect =
-        document.getElementById("role_code");
+    function validateField(config) {
+        const field = document.getElementById(config.id);
+        const error = document.getElementById(config.errorId);
 
-    const form =
-        document.getElementById("workflowStepForm");
+        let invalid = !field.value.trim();
 
-    const saveButton =
-        document.getElementById("saveButton");
+        // Step Number must also be a positive integer.
+        if (config.id === "step_number" && !invalid) {
+            const number = Number(field.value);
+            invalid = !Number.isInteger(number) || number < 1;
+        }
 
+        field.classList.toggle("is-invalid", invalid);
+        error.classList.toggle("show", invalid);
+
+        if (invalid) {
+            error.textContent =
+                config.id === "step_number" && field.value.trim()
+                    ? "Step Number must be a positive whole number."
+                    : config.message;
+        }
+
+        return !invalid;
+    }
+
+    // Clear warnings when a field is corrected.
+    requiredFields.forEach(config => {
+        const field = document.getElementById(config.id);
+        const eventName =
+            field.tagName === "SELECT" ? "change" : "input";
+
+        field.addEventListener(eventName, () => {
+            validateField(config);
+        });
+    });
 
     async function loadWorkflows() {
-
         try {
+            const data = await api.get(
+                "/api/workflow-master/workflows/?is_active=true"
+            );
 
-            const data =
-                await api.get(
-                    "/api/workflow-master/workflows/?is_active=true"
-                );
-
-            const workflows =
-                data.results || data;
+            const workflows = data.results || data;
 
             workflows.forEach(workflow => {
-
-                const option =
-                    document.createElement("option");
-
-                option.value =
-                    workflow.id;
-
+                const option = document.createElement("option");
+                option.value = workflow.id;
                 option.textContent =
                     `${workflow.code} - ${workflow.name}`;
-
                 workflowSelect.appendChild(option);
-
             });
-
         } catch (error) {
-
-            console.error(error);
-
-            alert(
-                error.detail ||
-                "Unable to load workflows."
-            );
+            console.error("Unable to load workflows:", error);
+            alert(error.detail || "Unable to load workflows.");
         }
     }
-
 
     async function loadRoles() {
-
         try {
+            const data = await api.get(
+                "/api/users/roles/?is_active=true"
+            );
 
-            const data =
-                await api.get(
-                    "/api/users/roles/?is_active=true"
-                );
-
-            const roles =
-                data.results || data;
+            const roles = data.results || data;
 
             roles.forEach(role => {
-
-                const option =
-                    document.createElement("option");
-
-                option.value =
-                    role.code;
-
-                option.textContent =
-                    `${role.code} - ${role.name}`;
-
+                const option = document.createElement("option");
+                option.value = role.code;
+                option.textContent = `${role.code} - ${role.name}`;
                 roleSelect.appendChild(option);
-
             });
-
         } catch (error) {
-
-            console.error(error);
-
-            alert(
-                error.detail ||
-                "Unable to load roles."
-            );
+            console.error("Unable to load roles:", error);
+            alert(error.detail || "Unable to load roles.");
         }
     }
 
+    form.addEventListener("submit", async event => {
+        event.preventDefault();
 
-    form.addEventListener(
-        "submit",
-        async event => {
+        const results = requiredFields.map(validateField);
 
-            event.preventDefault();
+        if (results.includes(false)) {
+            const firstInvalid = form.querySelector(".is-invalid");
 
-            saveButton.disabled = true;
-            saveButton.textContent = "Saving...";
+            firstInvalid?.scrollIntoView({
+                behavior: "smooth",
+                block: "center"
+            });
 
+            firstInvalid?.focus({ preventScroll: true });
+            return;
+        }
 
-            const payload = {
+        if (saveButton.disabled) {
+            return;
+        }
 
-                workflow:
-                    Number(workflowSelect.value),
+        saveButton.disabled = true;
+        saveButton.textContent = "Submitting...";
 
-                step_number:
-                    Number(
-                        document.getElementById(
-                            "step_number"
-                        ).value
-                    ),
+        const payload = {
+            workflow: Number(workflowSelect.value),
+            step_number: Number(
+                document.getElementById("step_number").value
+            ),
+            code: document.getElementById("code").value.trim(),
+            name: document.getElementById("name").value.trim(),
+            role_code: roleSelect.value,
+            description: document.getElementById("description").value.trim(),
+            is_active:
+                document.getElementById("is_active").value === "true"
+        };
 
-                code:
-                    document.getElementById(
-                        "code"
-                    ).value.trim(),
+        try {
+            await api.post(
+                "/api/workflow-master/steps/",
+                payload
+            );
 
-                name:
-                    document.getElementById(
-                        "name"
-                    ).value.trim(),
+            alert("Workflow step created successfully.");
 
-                role_code:
-                    roleSelect.value,
+            window.location.href = "{% url 'workflow_steps' %}";
+        } catch (error) {
+            console.error(error);
 
-                description:
-                    document.getElementById(
-                        "description"
-                    ).value.trim(),
+            let message =
+                error.detail || "Unable to create workflow step.";
 
-                is_active:
-                    document.getElementById(
-                        "is_active"
-                    ).value === "true"
-            };
-
-
-            try {
-
-                await api.post(
-                    "/api/workflow-master/steps/",
-                    payload
+            if (error.data && typeof error.data === "object") {
+                const details = Object.entries(error.data).map(
+                    ([field, value]) =>
+                        `${field}: ${
+                            Array.isArray(value)
+                                ? value.join(", ")
+                                : value
+                        }`
                 );
 
-                alert(
-                    "Workflow step created successfully."
-                );
-
-                window.location.href =
-                    "{% url 'workflow_steps' %}";
-
-            } catch (error) {
-
-                console.error(error);
-
-                alert(
-                    error.detail ||
-                    "Unable to create workflow step."
-                );
-
-                saveButton.disabled = false;
-                saveButton.textContent = "Save";
+                if (details.length) {
+                    message += "\n" + details.join("\n");
+                }
             }
 
+            alert(message);
+
+            saveButton.disabled = false;
+            saveButton.textContent = "Submit";
         }
-    );
+    });
 
-
-    await loadWorkflows();
-    await loadRoles();
-
+    await Promise.all([
+        loadWorkflows(),
+        loadRoles()
+    ]);
 </script>
-
 {% endblock %}

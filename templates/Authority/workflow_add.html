@@ -4,6 +4,24 @@
 {% block title %}BD Portal{% endblock %}
 
 {% block content %}
+<style>
+    .form-control.is-invalid,
+    .form-select.is-invalid {
+        border: 1px solid #dc3545 !important;
+        box-shadow: 0 0 0 0.15rem rgba(220, 53, 69, 0.12);
+    }
+
+    .field-error {
+        display: none;
+        color: #dc3545;
+        font-size: 13px;
+        margin-top: 5px;
+    }
+
+    .field-error.show {
+        display: block;
+    }
+</style>
 <main class="content">
 
     <section class="page-inner d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-3">
@@ -37,16 +55,10 @@
 
     <div class="card border-0 shadow-sm">
 
-        <div class="card-header">
-            <h4 class="card-title mb-0">
-                Workflow Details
-            </h4>
-        </div>
-
 
         <div class="card-body">
 
-            <form id="workflowAddForm">
+            <form id="workflowAddForm" novalidate>
 
                 <div class="row g-3">
 
@@ -83,6 +95,9 @@
                             </option>
 
                         </select>
+                        <div class="field-error" id="applicationTypeError">
+                           Please select an Application Type.
+                        </div>
 
                     </div>
 
@@ -99,6 +114,9 @@
                                 Loading ULBs...
                             </option>
                         </select>
+                        <div class="field-error" id="ulbError">
+                           Please select a ULB.
+                        </div>
 
                     </div>
 
@@ -112,6 +130,9 @@
 
                         <input type="text" id="code" class="form-control" maxlength="50"
                             placeholder="Example: TL_DEFAULT" required>
+                        <div class="field-error" id="codeError">
+                           Workflow Code is required.
+                        </div>
 
                     </div>
 
@@ -125,6 +146,10 @@
 
                         <input type="text" id="name" class="form-control" maxlength="150"
                             placeholder="Example: Trade Licence Standard Workflow" required>
+
+                        <div class="field-error" id="nameError">
+                           Workflow Name is required.
+                        </div>
 
                     </div>
 
@@ -165,11 +190,11 @@
                 <div class="mt-4">
 
                     <button type="submit" class="btn btn-primary" id="saveWorkflow">
-                        Save
+                        Submit
                     </button>
 
                     <a href="{% url 'workflows' %}" class="btn btn-secondary ms-2">
-                        Cancel
+                        Back
                     </a>
 
                 </div>
@@ -184,177 +209,179 @@
 {% endblock %}
 
 
+
 {% block extra_js %}
 <script type="module">
-
     import api from "{% static 'js/api.js' %}";
 
+    document.addEventListener("DOMContentLoaded", async () => {
+        const ulbSelect = document.getElementById("ulb");
+        const form = document.getElementById("workflowAddForm");
+        const saveButton = document.getElementById("saveWorkflow");
 
-    document.addEventListener(
-        "DOMContentLoaded",
-        async () => {
+        const requiredFields = [
+            {
+                id: "applicationType",
+                errorId: "applicationTypeError",
+                message: "Please select an Application Type."
+            },
+            {
+                id: "ulb",
+                errorId: "ulbError",
+                message: "Please select a ULB."
+            },
+            {
+                id: "code",
+                errorId: "codeError",
+                message: "Workflow Code is required."
+            },
+            {
+                id: "name",
+                errorId: "nameError",
+                message: "Workflow Name is required."
+            }
+        ];
 
-            const ulbSelect =
-                document.getElementById("ulb");
+        function validateField(config) {
+            const field = document.getElementById(config.id);
+            const error = document.getElementById(config.errorId);
 
-            const form =
-                document.getElementById("workflowAddForm");
+            const invalid = !field.value.trim();
 
-            const saveButton =
-                document.getElementById("saveWorkflow");
+            field.classList.toggle("is-invalid", invalid);
+            error.classList.toggle("show", invalid);
 
-
-            async function loadUlbs() {
-
-                try {
-
-                    const response =
-                        await api.get(
-                            "/api/geography/ulbs/?is_active=true"
-                        );
-
-                    const ulbs =
-                        response.results || response;
-
-                    ulbSelect.innerHTML = `
-                        <option value="">
-                            Select ULB
-                        </option>
-                    `;
-
-
-                    ulbs.forEach(ulb => {
-
-                        const option =
-                            document.createElement("option");
-
-                        option.value =
-                            ulb.id;
-
-                        option.textContent =
-                            `${ulb.code} - ${ulb.name}`;
-
-                        ulbSelect.appendChild(option);
-
-                    });
-
-
-                } catch (error) {
-
-                    ulbSelect.innerHTML = `
-                        <option value="">
-                            Unable to load ULBs
-                        </option>
-                    `;
-
-                    console.error(
-                        "Unable to load ULBs:",
-                        error
-                    );
-                }
+            if (invalid) {
+                error.textContent = config.message;
             }
 
-
-            form.addEventListener(
-                "submit",
-                async event => {
-
-                    event.preventDefault();
-
-
-                    saveButton.disabled = true;
-                    saveButton.textContent = "Saving...";
-
-
-                    const payload = {
-                        application_type:
-                            document.getElementById(
-                                "applicationType"
-                            ).value,
-
-                        ulb:
-                            document.getElementById(
-                                "ulb"
-                            ).value,
-
-                        code:
-                            document.getElementById(
-                                "code"
-                            ).value.trim().toUpperCase(),
-
-                        name:
-                            document.getElementById(
-                                "name"
-                            ).value.trim(),
-
-                        description:
-                            document.getElementById(
-                                "description"
-                            ).value.trim(),
-
-                        is_active:
-                            document.getElementById(
-                                "isActive"
-                            ).value === "true"
-                    };
-
-
-                    if (
-                        !payload.application_type ||
-                        !payload.ulb ||
-                        !payload.code ||
-                        !payload.name
-                    ) {
-
-                        alert(
-                            "Please fill all required fields."
-                        );
-
-                        saveButton.disabled = false;
-                        saveButton.textContent = "Save";
-
-                        return;
-                    }
-
-
-                    try {
-
-                        await api.post(
-                            "/api/workflow-master/workflows/",
-                            payload
-                        );
-
-
-                        alert(
-                            "Workflow created successfully."
-                        );
-
-
-                        window.location.href =
-                            "{% url 'workflows' %}";
-
-
-                    } catch (error) {
-
-                        console.error(error);
-
-                        alert(
-                            error.detail ||
-                            "Unable to create workflow."
-                        );
-
-                        saveButton.disabled = false;
-                        saveButton.textContent = "Save";
-                    }
-
-                }
-            );
-
-
-            await loadUlbs();
-
+            return !invalid;
         }
-    );
 
+        // Clear an individual field's error when corrected.
+        requiredFields.forEach(config => {
+            const field = document.getElementById(config.id);
+            const eventName =
+                field.tagName === "SELECT" ? "change" : "input";
+
+            field.addEventListener(eventName, () => {
+                if (field.value.trim()) {
+                    field.classList.remove("is-invalid");
+                    document
+                        .getElementById(config.errorId)
+                        .classList.remove("show");
+                }
+            });
+        });
+
+        async function loadUlbs() {
+            try {
+                const response = await api.get(
+                    "/api/geography/ulbs/?is_active=true"
+                );
+
+                const ulbs = response.results || response;
+
+                ulbSelect.innerHTML =
+                    '<option value="">Select ULB</option>';
+
+                ulbs.forEach(ulb => {
+                    const option = document.createElement("option");
+                    option.value = ulb.id;
+                    option.textContent = `${ulb.code} - ${ulb.name}`;
+                    ulbSelect.appendChild(option);
+                });
+            } catch (error) {
+                ulbSelect.innerHTML =
+                    '<option value="">Unable to load ULBs</option>';
+
+                console.error("Unable to load ULBs:", error);
+            }
+        }
+
+        form.addEventListener("submit", async event => {
+            event.preventDefault();
+
+            const results = requiredFields.map(validateField);
+            const isValid = results.every(Boolean);
+
+            if (!isValid) {
+                const firstInvalid = form.querySelector(".is-invalid");
+
+                firstInvalid?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center"
+                });
+
+                firstInvalid?.focus({ preventScroll: true });
+                return;
+            }
+
+            if (saveButton.disabled) {
+                return;
+            }
+
+            saveButton.disabled = true;
+            saveButton.textContent = "Saving...";
+
+            const payload = {
+                application_type:
+                    document.getElementById("applicationType").value,
+
+                ulb:
+                    document.getElementById("ulb").value,
+
+                code:
+                    document.getElementById("code").value.trim().toUpperCase(),
+
+                name:
+                    document.getElementById("name").value.trim(),
+
+                description:
+                    document.getElementById("description").value.trim(),
+
+                is_active:
+                    document.getElementById("isActive").value === "true"
+            };
+
+            try {
+                await api.post(
+                    "/api/workflow-master/workflows/",
+                    payload
+                );
+
+                alert("Workflow created successfully.");
+
+                window.location.href = "{% url 'workflows' %}";
+            } catch (error) {
+                console.error(error);
+
+                let message =
+                    error.detail || "Unable to create workflow.";
+
+                if (error.data && typeof error.data === "object") {
+                    const details = Object.entries(error.data)
+                        .map(([field, value]) =>
+                            `${field}: ${
+                                Array.isArray(value)
+                                    ? value.join(", ")
+                                    : value
+                            }`
+                        );
+
+                    if (details.length) {
+                        message += "\n" + details.join("\n");
+                    }
+                }
+
+                alert(message);
+
+                saveButton.disabled = false;
+                saveButton.textContent = "Save";
+            }
+        });
+
+        await loadUlbs();
+    });
 </script>
 {% endblock %}

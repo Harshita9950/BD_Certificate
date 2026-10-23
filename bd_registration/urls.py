@@ -35,6 +35,7 @@ from .views import (
     ApplicationViewSet,
     BirthApplicationCreateView,
     BirthRegistrationViewSet,
+    DeathApplicationCreateView,
     DeathRegistrationRestrictedViewSet,
     DeathRegistrationViewSet,
     DelayCheckView,
@@ -58,6 +59,9 @@ urlpatterns = [
 
     # ── Atomic birth application create (draft or submit in one call) ──────────
     path('birth-applications/', BirthApplicationCreateView.as_view(), name='birth_application_create'),
+
+    # ── Atomic death application create (draft or submit in one call) ──────────
+    path('death-applications/', DeathApplicationCreateView.as_view(), name='death_application_create'),
 
     # ── Nested document routes (manual, no extra package needed) ──────────────
     path(

@@ -4,23 +4,51 @@
 {% block title %}Add Ward{% endblock %}
 
 {% block content %}
+<style>
+    .form-control.is-invalid,
+    .form-select.is-invalid {
+        border: 1px solid #dc3545 !important;
+        box-shadow: 0 0 0 0.15rem rgba(220, 53, 69, 0.12);
+    }
+
+    .field-error {
+        display: none;
+        color: #dc3545;
+        font-size: 13px;
+        margin-top: 5px;
+    }
+
+    .field-error.show {
+        display: block;
+    }
+</style>
+
 <div class="container-fluid py-4">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h4 class="mb-1">Add Ward</h4>
-            <p class="text-muted mb-0">Create a new ward</p>
-        </div>
+    <section class="page-inner d-flex align-items-center flex-column flex-md-row pt-2 pb-3">
+        <div class="page-heading d-flex align-items-center flex-wrap">
+            <h1 class="page-title mb-0">Add Ward</h1>
 
-        <a href="{% url 'wards' %}" class="btn btn-light">
-            Back
-        </a>
-    </div>
+            <nav aria-label="breadcrumb" class="ms-4">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}">Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'wards' %}">Ward Master</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        Add Ward
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </section>
 
     <div class="card border-0 shadow-sm">
         <div class="card-body">
 
-            <form id="wardForm">
+            <form id="wardForm" novalidate>
 
                 <div class="row g-3">
 
@@ -32,6 +60,7 @@
                             class="form-control"
                             required
                         >
+                        <div class="field-error" id="codeError">Ward Code is required.</div>
                     </div>
 
                     <div class="col-md-6">
@@ -42,6 +71,7 @@
                             class="form-control"
                             required
                         >
+                        <div class="field-error" id="nameError">Ward Name is required.</div>
                     </div>
 
                     <div class="col-md-6">
@@ -49,6 +79,7 @@
                         <select id="zone" class="form-select" required>
                             <option value="">Select Zone</option>
                         </select>
+                        <div class="field-error" id="zoneError">Please select a Zone.</div>
                     </div>
 
                     <div class="col-md-6">
@@ -61,13 +92,14 @@
 
                 </div>
 
-                <div class="mt-4">
-                    <button type="submit" id="saveBtn" class="btn btn-primary">
-                        Save Ward
+                <div class="col-12 d-print-none mt-2">
+                    <div class="text-start pt-2"></div>
+                    <button type="submit" id="saveBtn" class="btn btn-primary btn-sm">
+                        Submit
                     </button>
 
-                    <a href="{% url 'wards' %}" class="btn btn-light ms-2">
-                        Cancel
+                    <a href="{% url 'wards' %}" class="btn btn-secondary btn-sm">
+                        Back
                     </a>
                 </div>
 
@@ -110,16 +142,75 @@ async function loadZones() {
     }
 }
 
+
+
+function validateField(field, message) {
+    const errorElement = document.getElementById(field.id + "Error");
+    const invalid = !field.value.trim();
+
+    field.classList.toggle("is-invalid", invalid);
+
+    if (errorElement) {
+        errorElement.textContent = invalid ? message : "";
+        errorElement.classList.toggle("show", invalid);
+    }
+
+    return !invalid;
+}
+
+["code", "name", "zone"].forEach((id) => {
+    const field = document.getElementById(id);
+
+    field.addEventListener("input", () => {
+        validateField(field, field.id === "zone"
+            ? "Please select a Zone."
+            : `${field.id === "code" ? "Ward Code" : "Ward Name"} is required.`);
+    });
+
+    field.addEventListener("change", () => {
+        validateField(field, field.id === "zone"
+            ? "Please select a Zone."
+            : `${field.id === "code" ? "Ward Code" : "Ward Name"} is required.`);
+    });
+});
+
+
+
 form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
     errorMessage.classList.add("d-none");
+
+    const codeField = document.getElementById("code");
+    const nameField = document.getElementById("name");
+    const zoneField = document.getElementById("zone");
+
+    const checks = [
+        validateField(codeField, "Ward Code is required."),
+        validateField(nameField, "Ward Name is required."),
+        validateField(zoneField, "Please select a Zone.")
+    ];
+
+    if (checks.includes(false)) {
+        const firstInvalidField = [codeField, nameField, zoneField]
+            .find(field => !field.value.trim());
+
+        firstInvalidField.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+        });
+
+        firstInvalidField.focus({ preventScroll: true });
+        return;
+    }
+
     saveBtn.disabled = true;
 
+
     const payload = {
-        code: document.getElementById("code").value.trim(),
-        name: document.getElementById("name").value.trim(),
-        zone: Number(zoneSelect.value),
+        code: codeField.value.trim(),
+        name: nameField.value.trim(),
+        zone: Number(zoneField.value),
         is_active: document.getElementById("is_active").value === "true"
     };
 
@@ -127,11 +218,13 @@ form.addEventListener("submit", async (event) => {
         await api.post("/api/geography/wards/", payload);
         window.location.href = "{% url 'wards' %}";
     } catch (error) {
-        errorMessage.textContent = error.detail || "Failed to create ward.";
+        errorMessage.textContent =
+            error.detail || "Failed to create ward.";
         errorMessage.classList.remove("d-none");
         saveBtn.disabled = false;
     }
 });
+
 
 loadZones();
 </script>

@@ -465,3 +465,55 @@ class PaymentOrderViewSet(
         order.save(update_fields=['status', 'updated_at'])
         logger.info('PaymentOrder pk=%s cancelled by %s.', order.pk, request.user)
         return Response(PaymentOrderSerializer(order).data)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PAYMENT RECEIPT PAGE VIEW
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class PaymentReceiptView(object):
+    """
+    GET /payments/receipt/<order_pk>/
+
+    Renders a printable cash payment receipt for a PAID PaymentOrder.
+    Only accessible by authenticated users.
+    """
+    pass
+
+
+def payment_receipt_view(request, order_pk):
+    """
+    Function-based receipt view to avoid extra import chain issues.
+    GET /payments/receipt/<order_pk>/
+    """
+    from django.contrib.auth.decorators import login_required
+    from django.shortcuts import get_object_or_404, render as django_render
+    from django.http import HttpResponseForbidden
+
+    if not request.user.is_authenticated:
+        from django.shortcuts import redirect
+        return redirect(f'/login/?next=/payments/receipt/{order_pk}/')
+
+    order = get_object_or_404(
+        PaymentOrder.objects.select_related(
+            'application__registration_type',
+            'application__district',
+            'application__ulb',
+            'application__submitted_by',
+            'created_by',
+        ).prefetch_related('transactions__collected_by'),
+        pk=order_pk,
+        status=PaymentOrderStatus.PAID,
+        payment_method=PaymentMethod.CASH,
+    )
+
+    # Get the captured transaction (there should be exactly one for cash)
+    txn = order.transactions.filter(
+        status=PaymentTransactionStatus.CAPTURED
+    ).select_related('collected_by').order_by('-initiated_at').first()
+
+    return django_render(request, 'Authority/payment_receipt.html', {
+        'order': order,
+        'txn':   txn,
+        'app':   order.application,
+    })

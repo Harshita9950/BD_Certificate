@@ -5,6 +5,27 @@
 
 {% block content %}
 <main class="content">
+    <style>
+    #districtForm .form-control.is-invalid {
+        border: 1px solid #dc3545 !important;
+        box-shadow: 0 0 0 0.15rem rgba(220, 53, 69, 0.12);
+    }
+
+    #districtForm .field-error {
+        display: none;
+        color: #dc3545;
+        font-size: 13px;
+        margin-top: 5px;
+    }
+
+    #districtForm .field-error.show {
+        display: block;
+    }
+
+    #districtForm .selectgroup.is-invalid .selectgroup-button {
+        border-color: #dc3545 !important;
+    }
+</style>
 
     <section class="page-inner d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-3">
         <div class="page-heading">
@@ -29,7 +50,7 @@
     </section>
 
     <section class="mb-4">
-        <div class="card">
+        <div class="card border-0 shadow-sm">
             <div class="card-body p-4">
 
                 <div class="section-heading">
@@ -42,9 +63,9 @@
 
                 <form id="districtForm" class="needs-validation" novalidate>
 
-                    <div class="row g-4">
+                    <div class="row g-3">
 
-                        <div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+                        <div class="col-md-6">
                             <label for="districtCode" class="form-label">
                                 District Code
                                 <span class="star-required">*</span>
@@ -58,9 +79,12 @@
                                 placeholder="Enter district code"
                                 required
                             >
+                            <div class="field-error" id="districtCodeError">
+                                District Code is required.
+                            </div>
                         </div>
 
-                        <div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+                        <div class="col-md-6">
                             <label for="districtName" class="form-label">
                                 District Name
                                 <span class="star-required">*</span>
@@ -74,9 +98,12 @@
                                 placeholder="Enter district name"
                                 required
                             >
+                            <div class="field-error" id="districtNameError">
+                               District Name is required.
+                            </div>
                         </div>
 
-                        <div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+                        <div class="col-md-6">
                             <label class="form-label">
                                 Status
                                 <span class="star-required">*</span>
@@ -115,10 +142,13 @@
                                 </label>
 
                             </div>
+                            <div class="field-error" id="statusError">
+                               Please select a status.
+                            </div>
                         </div>
 
                         <div class="col-12 d-print-none">
-                            <p class="text-center pt-2">
+                            <p class="text-start pt-2">
 
                                 <button
                                     type="submit"
@@ -146,6 +176,8 @@
     </section>
 
 </main>
+{% endblock %}
+
 {% block extra_js %}
 <script type="module">
     import api from "{% static 'js/api.js' %}";
@@ -153,65 +185,144 @@
     const form = document.getElementById("districtForm");
     const submitButton = form.querySelector('button[type="submit"]');
 
-    form.addEventListener("submit", async function (event) {
-        event.preventDefault();
+    
+function validateDistrictForm() {
+    const code = document.getElementById("districtCode");
+    const name = document.getElementById("districtName");
+    const statusActive = document.getElementById("statusActive");
+    const statusInactive = document.getElementById("statusInactive");
 
-        if (!form.checkValidity()) {
-            form.classList.add("was-validated");
-            return;
+    const fields = [
+        {
+            field: code,
+            error: document.getElementById("districtCodeError"),
+            message: "District Code is required."
+        },
+        {
+            field: name,
+            error: document.getElementById("districtNameError"),
+            message: "District Name is required."
+        }
+    ];
+
+    let firstInvalid = null;
+
+    fields.forEach(({ field, error, message }) => {
+        const invalid = !field.value.trim();
+
+        field.classList.toggle("is-invalid", invalid);
+        field.setAttribute("aria-invalid", String(invalid));
+
+        if (error) {
+            error.textContent = invalid ? message : "";
+            error.classList.toggle("show", invalid);
         }
 
-        if (submitButton.disabled) {
-            return;
-        }
-
-        submitButton.disabled = true;
-        submitButton.textContent = "Saving...";
-
-        const payload = {
-            code: document.getElementById("districtCode").value.trim(),
-            name: document.getElementById("districtName").value.trim(),
-            is_active: document.getElementById("statusActive").checked
-        };
-
-        const oldMessage = form.parentElement.querySelector(".alert");
-        if (oldMessage) {
-            oldMessage.remove();
-        }
-
-        try {
-            await api.post(
-                "/api/geography/districts/",
-                payload
-            );
-
-            const message = document.createElement("div");
-            message.className = "alert alert-success mt-3";
-            message.textContent = "District saved successfully.";
-
-            form.parentElement.insertBefore(message, form);
-
-            setTimeout(() => {
-                window.location.href = "{% url 'district_master' %}";
-            }, 1000);
-
-        } catch (error) {
-            const message = document.createElement("div");
-            message.className = "alert alert-danger mt-3";
-
-            if (error.data?.code?.[0]) {
-                message.textContent = error.data.code[0];
-            } else {
-                message.textContent =
-                    error.detail || "Unable to save district.";
-            }
-
-            form.parentElement.insertBefore(message, form);
-
-            submitButton.disabled = false;
-            submitButton.textContent = "Submit";
+        if (invalid && !firstInvalid) {
+            firstInvalid = field;
         }
     });
+
+    const statusInvalid =
+        !statusActive.checked && !statusInactive.checked;
+
+    const statusError = document.getElementById("statusError");
+    const statusGroup = statusActive.closest(".selectgroup");
+
+    if (statusGroup) {
+        statusGroup.classList.toggle("is-invalid", statusInvalid);
+    }
+
+    if (statusError) {
+        statusError.textContent = "Please select a status.";
+        statusError.classList.toggle("show", statusInvalid);
+    }
+
+    if (statusInvalid && !firstInvalid) {
+        firstInvalid = statusActive;
+    }
+
+    if (firstInvalid) {
+        firstInvalid.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+        });
+        firstInvalid.focus({ preventScroll: true });
+        return false;
+    }
+
+    return true;
+}
+
+["districtCode", "districtName"].forEach(id => {
+    document.getElementById(id).addEventListener("input", () => {
+        validateDistrictForm();
+    });
+});
+
+document.querySelectorAll('input[name="status"]').forEach(radio => {
+    radio.addEventListener("change", validateDistrictForm);
+});
+
+
+    
+form.addEventListener("submit", async function (event) {
+    event.preventDefault();
+
+    if (!validateDistrictForm()) {
+        return;
+    }
+
+    if (submitButton.disabled) {
+        return;
+    }
+
+    submitButton.disabled = true;
+    submitButton.textContent = "Saving...";
+
+    const payload = {
+        code: document.getElementById("districtCode").value.trim(),
+        name: document.getElementById("districtName").value.trim(),
+        is_active: document.getElementById("statusActive").checked
+    };
+
+    const oldMessage = form.parentElement.querySelector(".alert");
+    if (oldMessage) {
+        oldMessage.remove();
+    }
+
+    try {
+        await api.post("/api/geography/districts/", payload);
+
+        const message = document.createElement("div");
+        message.className = "alert alert-success mt-3";
+        message.textContent = "District saved successfully.";
+
+        form.parentElement.insertBefore(message, form);
+
+        setTimeout(() => {
+            window.location.href = "{% url 'district_master' %}";
+        }, 1000);
+
+    } catch (error) {
+        const message = document.createElement("div");
+        message.className = "alert alert-danger mt-3";
+
+        if (error.data?.code?.[0]) {
+            message.textContent = error.data.code[0];
+        } else if (error.data?.name?.[0]) {
+            message.textContent = error.data.name[0];
+        } else {
+            message.textContent =
+                error.detail || "Unable to save district.";
+        }
+
+        form.parentElement.insertBefore(message, form);
+
+        submitButton.disabled = false;
+        submitButton.textContent = "Submit";
+    }
+});
+
 </script>
-{% endblock %}
 {% endblock %}

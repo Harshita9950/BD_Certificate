@@ -49,6 +49,7 @@ from .serializers import (
     ApplicationSerializer,
     BirthApplicationSerializer,
     BirthRegistrationSerializer,
+    DeathApplicationSerializer,
     DeathRegistrationRestrictedSerializer,
     DeathRegistrationSerializer,
     StillBirthRegistrationSerializer,
@@ -141,12 +142,33 @@ class BirthRegistrationPageView(LoginRequiredMixin, View):
 
 
 class DeathRegistrationPageView(LoginRequiredMixin, View):
-    """GET /death-registration/ → renders the death application form."""
+    """
+    GET /death-registration/          → blank new form
+    GET /death-registration/?app=<pk> → pre-filled editable form for a
+                                        PAYMENT_PENDING application
+    """
     login_url = '/login/'
 
     def get(self, request):
         ctx = _get_master_context()
         ctx['application'] = None
+        ctx['death_registration'] = None
+
+        app_pk = request.GET.get('app')
+        if app_pk:
+            try:
+                app = Application.objects.select_related(
+                    'registration_type', 'district', 'ulb',
+                ).get(pk=app_pk, status=ApplicationStatus.PAYMENT_PENDING)
+                try:
+                    dr = app.death_registration
+                except Exception:
+                    dr = None
+                ctx['application'] = app
+                ctx['death_registration'] = dr
+            except Application.DoesNotExist:
+                pass
+
         return render(request, 'Authority/death_application_form.html', ctx)
 
 
@@ -576,7 +598,18 @@ class ApplicationViewSet(
 
     @action(detail=True, methods=['post'], url_path='approve')
     def approve(self, request, pk=None):
-        """POST .../approve/"""
+        """
+        POST .../approve/
+
+        On the last workflow step: approves AND immediately registers the
+        application in a single atomic transaction — generating a unique
+        registration number and setting date_of_registration on the child
+        record. Returns registration_number so the client can redirect to
+        the certificate page.
+
+        On intermediate steps (if approve is ever called from a non-last
+        step by an ADMIN): approves only (no registration number yet).
+        """
         app = self.get_object()
         if app.status not in _ALLOWED_TRANSITIONS['approve']:
             return Response(
@@ -584,13 +617,34 @@ class ApplicationViewSet(
                  'code': 'invalid_transition'},
                 status=http_status.HTTP_400_BAD_REQUEST,
             )
-        old_status = app.status
-        app.status = ApplicationStatus.APPROVED
-        app.save(update_fields=['status'])
-        _record_transition(app, old_status, ApplicationStatus.APPROVED,
-                           'APPROVED', request.user,
-                           request.data.get('remarks', ''))
-        return Response(ApplicationSerializer(app).data)
+
+        today = timezone.localdate()
+        reg_number = _generate_registration_number(app, today)
+
+        with transaction.atomic():
+            old_status = app.status
+            # Move directly to REGISTERED in one step
+            app.status = ApplicationStatus.REGISTERED
+            app.save(update_fields=['status'])
+
+            _set_registration_on_transaction(app, reg_number, today)
+
+            _record_transition(
+                app, old_status, ApplicationStatus.REGISTERED,
+                'APPROVED', request.user,
+                request.data.get('remarks', ''),
+            )
+
+        logger.info(
+            'Application %s approved+registered: reg_no=%s by %s.',
+            app.application_number, reg_number, request.user,
+        )
+
+        return Response({
+            **ApplicationSerializer(app).data,
+            'registration_number': reg_number,
+            'date_of_registration': str(today),
+        })
 
     # ── Reject ────────────────────────────────────────────────────────────────
 
@@ -1136,6 +1190,167 @@ class BirthApplicationCreateView(APIView):
                         )
                         # Assign workflow immediately — fee-free path goes
                         # straight to SUBMITTED without a payment step.
+                        assign_workflow(app)
+                        app._fee_required = False
+
+        except ValueError as exc:
+            errs = exc.args[0] if exc.args else {}
+            if isinstance(errs, dict):
+                return Response(
+                    {'detail': 'Validation failed.', 'errors': errs,
+                     'code': 'validation_error'},
+                    status=http_status.HTTP_400_BAD_REQUEST,
+                )
+            return Response(
+                {'detail': str(exc), 'code': 'validation_error'},
+                status=http_status.HTTP_400_BAD_REQUEST,
+            )
+
+        return Response(
+            {
+                **ApplicationSerializer(app, context={'request': request}).data,
+                'payment_required': getattr(app, '_fee_required', False),
+                **(
+                    {
+                        'applicable_fee':  str(app._delay_result.applicable_fee),
+                        'fee_code':        app._delay_result.fee_code,
+                        'currency':        app._delay_result.currency,
+                        'delay_category':  app._delay_result.delay_category,
+                    }
+                    if getattr(app, '_fee_required', False) else {}
+                ),
+            },
+            status=http_status.HTTP_201_CREATED,
+        )
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# DEATH APPLICATION CREATE VIEW
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class DeathApplicationCreateView(APIView):
+    """
+    POST /api/bd-registration/death-applications/
+
+    Creates an Application + DeathRegistration atomically.
+    Mirrors BirthApplicationCreateView exactly — same draft/submit logic,
+    fee gate via DelayCalculationService using date_of_death as event_date.
+    """
+
+    def post(self, request):
+        from .serializers import DeathApplicationSerializer
+
+        ser = DeathApplicationSerializer(data=request.data)
+        if not ser.is_valid():
+            return Response(
+                {'detail': 'Validation failed.', 'errors': ser.errors,
+                 'code': 'validation_error'},
+                status=http_status.HTTP_400_BAD_REQUEST,
+            )
+
+        data   = ser.validated_data
+        action = data.pop('action', 'draft')
+
+        app_field_names = {
+            'service_type', 'registration_type', 'state_code',
+            'district', 'ulb', 'date_of_reporting', 'remarks',
+        }
+        death_field_names = {
+            'deceased_first_name', 'deceased_middle_name', 'deceased_last_name',
+            'sex', 'date_of_birth_of_deceased',
+            'age_at_death_years', 'age_at_death_months', 'age_at_death_days',
+            'nationality', 'date_of_death', 'time_of_death',
+            'event_location_type', 'institution_name', 'place_of_death_address',
+            'ward', 'last_residence_address',
+            'father_name', 'mother_name', 'spouse_name',
+            'informant_name', 'informant_relation', 'informant_address', 'informant_mobile',
+        }
+
+        app_data   = {k: v for k, v in data.items() if k in app_field_names and v is not None}
+        death_data = {k: v for k, v in data.items() if k in death_field_names}
+
+        for fk_field in ('district', 'ulb'):
+            if fk_field in app_data and not app_data[fk_field]:
+                del app_data[fk_field]
+
+        try:
+            with transaction.atomic():
+                app = Application(**app_data)
+                app.submitted_by = request.user
+                app.save()
+
+                _record_transition(
+                    application=app,
+                    old_status='',
+                    new_status=ApplicationStatus.DRAFT,
+                    action_code='CREATED',
+                    user=request.user,
+                )
+
+                DeathRegistration.objects.create(application=app, **death_data)
+
+                if action == 'submit':
+                    errors = {}
+                    if not app.date_of_reporting:
+                        errors['date_of_reporting'] = 'Date of reporting is required.'
+
+                    event_date = death_data.get('date_of_death')
+                    if not event_date:
+                        errors['date_of_death'] = 'Date of death is required.'
+
+                    if errors:
+                        raise ValueError(errors)
+
+                    state_code   = app.state_code or ''
+                    delay_result = DelayCalculationService.calculate(
+                        event_date=event_date,
+                        date_of_reporting=app.date_of_reporting,
+                        state_code=state_code,
+                    )
+                    if delay_result.error and delay_result.delay_category == '':
+                        raise ValueError({'non_field': delay_result.error})
+
+                    if delay_result.requires_permission_order:
+                        raise ValueError({
+                            'non_field': (
+                                'This death registration is delayed by more than 1 year. '
+                                'An order from the prescribed authority (DM/SDM) must be '
+                                'uploaded before submission. Please save as draft first, '
+                                'upload the document, then submit.'
+                            )
+                        })
+
+                    from decimal import Decimal
+                    fee_required = (
+                        delay_result.applicable_fee is not None
+                        and delay_result.applicable_fee > Decimal('0.00')
+                    )
+
+                    if fee_required:
+                        app.status = ApplicationStatus.PAYMENT_PENDING
+                        app.save(update_fields=['status'])
+                        _record_transition(
+                            application=app,
+                            old_status=ApplicationStatus.DRAFT,
+                            new_status=ApplicationStatus.PAYMENT_PENDING,
+                            action_code='PAYMENT_PENDING',
+                            user=request.user,
+                            remarks=app_data.get('remarks', ''),
+                        )
+                        app._fee_required = True
+                        app._delay_result = delay_result
+                    else:
+                        app.status       = ApplicationStatus.SUBMITTED
+                        app.submitted_at = timezone.now()
+                        app.save(update_fields=['status', 'submitted_at'])
+                        _record_transition(
+                            application=app,
+                            old_status=ApplicationStatus.DRAFT,
+                            new_status=ApplicationStatus.SUBMITTED,
+                            action_code='SUBMITTED',
+                            user=request.user,
+                            remarks=app_data.get('remarks', ''),
+                        )
                         assign_workflow(app)
                         app._fee_required = False
 
@@ -2083,4 +2298,82 @@ class ApplicationSentboxView(LoginRequiredMixin, View):
             'applications': qs,
             'inbox_title':  'Sentbox — Forwarded Applications',
             'from_param':   'sentbox',
+        })
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# BIRTH CERTIFICATE VIEW
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class BirthCertificateView(LoginRequiredMixin, View):
+    """
+    GET /certificates/<pk>/birth/
+
+    Renders the official Birth Certificate for an application that has
+    been REGISTERED. Only REGISTERED applications have a registration_number
+    set on their BirthRegistration record.
+
+    Access rule: the application must be REGISTERED and must be a
+    BIRTH_REGISTRATION service type.
+    """
+    login_url = '/login/'
+
+    def get(self, request, pk):
+        from django.shortcuts import get_object_or_404
+
+        app = get_object_or_404(
+            Application.objects.select_related(
+                'registration_type', 'district', 'ulb',
+                'submitted_by',
+                'birth_registration__ward',
+            ),
+            pk=pk,
+            service_type='BIRTH_REGISTRATION',
+            status=ApplicationStatus.REGISTERED,
+        )
+
+        birth = app.birth_registration
+        today = timezone.localdate()
+
+        return render(request, 'Authority/birth-certificate.html', {
+            'app':   app,
+            'birth': birth,
+            'today': today,
+        })
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# DEATH CERTIFICATE VIEW
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class DeathCertificateView(LoginRequiredMixin, View):
+    """
+    GET /certificates/<pk>/death/
+
+    Renders the official Death Certificate for a REGISTERED death application.
+    Mirrors BirthCertificateView exactly.
+    """
+    login_url = '/login/'
+
+    def get(self, request, pk):
+        from django.shortcuts import get_object_or_404
+
+        app = get_object_or_404(
+            Application.objects.select_related(
+                'registration_type', 'district', 'ulb',
+                'submitted_by',
+                'death_registration__ward',
+            ),
+            pk=pk,
+            service_type='DEATH_REGISTRATION',
+            status=ApplicationStatus.REGISTERED,
+        )
+
+        death = app.death_registration
+        today = timezone.localdate()
+
+        return render(request, 'Authority/death-certificate.html', {
+            'app':   app,
+            'death': death,
+            'today': today,
         })

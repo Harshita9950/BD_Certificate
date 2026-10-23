@@ -33,6 +33,8 @@ from bd_registration.views import (
     ApplicationReviewView,
     ApplicationDetailView,
     MyApplicationsView,
+    BirthCertificateView,
+    DeathCertificateView,
     ReportApplicationRegisterView,
     ReportPendingApplicationsView,
     ReportRegistrationRegisterView,
@@ -40,6 +42,8 @@ from bd_registration.views import (
     ReportFeePaymentRegisterView,
     ReportCertificateHistoryView,
 )
+
+from payments.views import payment_receipt_view
 
 from fee_master.views import FeeMasterPageView, FeeMasterAddView, FeeMasterEditView
 
@@ -219,6 +223,13 @@ urlpatterns = [
 
     # ── Application review + payment mode page ────────────────────────────────
     path('applications/<int:pk>/review/', ApplicationReviewView.as_view(), name='application_review'),
+
+    # ── Certificates ──────────────────────────────────────────────────────────
+    path('certificates/<int:pk>/birth/', BirthCertificateView.as_view(), name='birth_certificate'),
+    path('certificates/<int:pk>/death/', DeathCertificateView.as_view(), name='death_certificate'),
+
+    # ── Payment Receipt ───────────────────────────────────────────────────────
+    path('payments/receipt/<int:order_pk>/', payment_receipt_view, name='payment_receipt'),
 
     # ── Fee Master page ───────────────────────────────────────────────────────
     path('masters/fees/',              FeeMasterPageView.as_view(),    name='fee_master_page'),

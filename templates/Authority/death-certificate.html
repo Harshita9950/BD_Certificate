@@ -1,0 +1,173 @@
+{% extends 'Authority/base.html' %}
+{% load static %}
+{% block title %}Death Certificate — {{ death.registration_number }}{% endblock %}
+
+{% block content %}
+<style>
+  .certificate::before { content:""; position:absolute; top:7mm; right:7mm; bottom:7mm; left:7mm; border:2px solid #757575; pointer-events:none; z-index:5; }
+  .certificate::after  { content:""; position:absolute; top:9mm; right:9mm; bottom:9mm; left:9mm; border:1px solid #757575; pointer-events:none; z-index:5; }
+  .my-table th,.my-table td { white-space:normal!important; word-break:break-all!important; overflow-wrap:anywhere!important; overflow:hidden!important; }
+</style>
+
+<main class="content">
+  <section class="page-inner d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-3">
+    <div class="page-heading">
+      <h1 class="page-title">Death Certificate</h1>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+          <li class="breadcrumb-item"><a href="{% url 'report_registration_register' %}">Registration Register</a></li>
+          <li class="breadcrumb-item active">{{ death.registration_number }}</li>
+        </ol>
+      </nav>
+    </div>
+    <div class="ms-auto d-print-none d-flex gap-2">
+      <button onclick="printTable('printableArea')" class="btn btn-primary btn-sm"><i class="ri-printer-line me-1"></i> Print</button>
+      <a href="{% url 'report_registration_register' %}" class="btn btn-light btn-sm"><i class="ri-arrow-left-line me-1"></i> Back</a>
+    </div>
+  </section>
+
+  <section class="mb-4">
+    <div class="card">
+      <div class="card-body p-4">
+        <div class="certificate-wrapper" id="printableArea" style="padding:30px 15px;">
+          <main class="certificate" style="position:relative; width:210mm; min-width:210mm; max-width:100%; margin:0 auto; padding:17mm 17mm; background:#ffffff; overflow:hidden;">
+            <div class="certificate-content">
+
+              <!-- HEADER -->
+              <table style="width:100%; border-collapse:collapse;">
+                <tr>
+                  <td style="width:25%; text-align:left; vertical-align:middle;"><img src="{% static 'images/logo/logo.png' %}" alt="Logo" style="width:75px;height:75px;object-fit:contain;"></td>
+                  <td style="width:50%; text-align:center; vertical-align:middle;"><img src="{% static 'images/logo/logo.png' %}" alt="Logo" style="width:85px;height:85px;object-fit:contain;"></td>
+                  <td style="width:25%; text-align:right; vertical-align:middle;"><img src="{% static 'images/logo/logo.png' %}" alt="Logo" style="width:75px;height:75px;object-fit:contain;"></td>
+                </tr>
+              </table>
+
+              <div style="text-align:center; padding-bottom:13px; margin-bottom:15px; border-bottom:2px solid #000;">
+                <div style="color:#0e0e0e; font-size:10px; padding:1px 0;">प्ररूप संख्या 6</div>
+                <div style="color:#0e0e0e; font-size:10px;">FORM NO. 6</div>
+                <div style="color:#000; font-size:20px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">राजस्थान सरकार</div>
+                <div style="color:#000; font-size:20px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Government of Rajasthan</div>
+                <div style="color:#000; font-size:18px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">अर्थशास्त्र एवं सांख्यिकी निदेशालय</div>
+                <div style="color:#000; font-size:18px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Directorate of Economics &amp; Statistics</div>
+                <div style="text-align:center; margin:8px auto; border:2px solid #757575; width:300px; border-radius:5px; padding:5px 0;">
+                  <h2 style="margin:0; color:#000; font-size:20px; font-weight:700;">मृत्यु प्रमाण पत्र</h2>
+                  <h1 style="margin:0; color:#000; font-size:20px; font-weight:700; letter-spacing:1px;">DEATH CERTIFICATE</h1>
+                </div>
+                <div style="color:#141414; font-size:11px; margin:3px 0;">(जन्म और मृत्यु रजिस्ट्रीकरण अधिनियम, 1969 की धारा 12/17 और राजस्थान जन्म और मृत्यु रजिस्ट्रीकरण नियम, 2000 के नियम 8/13 के अधीन जारी किया गया)</div>
+                <div style="color:#141414; font-size:11px;">(Issued under Section 12/17 of the Registration of Births and Deaths Act, 1969 and Rule 8/13 of the Rajasthan Registration of Births and Deaths Rules, 2000)</div>
+              </div>
+
+              <!-- INTRO PARAGRAPH -->
+              <p style="margin-bottom:13px; font-size:13px; line-height:1.85; text-align:justify;">
+                यह प्रमाणित किया जाता है कि निम्नलिखित सूचना मृत्यु के मूल अभिलेख से ली गई है जो कि (स्थानीय क्षेत्र/स्थानीय निकाय)
+                <strong>{{ app.ulb.name|default:"" }}</strong> तहसील/खण्ड <strong>{{ app.district.name|default:"" }}</strong>
+                जिला <strong>{{ app.district.name|default:"" }}</strong> राज्य/संघ राज्य <strong>{{ app.state_code|default:"Rajasthan" }}</strong>, भारत का रजिस्टर है।
+              </p>
+              <p style="margin-bottom:13px; font-size:13px; line-height:1.85; text-align:justify;">
+                This is to certify that the following information has been taken from the original record of death which is the register for (local area/local body)
+                <strong>{{ app.ulb.name|default:"" }}</strong> of Tehsil/Block <strong>{{ app.district.name|default:"" }}</strong>
+                of District <strong>{{ app.district.name|default:"" }}</strong> of State/Union Territory <strong>{{ app.state_code|default:"Rajasthan" }}</strong>.
+              </p>
+
+              <!-- REGISTRATION META -->
+              <section style="padding:10px 12px; margin-bottom:15px; border:1px solid #d7dadd;">
+                <div class="row">
+                  <div class="col-md-6">
+                    <div style="display:flex; gap:7px; margin-bottom:5px; font-size:13px;">
+                      <span style="font-weight:700;">पंजीकरण संख्या (Registration No.):</span>
+                      <span style="color:#222; font-weight:600;">{{ death.registration_number }}</span>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div style="display:flex; gap:7px; margin-bottom:5px; font-size:13px;">
+                      <span style="font-weight:700;">पंजीकरण तिथि (Registration Date):</span>
+                      <span style="color:#222; font-weight:600;">{{ death.date_of_registration|date:"d/m/Y" }}</span>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- MAIN DATA TABLE -->
+              <table class="table my-table" style="width:100%; max-width:100%; margin-top:15px; border-collapse:collapse; font-size:12px; border:1px solid #d7dadd; table-layout:fixed;">
+                <tbody>
+                  <tr>
+                    <th width="30%">नाम / Name</th>
+                    <td width="40%">{% if death.deceased_first_name %}{{ death.deceased_first_name }}{% if death.deceased_middle_name %} {{ death.deceased_middle_name }}{% endif %}{% if death.deceased_last_name %} {{ death.deceased_last_name }}{% endif %}{% else %}—{% endif %}</td>
+                    <th width="15%">लिंग / Sex</th>
+                    <td width="15%">{{ death.get_sex_display|default:"—" }}</td>
+                  </tr>
+                  <tr>
+                    <th>मृत्यु की तिथि / Date of Death</th>
+                    <td colspan="3">{{ death.date_of_death|date:"d/m/Y"|default:"—" }}</td>
+                  </tr>
+                  <tr>
+                    <th>मृत्यु स्थान / Place of Death</th>
+                    <td colspan="3">{% if death.institution_name %}{{ death.institution_name }}{% if death.place_of_death_address %}, {{ death.place_of_death_address }}{% endif %}{% elif death.place_of_death_address %}{{ death.place_of_death_address }}{% else %}—{% endif %}</td>
+                  </tr>
+                  <tr>
+                    <th>माता का नाम / Name of Mother</th>
+                    <td colspan="3">{{ death.mother_name|default:"—" }}</td>
+                  </tr>
+                  <tr>
+                    <th>पिता का नाम / Name of Father</th>
+                    <td colspan="3">{{ death.father_name|default:"—" }}</td>
+                  </tr>
+                  <tr>
+                    <th>पति/पत्नी का नाम / Name of Husband/Wife</th>
+                    <td colspan="3">{{ death.spouse_name|default:"—" }}</td>
+                  </tr>
+                  <tr>
+                    <th>मृतक का मृत्यु के समय का पता / <br>Address at the time of Death</th>
+                    <td colspan="3">{{ death.last_residence_address|default:death.place_of_death_address|default:"—" }}</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <!-- SIGNATURE / QR -->
+              <section style="margin-top:30px;">
+                <div class="row align-items-end">
+                  <div class="col-6">
+                    <div style="width:88px; height:88px; border:1px solid #222; display:flex; align-items:center; justify-content:center;">
+                      <img src="{% static 'images/logo/qr/sampleqr.png' %}" alt="QR" width="80px">
+                    </div>
+                    <div style="text-align:start; margin-top:5px; font-size:9px; color:#555;">Certificate Verification</div>
+                  </div>
+                  <div class="col-6">
+                    <div style="min-height:105px; padding-top:45px; text-align:center;">
+                      <div style="width:165px; margin:0 auto 5px; border-top:1px solid #444;"></div>
+                      <div style="font-size:12px;">जारी करने वाले प्राधिकारी के हस्ताक्षर / <br>Signature of issuing authority</div>
+                      <div style="color:#2b2b2b; font-size:10.5px;">{{ app.ulb.name|default:"" }}<br>{{ app.district.name|default:"" }}, {{ app.state_code|default:"Rajasthan" }}</div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- ISSUE DATE -->
+              <section style="margin-top:8px;">
+                <div style="color:#363636; font-size:10.5px;">
+                  जारी करने की तिथि / Date of Issue:<br>
+                  <span style="font-size:11.5px; font-weight:700; color:#222;">{{ today|date:"d F Y" }}</span>
+                </div>
+              </section>
+
+              <!-- NOTE -->
+              <h3 style="margin-top:22px; margin-bottom:9px; padding-bottom:5px; color:#000; border-bottom:1px solid #c7d0d8; font-size:14px; font-weight:700;">Note:</h3>
+              <ol style="margin:0; padding-left:21px; font-size:11.2px; line-height:1.7;">
+                <li>Use of Digital Signature for issuing birth and death certificate is recognized by Economics and Statistics Department, Government of Rajasthan vide circular number F13/1/39/VS/DES/2013/22519 Dated 02.06.2015</li>
+              </ol>
+
+              <!-- FOOTER -->
+              <footer style="display:flex; justify-content:space-between; gap:15px; margin-top:10px; padding-top:5px; border-bottom:1px solid #cbd3da; font-size:9px; color:#59636c;">
+                <div>Generated Date: <span>{{ today|date:"d/m/Y" }}</span></div>
+                <div>This is a computer generated Death Certificate.</div>
+              </footer>
+
+            </div>
+          </main>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+{% endblock %}

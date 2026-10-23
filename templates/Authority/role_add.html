@@ -4,6 +4,24 @@
 {% block title %}BD Portal{% endblock %}
 
 {% block content %}
+<style>
+    .field-error {
+        display: none;
+        color: #dc3545 !important;
+        font-size: 0.875rem;
+        margin-top: 5px;
+    }
+
+    .field-error.show {
+        display: block;
+    }
+
+    .form-control.is-invalid,
+    .form-select.is-invalid {
+        border: 1px solid #dc3545 !important;
+        box-shadow: 0 0 0 0.15rem rgba(220, 53, 69, 0.15);
+    }
+</style>
 <main class="content">
 
     <section class="page-inner d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-3">
@@ -34,13 +52,9 @@
 
     <div class="card border-0 shadow-sm">
 
-        <div class="card-header">
-            <h5 class="mb-0">Role Details</h5>
-        </div>
-
         <div class="card-body">
 
-            <form id="roleForm">
+            <form id="roleForm" novalidate>
 
                 <div class="row g-3">
 
@@ -56,6 +70,9 @@
                             placeholder="Enter role name"
                             required
                         >
+                        <div class="field-error" id="roleNameError">
+                           Role Name is required.
+                        </div>
                     </div>
 
                     <div class="col-md-6">
@@ -81,6 +98,9 @@
                             <option value="AUDITOR">Auditor</option>
                             <option value="ADMIN">System Administrator</option>
                         </select>
+                        <div class="field-error" id="roleCodeError">
+                           Please select a Role Code.
+                        </div>
                     </div>
 
                     <div class="col-12">
@@ -95,6 +115,10 @@
                             rows="3"
                             placeholder="Enter role description"
                         ></textarea>
+                    <div class="d-flex justify-content-between mt-1">
+                        <small id="descriptionError" class="text-danger"></small>
+                        <small id="descriptionWordCount" class="text-muted">0/15 words</small>
+                    </div>
 
                     </div>
 
@@ -184,23 +208,21 @@
                 </div>
 
                 <div class="mt-4 d-flex gap-2">
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                        id="submitRoleBtn"
+                    >
+                        Submit
+                    </button>
 
                     <a
                         href="{% url 'roles' %}"
                         class="btn btn-secondary"
                     >
-                        BACK
+                        Back
                     </a>
-
-                    <button
-                        type="submit"
-                        class="btn btn-primary"
-                    >
-                        SAVE
-                    </button>
-
                 </div>
-
             </form>
 
         </div>
@@ -210,50 +232,153 @@
 </main>
 {% endblock %}
 
+
+
 {% block extra_js %}
 <script type="module">
-
     import api from "{% static 'js/api.js' %}";
 
     document.addEventListener("DOMContentLoaded", async () => {
+        const form = document.getElementById("roleForm");
+        const roleName = document.getElementById("roleName");
+        const roleCode = document.getElementById("roleCode");
+        const description = document.getElementById("description");
+        const submitButton = document.getElementById("submitRoleBtn");
+        const permissionsContainer = document.getElementById("permissionsContainer");
 
-        const form =
-            document.getElementById("roleForm");
+        const descriptionError = document.getElementById("descriptionError");
+        const descriptionWordCount = document.getElementById("descriptionWordCount");
 
-        const permissionsContainer =
-            document.getElementById("permissionsContainer");
+        // Show validation error below a field
+        function showFieldError(input, errorId, message) {
+            input.classList.add("is-invalid");
 
+            const error = document.getElementById(errorId);
+            error.textContent = message;
+            error.classList.add("show");
+        }
+
+        // Clear validation error
+        function clearFieldError(input, errorId) {
+            input.classList.remove("is-invalid");
+
+            const error = document.getElementById(errorId);
+            error.textContent = "";
+            error.classList.remove("show");
+        }
+
+        // Count words, ignoring extra spaces and line breaks
+        function countWords(text) {
+            const trimmed = text.trim();
+            return trimmed ? trimmed.split(/\s+/).length : 0;
+        }
+
+        // Validate description and update the counter
+        function validateDescription() {
+            const wordCount = countWords(description.value);
+
+            descriptionWordCount.textContent = `${wordCount}/15 words`;
+
+            if (wordCount > 15) {
+                showFieldError(
+                    description,
+                    "descriptionError",
+                    "Description cannot exceed 15 words."
+                );
+                return false;
+            }
+
+            clearFieldError(description, "descriptionError");
+            return true;
+        }
+
+        // Validate required fields
+        function validateRoleForm() {
+            let isValid = true;
+
+            if (!roleName.value.trim()) {
+                showFieldError(
+                    roleName,
+                    "roleNameError",
+                    "Role Name is required."
+                );
+                isValid = false;
+            } else {
+                clearFieldError(roleName, "roleNameError");
+            }
+
+            if (!roleCode.value) {
+                showFieldError(
+                    roleCode,
+                    "roleCodeError",
+                    "Please select a Role Code."
+                );
+                isValid = false;
+            } else {
+                clearFieldError(roleCode, "roleCodeError");
+            }
+
+            if (!validateDescription()) {
+                isValid = false;
+            }
+
+            if (!isValid) {
+                const firstInvalid = form.querySelector(".is-invalid");
+
+                firstInvalid?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center"
+                });
+
+                firstInvalid?.focus();
+            }
+
+            return isValid;
+        }
+
+        // Clear errors as fields are corrected
+        roleName.addEventListener("input", () => {
+            if (roleName.value.trim()) {
+                clearFieldError(roleName, "roleNameError");
+            }
+        });
+
+        roleCode.addEventListener("change", () => {
+            if (roleCode.value) {
+                clearFieldError(roleCode, "roleCodeError");
+            }
+        });
+
+        description.addEventListener("input", validateDescription);
+
+        // Safely render text from the API
+        function escapeHtml(value) {
+            const div = document.createElement("div");
+            div.textContent = value ?? "";
+            return div.innerHTML;
+        }
+
+        // Load permissions
         async function loadPermissions() {
-
             try {
-
-                const data =
-                    await api.get(
-                        "/api/users/permissions/"
-                    );
-
-                const permissions =
-                    data.results || data;
+                const data = await api.get("/api/users/permissions/");
+                const permissions = data.results || data;
 
                 permissionsContainer.innerHTML = "";
 
                 if (!permissions.length) {
-
                     permissionsContainer.innerHTML = `
                         <div class="text-secondary">
                             No permissions available.
                         </div>
                     `;
-
                     return;
                 }
 
                 const grouped = {};
 
                 permissions.forEach(permission => {
-
-                    const module =
-                        permission.module || "Other";
+                    const module = permission.module || "Other";
 
                     if (!grouped[module]) {
                         grouped[module] = [];
@@ -262,196 +387,121 @@
                     grouped[module].push(permission);
                 });
 
-                Object.keys(grouped)
-                    .sort()
-                    .forEach(module => {
+                Object.keys(grouped).sort().forEach(module => {
+                    const moduleWrapper = document.createElement("div");
+                    moduleWrapper.className = "mb-3";
 
-                        const moduleWrapper =
-                            document.createElement("div");
+                    moduleWrapper.innerHTML = `
+                        <div class="fw-semibold mb-2">
+                            ${escapeHtml(module)}
+                        </div>
+                    `;
 
-                        moduleWrapper.className =
-                            "mb-3";
+                    grouped[module].forEach(permission => {
+                        const wrapper = document.createElement("div");
+                        wrapper.className = "form-check mb-1";
 
-                        moduleWrapper.innerHTML = `
-                            <div class="fw-semibold mb-2">
-                                ${escapeHtml(module)}
-                            </div>
+                        wrapper.innerHTML = `
+                            <input
+                                class="form-check-input permission-checkbox"
+                                type="checkbox"
+                                value="${permission.id}"
+                                id="permission_${permission.id}"
+                            >
+                            <label
+                                class="form-check-label"
+                                for="permission_${permission.id}"
+                            >
+                                ${escapeHtml(permission.code)}
+                                ${
+                                    permission.description
+                                        ? `<span class="text-secondary ms-1">
+                                            - ${escapeHtml(permission.description)}
+                                           </span>`
+                                        : ""
+                                }
+                            </label>
                         `;
 
-                        grouped[module].forEach(
-                            permission => {
-
-                                const wrapper =
-                                    document.createElement("div");
-
-                                wrapper.className =
-                                    "form-check mb-1";
-
-                                wrapper.innerHTML = `
-                                    <input
-                                        class="form-check-input permission-checkbox"
-                                        type="checkbox"
-                                        value="${permission.id}"
-                                        id="permission_${permission.id}"
-                                    >
-
-                                    <label
-                                        class="form-check-label"
-                                        for="permission_${permission.id}"
-                                    >
-                                        ${escapeHtml(permission.code)}
-
-                                        ${
-                                            permission.description
-                                                ? `<span class="text-secondary ms-1">
-                                                    - ${escapeHtml(permission.description)}
-                                                   </span>`
-                                                : ""
-                                        }
-                                    </label>
-                                `;
-
-                                moduleWrapper.appendChild(
-                                    wrapper
-                                );
-                            }
-                        );
-
-                        permissionsContainer.appendChild(
-                            moduleWrapper
-                        );
+                        moduleWrapper.appendChild(wrapper);
                     });
 
+                    permissionsContainer.appendChild(moduleWrapper);
+                });
             } catch (error) {
-
                 permissionsContainer.innerHTML = `
                     <div class="text-danger">
                         ${escapeHtml(
-                            error.detail ||
-                            "Unable to load permissions."
+                            error.detail || "Unable to load permissions."
                         )}
                     </div>
                 `;
             }
         }
 
-        form.addEventListener(
-            "submit",
-            async event => {
+        // Submit role
+        form.addEventListener("submit", async event => {
+            event.preventDefault();
 
-                event.preventDefault();
-
-                const selectedPermissions =
-                    Array.from(
-                        document.querySelectorAll(
-                            ".permission-checkbox:checked"
-                        )
-                    ).map(
-                        checkbox =>
-                            Number(checkbox.value)
-                    );
-
-                const payload = {
-
-                    name:
-                        document
-                            .getElementById("roleName")
-                            .value
-                            .trim(),
-
-                    code:
-                        document
-                            .getElementById("roleCode")
-                            .value,
-
-                    description:
-                        document
-                            .getElementById("description")
-                            .value
-                            .trim(),
-
-                    permissions:
-                        selectedPermissions,
-
-                    ulb_code:
-                        document
-                            .getElementById("ulbCode")
-                            .value
-                            .trim(),
-
-                    is_active:
-                        document
-                            .querySelector(
-                                'input[name="status"]:checked'
-                            )
-                            .value === "true"
-                };
-
-                try {
-
-                    await api.post(
-                        "/api/users/roles/",
-                        payload
-                    );
-
-                    alert(
-                        "Role created successfully."
-                    );
-
-                    window.location.href =
-                        "{% url 'roles' %}";
-
-                } catch (error) {
-
-                    let message =
-                        error.detail ||
-                        "Unable to create role.";
-
-                    if (
-                        error.data &&
-                        typeof error.data === "object"
-                    ) {
-
-                        const errors = [];
-
-                        Object.entries(
-                            error.data
-                        ).forEach(
-                            ([field, value]) => {
-
-                                errors.push(
-                                    `${field}: ${Array.isArray(value)
-                                        ? value.join(", ")
-                                        : value}`
-                                );
-                            }
-                        );
-
-                        if (errors.length) {
-                            message =
-                                errors.join("\n");
-                        }
-                    }
-
-                    alert(message);
-                }
+            if (!validateRoleForm()) {
+                return;
             }
-        );
 
-        function escapeHtml(value) {
+            if (submitButton.disabled) {
+                return;
+            }
 
-            const div =
-                document.createElement("div");
+            submitButton.disabled = true;
+            submitButton.textContent = "Submitting...";
 
-            div.textContent =
-                value ?? "";
+            const selectedPermissions = Array.from(
+                document.querySelectorAll(".permission-checkbox:checked")
+            ).map(checkbox => Number(checkbox.value));
 
-            return div.innerHTML;
-        }
+            const payload = {
+                name: roleName.value.trim(),
+                code: roleCode.value,
+                description: description.value.trim(),
+                permissions: selectedPermissions,
+                ulb_code: document.getElementById("ulbCode").value.trim(),
+                is_active: document.querySelector(
+                    'input[name="status"]:checked'
+                ).value === "true"
+            };
 
+            try {
+                await api.post("/api/users/roles/", payload);
+
+                alert("Role created successfully.");
+                window.location.href = "{% url 'roles' %}";
+            } catch (error) {
+                let message = error.detail || "Unable to create role.";
+
+                if (error.data && typeof error.data === "object") {
+                    const errors = [];
+
+                    Object.entries(error.data).forEach(([field, value]) => {
+                        errors.push(
+                            `${field}: ${
+                                Array.isArray(value) ? value.join(", ") : value
+                            }`
+                        );
+                    });
+
+                    if (errors.length) {
+                        message = errors.join("\n");
+                    }
+                }
+
+                alert(message);
+                submitButton.disabled = false;
+                submitButton.textContent = "Submit";
+            }
+        });
+
+        // Initialize counter and load permissions
+        validateDescription();
         await loadPermissions();
-
     });
-
 </script>
 {% endblock %}

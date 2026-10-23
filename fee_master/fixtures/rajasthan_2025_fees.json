@@ -262,5 +262,71 @@
       "created_at": "2025-02-07T00:00:00Z",
       "updated_at": "2025-02-07T00:00:00Z"
     }
+  },
+  {
+    "model": "fee_master.feemaster",
+    "pk": 13,
+    "fields": {
+      "fee_code": "DD.LATE_30",
+      "fee_name": "Death — Delayed Registration (after 21 days, up to 30 days)",
+      "service_type": "DEATH_REGISTRATION",
+      "calculation_type": "FIXED",
+      "amount": "20.00",
+      "currency": "INR",
+      "state_code": "RJ",
+      "district": null,
+      "ulb": null,
+      "effective_from": "2025-02-07",
+      "effective_to": null,
+      "rule_reference": "Rajasthan Registration of Births and Deaths (Amendment) Rules, 2025 — Rule 9(i)",
+      "notes": "Death registration after 21 days but within 30 days of the event. Late fee of Rs. 20 applicable.",
+      "is_active": true,
+      "created_at": "2025-02-07T00:00:00Z",
+      "updated_at": "2025-02-07T00:00:00Z"
+    }
+  },
+  {
+    "model": "fee_master.feemaster",
+    "pk": 14,
+    "fields": {
+      "fee_code": "DD.LATE_1_YEAR",
+      "fee_name": "Death — Delayed Registration (after 30 days, up to 1 year)",
+      "service_type": "DEATH_REGISTRATION",
+      "calculation_type": "FIXED",
+      "amount": "50.00",
+      "currency": "INR",
+      "state_code": "RJ",
+      "district": null,
+      "ulb": null,
+      "effective_from": "2025-02-07",
+      "effective_to": null,
+      "rule_reference": "Rajasthan Registration of Births and Deaths (Amendment) Rules, 2025 — Rule 9(ii)",
+      "notes": "Death registration after 30 days but within 1 year. Written permission of District Registrar or BSO required. Form No. 14 mandatory. Late fee Rs. 50.",
+      "is_active": true,
+      "created_at": "2025-02-07T00:00:00Z",
+      "updated_at": "2025-02-07T00:00:00Z"
+    }
+  },
+  {
+    "model": "fee_master.feemaster",
+    "pk": 15,
+    "fields": {
+      "fee_code": "DD.LATE_ABOVE_YEAR",
+      "fee_name": "Death — Delayed Registration (after 1 year)",
+      "service_type": "DEATH_REGISTRATION",
+      "calculation_type": "FIXED",
+      "amount": "100.00",
+      "currency": "INR",
+      "state_code": "RJ",
+      "district": null,
+      "ulb": null,
+      "effective_from": "2025-02-07",
+      "effective_to": null,
+      "rule_reference": "Rajasthan Registration of Births and Deaths (Amendment) Rules, 2025 — Rule 9(iii)",
+      "notes": "Death registration after 1 year. Order of District Magistrate / Sub-Divisional Magistrate / Executive Magistrate required. Late fee Rs. 100.",
+      "is_active": true,
+      "created_at": "2025-02-07T00:00:00Z",
+      "updated_at": "2025-02-07T00:00:00Z"
+    }
   }
 ]

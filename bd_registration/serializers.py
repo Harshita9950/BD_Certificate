@@ -435,3 +435,105 @@ class BirthApplicationSerializer(serializers.Serializer):
                 raise serializers.ValidationError(errors)
 
         return data
+
+
+# ─── Combined Death Application (atomic create) ───────────────────────────────
+
+class DeathApplicationSerializer(serializers.Serializer):
+    """
+    Write-only serializer for atomically creating an Application +
+    DeathRegistration in a single API call.
+
+    POST /api/bd-registration/death-applications/
+    Body: { ...application fields..., ...death fields..., action: 'draft'|'submit' }
+    """
+
+    # ── Action ────────────────────────────────────────────────────────────────
+    action = serializers.ChoiceField(
+        choices=['draft', 'submit'],
+        default='draft',
+        write_only=True,
+    )
+
+    # ── Application fields ────────────────────────────────────────────────────
+    service_type       = serializers.CharField(default='DEATH_REGISTRATION')
+    registration_type  = serializers.PrimaryKeyRelatedField(
+        required=False, allow_null=True,
+        queryset=RegistrationType.objects.filter(is_active=True),
+    )
+    state_code         = serializers.CharField(required=False, allow_blank=True, default='RJ')
+    district           = serializers.PrimaryKeyRelatedField(
+        required=False, allow_null=True,
+        queryset=District.objects.filter(is_active=True),
+    )
+    ulb                = serializers.PrimaryKeyRelatedField(
+        required=False, allow_null=True,
+        queryset=ULB.objects.filter(is_active=True),
+    )
+    date_of_reporting  = serializers.DateField(required=False, allow_null=True)
+    remarks            = serializers.CharField(required=False, allow_blank=True, default='')
+
+    # ── Death-specific fields ─────────────────────────────────────────────────
+    deceased_first_name      = serializers.CharField(required=False, allow_blank=True, default='', max_length=100)
+    deceased_middle_name     = serializers.CharField(required=False, allow_blank=True, default='', max_length=100)
+    deceased_last_name       = serializers.CharField(required=False, allow_blank=True, default='', max_length=100)
+    sex                      = serializers.CharField(required=False, allow_blank=True, default='UNKNOWN', max_length=10)
+    date_of_birth_of_deceased = serializers.DateField(required=False, allow_null=True)
+    age_at_death_years       = serializers.IntegerField(required=False, allow_null=True, min_value=0)
+    age_at_death_months      = serializers.IntegerField(required=False, allow_null=True, min_value=0, max_value=11)
+    age_at_death_days        = serializers.IntegerField(required=False, allow_null=True, min_value=0, max_value=30)
+    nationality              = serializers.CharField(required=False, allow_blank=True, default='Indian', max_length=100)
+    date_of_death            = serializers.DateField(required=False, allow_null=True)
+    time_of_death            = serializers.TimeField(required=False, allow_null=True)
+    event_location_type      = serializers.CharField(required=False, allow_blank=True, default='', max_length=25)
+    institution_name         = serializers.CharField(required=False, allow_blank=True, default='', max_length=250)
+    place_of_death_address   = serializers.CharField(required=False, allow_blank=True, default='')
+    ward                     = serializers.PrimaryKeyRelatedField(
+        required=False, allow_null=True,
+        queryset=GeographyWard.objects.filter(is_active=True),
+    )
+    last_residence_address   = serializers.CharField(required=False, allow_blank=True, default='')
+    father_name              = serializers.CharField(required=False, allow_blank=True, default='', max_length=150)
+    mother_name              = serializers.CharField(required=False, allow_blank=True, default='', max_length=150)
+    spouse_name              = serializers.CharField(required=False, allow_blank=True, default='', max_length=150)
+    informant_name           = serializers.CharField(required=False, allow_blank=True, default='', max_length=150)
+    informant_relation       = serializers.CharField(required=False, allow_blank=True, default='', max_length=20)
+    informant_address        = serializers.CharField(required=False, allow_blank=True, default='')
+    informant_mobile         = serializers.CharField(required=False, allow_blank=True, default='', max_length=15)
+
+    def validate(self, data):
+        action = data.get('action', 'draft')
+
+        if action == 'submit':
+            errors = {}
+
+            if not data.get('district'):
+                errors['district'] = 'District is required for submission.'
+            if not data.get('ulb'):
+                errors['ulb'] = 'ULB is required for submission.'
+            if not data.get('date_of_reporting'):
+                errors['date_of_reporting'] = 'Date of reporting is required for submission.'
+            if not data.get('date_of_death'):
+                errors['date_of_death'] = 'Date of death is required for submission.'
+            if not data.get('deceased_first_name', '').strip():
+                errors['deceased_first_name'] = 'Deceased first name is required for submission.'
+            if not data.get('sex') or data.get('sex') == 'UNKNOWN':
+                errors['sex'] = 'Sex is required for submission.'
+
+            from django.utils import timezone
+            today = timezone.localdate()
+
+            dod = data.get('date_of_death')
+            dor = data.get('date_of_reporting')
+
+            if dod and dod > today:
+                errors['date_of_death'] = 'Date of death cannot be in the future.'
+            if dor and dor > today:
+                errors['date_of_reporting'] = 'Date of reporting cannot be in the future.'
+            if dod and dor and dor < dod:
+                errors['date_of_reporting'] = 'Date of reporting cannot be before date of death.'
+
+            if errors:
+                raise serializers.ValidationError(errors)
+
+        return data
