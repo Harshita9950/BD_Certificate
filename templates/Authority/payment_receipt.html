@@ -125,7 +125,7 @@
       <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
           <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
-          <li class="breadcrumb-item"><a href="{% url 'my_applications' %}">My Applications</a></li>
+          <li class="breadcrumb-item"><a href="javascript:history.back()">Back</a></li>
           <li class="breadcrumb-item active">Receipt</li>
         </ol>
       </nav>
@@ -133,8 +133,8 @@
     <div class="ms-auto d-print-none d-flex gap-2">
       <button onclick="window.print()" class="btn btn-outline-secondary btn-sm"><i class="ri-printer-line me-1"></i>
         Print</button>
-      <a href="{% url 'my_applications' %}" class="btn btn-light btn-sm"><i class="ri-arrow-left-line me-1"></i> My
-        Applications</a>
+      <button onclick="history.back()" class="btn btn-light btn-sm"><i class="ri-arrow-left-line me-1"></i>
+        Back</button>
     </div>
   </section>
 
@@ -162,7 +162,8 @@
         <!-- RECEIPT DETAILS -->
         <div class="receipt-row">
           <span class="receipt-label">Receipt Number</span>
-          <span class="receipt-value" style="color:#1572e8;">{% if txn %}{{ txn.receipt_number }}{% else %}—{% endif %}</span>
+          <span class="receipt-value" style="color:#1572e8;">{% if txn %}{{ txn.receipt_number }}{% else %}—{% endif
+            %}</span>
         </div>
         <div class="receipt-row">
           <span class="receipt-label">Application Number</span>
@@ -182,11 +183,13 @@
         </div>
         <div class="receipt-row">
           <span class="receipt-label">Payment Date</span>
-          <span class="receipt-value">{% if txn %}{% if txn.completed_at %}{{ txn.completed_at|date:"d-m-Y H:i" }}{% else %}{{ txn.initiated_at|date:"d-m-Y H:i" }}{% endif %}{% else %}—{% endif %}</span>
+          <span class="receipt-value">{% if txn %}{% if txn.completed_at %}{{ txn.completed_at|date:"d-m-Y H:i" }}{%
+            else %}{{ txn.initiated_at|date:"d-m-Y H:i" }}{% endif %}{% else %}—{% endif %}</span>
         </div>
         <div class="receipt-row">
           <span class="receipt-label">Collected By</span>
-          <span class="receipt-value">{% if txn and txn.collected_by %}{{ txn.collected_by.get_full_name|default:txn.collected_by.username }}{% else %}—{% endif %}</span>
+          <span class="receipt-value">{% if txn and txn.collected_by %}{{
+            txn.collected_by.get_full_name|default:txn.collected_by.username }}{% else %}—{% endif %}</span>
         </div>
         {% if txn and txn.notes %}
         <div class="receipt-row">
@@ -200,7 +203,8 @@
         </div>
         <div class="receipt-row">
           <span class="receipt-label">Submitted By</span>
-          <span class="receipt-value">{% if app.submitted_by %}{{ app.submitted_by.get_full_name|default:app.submitted_by.username }}{% else %}—{% endif %}</span>
+          <span class="receipt-value">{% if app.submitted_by %}{{
+            app.submitted_by.get_full_name|default:app.submitted_by.username }}{% else %}—{% endif %}</span>
         </div>
 
         <!-- FOOTER -->
