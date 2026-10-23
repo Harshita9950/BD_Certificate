@@ -1769,7 +1769,10 @@ def _report_filter_context(request):
         'districts':      districts_qs,
         'ulbs':           ulbs_qs,
         'wards':          wards_qs,
-        'service_types':  ServiceType.choices,
+        'service_types':  [
+            ('BIRTH_REGISTRATION',  'Birth Registration'),
+            ('DEATH_REGISTRATION',  'Death Registration'),
+        ],
         'status_choices': ApplicationStatus.choices,
         'filter_params':  request.GET,
     }

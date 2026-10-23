@@ -27,23 +27,40 @@
 </form>
 {% endblock %}
 
+{% block summary_cards %}
+<div class="row g-3 mb-4 d-print-none">
+    {% for r in by_service %}
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <div class="fs-2 fw-bold {% if r.service_type == 'BIRTH_REGISTRATION' %}text-primary{% elif r.service_type == 'DEATH_REGISTRATION' %}text-danger{% else %}text-secondary{% endif %}">{{ r.count }}</div>
+            <div class="small text-muted mt-1">{% if r.service_type == 'BIRTH_REGISTRATION' %}Birth Registrations{% elif r.service_type == 'DEATH_REGISTRATION' %}Death Registrations{% elif r.service_type == 'STILL_BIRTH_REGISTRATION' %}Still Birth{% else %}{{ r.service_type }}{% endif %}</div>
+        </div>
+    </div>
+    {% endfor %}
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm text-center p-3 bg-light">
+            <div class="fs-2 fw-bold text-dark">{{ total }}</div>
+            <div class="small text-muted mt-1">Total Applications</div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
 {% block report_table %}
 <div class="p-3">
     <div class="row g-4 mb-4">
-        <!-- Service Type Summary -->
         <div class="col-md-4">
-            <h6 class="fw-bold mb-3">By Service Type</h6>
+            <h6 class="fw-bold mb-3 border-bottom pb-2">By Service Type</h6>
             <table class="table table-sm table-bordered">
                 <thead class="table-light"><tr><th>Service</th><th class="text-end">Count</th></tr></thead>
                 <tbody>
-                    {% for r in by_service %}<tr><td><small>{{ r.service_type }}</small></td><td class="text-end fw-semibold">{{ r.count }}</td></tr>{% empty %}<tr><td colspan="2" class="text-muted text-center">—</td></tr>{% endfor %}
+                    {% for r in by_service %}<tr><td><small>{% if r.service_type == 'BIRTH_REGISTRATION' %}<span class="text-primary fw-semibold">Birth Registration</span>{% elif r.service_type == 'DEATH_REGISTRATION' %}<span class="text-danger fw-semibold">Death Registration</span>{% else %}{{ r.service_type }}{% endif %}</small></td><td class="text-end fw-semibold">{{ r.count }}</td></tr>{% empty %}<tr><td colspan="2" class="text-muted text-center">—</td></tr>{% endfor %}
                     <tr class="table-light fw-bold"><td>Total</td><td class="text-end">{{ total }}</td></tr>
                 </tbody>
             </table>
         </div>
-        <!-- Status Summary -->
         <div class="col-md-4">
-            <h6 class="fw-bold mb-3">By Status</h6>
+            <h6 class="fw-bold mb-3 border-bottom pb-2">By Status</h6>
             <table class="table table-sm table-bordered">
                 <thead class="table-light"><tr><th>Status</th><th class="text-end">Count</th></tr></thead>
                 <tbody>
@@ -51,9 +68,8 @@
                 </tbody>
             </table>
         </div>
-        <!-- District Summary -->
         <div class="col-md-4">
-            <h6 class="fw-bold mb-3">Top Districts</h6>
+            <h6 class="fw-bold mb-3 border-bottom pb-2">Top Districts</h6>
             <table class="table table-sm table-bordered">
                 <thead class="table-light"><tr><th>District</th><th class="text-end">Count</th></tr></thead>
                 <tbody>
@@ -62,12 +78,11 @@
             </table>
         </div>
     </div>
-    <!-- Time Series -->
-    <h6 class="fw-bold mb-3">{% if group_by == 'monthly' %}Monthly{% else %}Daily{% endif %} Trend</h6>
+    <h6 class="fw-bold mb-3 border-bottom pb-2">{% if group_by == 'monthly' %}Monthly{% else %}Daily{% endif %} Trend</h6>
     <table class="table table-hover table-bordered">
         <thead class="table-primary"><tr><th>Period</th><th>Service Type</th><th class="text-end">Count</th></tr></thead>
         <tbody>
-            {% for r in time_series %}<tr><td class="text-nowrap">{% if r.period %}{{ r.period|date:"Y-m" }}{% else %}—{% endif %}</td><td><small>{{ r.service_type }}</small></td><td class="text-end fw-semibold">{{ r.count }}</td></tr>{% empty %}<tr><td colspan="3" class="text-center text-muted py-4">No data found.</td></tr>{% endfor %}
+            {% for r in time_series %}<tr><td class="text-nowrap">{% if r.period %}{{ r.period|date:"Y-m" }}{% else %}—{% endif %}</td><td><small>{% if r.service_type == 'BIRTH_REGISTRATION' %}Birth Registration{% elif r.service_type == 'DEATH_REGISTRATION' %}Death Registration{% else %}{{ r.service_type }}{% endif %}</small></td><td class="text-end fw-semibold">{{ r.count }}</td></tr>{% empty %}<tr><td colspan="3" class="text-center text-muted py-4">No data found.</td></tr>{% endfor %}
         </tbody>
     </table>
 </div>
