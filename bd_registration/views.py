@@ -227,7 +227,14 @@ class ApplicationInboxView(LoginRequiredMixin, View):
             'adopted_birth_registration',
             'current_step',
         ).exclude(
-            status__in=(ApplicationStatus.DRAFT, ApplicationStatus.PAYMENT_PENDING)
+            status__in=(
+                ApplicationStatus.DRAFT,
+                ApplicationStatus.PAYMENT_PENDING,
+                ApplicationStatus.REGISTERED,
+                ApplicationStatus.APPROVED,
+                ApplicationStatus.REJECTED,
+                ApplicationStatus.CANCELLED,
+            )
         )
 
         # ADMINs and superusers see everything
@@ -2266,9 +2273,10 @@ class ApplicationSentboxView(LoginRequiredMixin, View):
     """
     GET /mailbox/sentbox/
 
-    Shows all applications that the authenticated user has forwarded to the
-    next step. Fetches distinct applications from ApplicationStatusHistory
-    where action='FORWARDED' and changed_by=request.user.
+    Shows all applications that the authenticated user has forwarded OR
+    approved/registered. Fetches distinct applications from
+    ApplicationStatusHistory where action IN ('FORWARDED', 'APPROVED') and
+    changed_by=request.user — keeping a record of all processed applications.
 
     Read-only view — no action buttons on detail pages when ?from=sentbox.
     """
@@ -2278,15 +2286,15 @@ class ApplicationSentboxView(LoginRequiredMixin, View):
         from bd_registration.models import ApplicationStatusHistory
         user = request.user
 
-        # Get all distinct application IDs this user has forwarded
-        fwd_app_ids = ApplicationStatusHistory.objects.filter(
+        # Get all distinct application IDs this user has forwarded or approved
+        processed_app_ids = ApplicationStatusHistory.objects.filter(
             changed_by=user,
-            action='FORWARDED',
+            action__in=('FORWARDED', 'APPROVED'),
         ).values_list('application_id', flat=True).distinct()
 
         # Fetch those applications with full relations
         qs = Application.objects.filter(
-            pk__in=fwd_app_ids
+            pk__in=processed_app_ids
         ).select_related(
             'registration_type', 'district', 'ulb',
             'submitted_by',
@@ -2299,7 +2307,7 @@ class ApplicationSentboxView(LoginRequiredMixin, View):
 
         return render(request, 'Authority/application_inbox.html', {
             'applications': qs,
-            'inbox_title':  'Sentbox — Forwarded Applications',
+            'inbox_title':  'Sentbox — Processed Applications',
             'from_param':   'sentbox',
         })
 

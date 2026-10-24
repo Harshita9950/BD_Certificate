@@ -296,6 +296,33 @@ class Application(TimestampMixin):
     def __str__(self):
         return self.application_number
 
+    @property
+    def smart_status(self):
+        """
+        Human-readable status for display throughout the portal.
+
+        - In-workflow statuses (SUBMITTED, UNDER_SCRUTINY, UNDER_PROCESS,
+          PENDING_DOCS) → "Pending at {step.name}" using the current workflow
+          step name.  Falls back to the plain status display if no step set.
+        - Terminal / other statuses → plain get_status_display().
+        """
+        IN_WORKFLOW = {
+            ApplicationStatus.SUBMITTED,
+            ApplicationStatus.UNDER_SCRUTINY,
+            ApplicationStatus.UNDER_PROCESS,
+            ApplicationStatus.PENDING_DOCS,
+        }
+        if self.status in IN_WORKFLOW:
+            step_name = None
+            try:
+                step_name = self.current_step.name if self.current_step_id else None
+            except Exception:
+                pass
+            if step_name:
+                return f'Pending at {step_name}'
+            return 'Pending'
+        return self.get_status_display()
+
     def save(self, *args, **kwargs):
         if not self.application_number:
             # Assign a temporary unique value; final number set after PK is known.

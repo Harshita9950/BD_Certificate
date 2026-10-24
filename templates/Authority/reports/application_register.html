@@ -56,7 +56,7 @@
             <td>{{ app.district.name|default:"—" }}</td>
             <td>{{ app.ulb.name|default:"—" }}</td>
             <td>{% if app.birth_registration %}{{ app.birth_registration.ward.name|default:"—" }}{% elif app.death_registration %}{{ app.death_registration.ward.name|default:"—" }}{% else %}—{% endif %}</td>
-            <td><span class="badge {% if app.status == 'REGISTERED' %}bg-success{% elif app.status == 'REJECTED' or app.status == 'CANCELLED' %}bg-danger{% elif app.status == 'SUBMITTED' %}bg-primary{% else %}bg-warning text-dark{% endif %}">{{ app.get_status_display }}</span></td>
+            <td><span class="badge {% if app.status == 'REGISTERED' %}bg-success{% elif app.status == 'REJECTED' or app.status == 'CANCELLED' %}bg-danger{% elif app.status == 'SUBMITTED' %}bg-primary{% else %}bg-warning text-dark{% endif %}">{{ app.smart_status }}</span></td>
         </tr>
         {% endwith %}
         {% empty %}

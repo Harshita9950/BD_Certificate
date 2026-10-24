@@ -22,7 +22,7 @@
 
   <div class="alert {% if app.status == 'SUBMITTED' or app.status == 'UNDER_SCRUTINY' or app.status == 'UNDER_PROCESS' or app.status == 'PENDING_DOCS' %}alert-info{% elif app.status == 'APPROVED' or app.status == 'REGISTERED' %}alert-success{% elif app.status == 'REJECTED' or app.status == 'CANCELLED' %}alert-danger{% else %}alert-warning{% endif %} d-flex justify-content-between align-items-center mb-4" role="alert">
     <div><strong>{{ app.application_number }}</strong> &nbsp;&middot;&nbsp; {{ service_label }}</div>
-    <span class="badge fs-6 {% if app.status == 'SUBMITTED' %}bg-primary{% elif app.status == 'APPROVED' or app.status == 'REGISTERED' %}bg-success{% elif app.status == 'REJECTED' or app.status == 'CANCELLED' %}bg-danger{% else %}bg-warning text-dark{% endif %}">{{ app.get_status_display }}</span>
+    <span class="badge fs-6 {% if app.status == 'SUBMITTED' %}bg-primary{% elif app.status == 'APPROVED' or app.status == 'REGISTERED' %}bg-success{% elif app.status == 'REJECTED' or app.status == 'CANCELLED' %}bg-danger{% else %}bg-warning text-dark{% endif %}">{{ app.smart_status }}</span>
   </div>
 
   <div class="card border-0 shadow-sm mb-4"><div class="card-body p-4">
@@ -248,7 +248,7 @@
       try{
         var result=await api.post('/api/bd-registration/applications/'+APP_ID+'/approve/',{remarks:remark});
         Swal.fire({icon:'success',title:'Certificate Generated!',text:'Application registered. Registration No: '+(result.registration_number||''),confirmButtonText:'View Certificate',confirmButtonColor:'#1572e8',allowOutsideClick:false})
-          .then(function(){window.location.href='/certificates/'+APP_ID+'/birth/';});
+          .then(function(){var certType=(result.service_type==='DEATH_REGISTRATION')?'death':'birth';window.location.href='/certificates/'+APP_ID+'/'+certType+'/';});
       }catch(err){
         document.getElementById('appModalSpinner').style.display='none';
         btnConfirmApprove.disabled=false;

@@ -150,7 +150,7 @@
                                         <span class="badge bg-dark">Cancelled</span>
                                     {% else %}
                                         <span class="badge bg-primary">
-                                            {{ app.get_status_display|default:app.status }}
+                                            {{ app.smart_status|default:app.status }}
                                         </span>
                                     {% endif %}
                                 </td>

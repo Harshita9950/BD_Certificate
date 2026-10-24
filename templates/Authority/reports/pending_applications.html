@@ -46,7 +46,7 @@
             <td>{{ app.current_step.name|default:"—" }}</td>
             <td>{% if app.assigned_to %}{{ app.assigned_to.get_full_name|default:app.assigned_to.username }}{% else %}—{% endif %}</td>
             <td class="text-center"><span class="badge {% if item.pending_days > 30 %}bg-danger{% elif item.pending_days > 15 %}bg-warning text-dark{% else %}bg-success{% endif %}">{{ item.pending_days }} days</span></td>
-            <td><span class="badge bg-warning text-dark">{{ app.get_status_display }}</span></td>
+            <td><span class="badge bg-warning text-dark">{{ app.smart_status }}</span></td>
             <td><small>{{ app.remarks|default:"—"|truncatechars:60 }}</small></td>
         </tr>
         {% endwith %}
