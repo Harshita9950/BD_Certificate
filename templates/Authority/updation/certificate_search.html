@@ -1,0 +1,63 @@
+{% extends 'Authority/base.html' %}
+{% block title %}Certificate Updation Search{% endblock %}
+{% block content %}
+<main class="content">
+  <section class="page-inner d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-3">
+    <div class="page-heading">
+      <h1 class="page-title">Certificate Updation</h1>
+      <nav aria-label="breadcrumb"><ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+        <li class="breadcrumb-item active">Certificate Search</li>
+      </ol></nav>
+    </div>
+  </section>
+
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-4">
+      <h5 class="fw-bold mb-1">Search Registered Certificate</h5>
+      <p class="text-muted small mb-4">Enter the Application Number (e.g. BD-2026-000015) or Certificate / Registration Number to find an issued certificate.</p>
+      <form method="post" class="row g-3">
+        {% csrf_token %}
+        <div class="col-md-8">
+          <input type="text" name="query" class="form-control" placeholder="Application No. or Certificate No." value="{{ query }}" autofocus>
+        </div>
+        <div class="col-md-2">
+          <button type="submit" class="btn btn-primary w-100"><i class="ri-search-line me-1"></i> Search</button>
+        </div>
+        {% if query %}<div class="col-md-2"><a href="{% url 'certificate_search' %}" class="btn btn-light w-100">Reset</a></div>{% endif %}
+      </form>
+      {% if error %}<div class="alert alert-warning mt-3"><i class="ri-information-line me-2"></i>{{ error }}</div>{% endif %}
+    </div>
+  </div>
+
+  {% if results is not None %}
+  <div class="card border-0 shadow-sm">
+    <div class="card-header"><h6 class="mb-0 fw-bold">Search Results ({{ results|length }})</h6></div>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-primary">
+          <tr><th>Application No.</th><th>Certificate No.</th><th>Service Type</th><th>Registration Type</th><th>District</th><th>ULB</th><th class="text-center">Action</th></tr>
+        </thead>
+        <tbody>
+          {% for app in results %}
+          <tr>
+            <td class="fw-semibold">{{ app.application_number }}</td>
+            <td class="text-success fw-semibold">{% if app.birth_registration %}{{ app.birth_registration.registration_number|default:"—" }}{% elif app.death_registration %}{{ app.death_registration.registration_number|default:"—" }}{% else %}—{% endif %}</td>
+            <td><small>{{ app.get_service_type_display }}</small></td>
+            <td>{{ app.registration_type.name|default:"—" }}</td>
+            <td>{{ app.district.name|default:"—" }}</td>
+            <td>{{ app.ulb.name|default:"—" }}</td>
+            <td class="text-center">
+              <a href="{% url 'certificate_edit' app.pk %}" class="btn btn-warning btn-sm"><i class="ri-edit-line me-1"></i> Update</a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="7" class="text-center text-muted py-4">No results found.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+</main>
+{% endblock %}

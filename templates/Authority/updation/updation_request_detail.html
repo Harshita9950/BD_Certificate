@@ -1,0 +1,266 @@
+﻿{% extends 'Authority/base.html' %}
+{% block title %}Updation Request #{{ req.pk }}{% endblock %}
+{% block content %}
+<main class="content">
+  <section class="page-inner d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-3">
+    <div class="page-heading">
+      <h1 class="page-title">Updation Request #{{ req.pk }}</h1>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+          {% if from_param == 'upd_inbox' %}<li class="breadcrumb-item"><a href="{% url 'updation_inbox' %}">Updation
+              Inbox</a></li>
+          {% elif from_param == 'upd_sentbox' %}<li class="breadcrumb-item"><a
+              href="{% url 'updation_sentbox' %}">Updation Sentbox</a></li>{% endif %}
+          <li class="breadcrumb-item active">#{{ req.pk }}</li>
+        </ol>
+      </nav>
+    </div>
+    <div class="ms-auto d-print-none d-flex gap-2">
+      <button onclick="window.print()" class="btn btn-outline-secondary btn-sm"><i class="ri-printer-line me-1"></i>
+        Print</button>
+      <a href="{% if from_param == 'upd_inbox' %}{% url 'updation_inbox' %}{% elif from_param == 'upd_sentbox' %}{% url 'updation_sentbox' %}{% else %}{% url 'certificate_search' %}{% endif %}"
+        class="btn btn-light btn-sm"><i class="ri-arrow-left-line me-1"></i> Back</a>
+    </div>
+  </section>
+
+  <!-- Status banner -->
+  <div
+    class="alert {% if req.status == 'APPROVED' %}alert-success{% elif req.status == 'REJECTED' %}alert-danger{% else %}alert-info{% endif %} d-flex justify-content-between align-items-center mb-4">
+    <div><strong>#{{ req.pk }}</strong> &nbsp;·&nbsp; {% if req.service_type == 'BIRTH_REGISTRATION' %}Birth{% else %}Death{% endif %} Registration Updation Request</div>
+    <span
+      class="badge fs-6 {% if req.status == 'APPROVED' %}bg-success{% elif req.status == 'REJECTED' %}bg-danger{% else %}bg-warning text-dark{% endif %}">{{ req.smart_status }}</span>
+  </div>
+
+  <!-- 1. Request Details -->
+  <div class="card border-0 shadow-sm mb-3">
+    <div class="card-body p-4">
+      <h5 class="fw-bold mb-3 pb-2 border-bottom">Request Details</h5>
+      <div class="row g-3">
+        <div class="col-sm-4">
+          <p class="text-muted small mb-1">Application No.</p>
+          <p class="fw-semibold mb-0"><a href="{% url 'application_detail' app.pk %}">{{ app.application_number }}</a>
+          </p>
+        </div>
+        <div class="col-sm-4">
+          <p class="text-muted small mb-1">Certificate No.</p>
+          <p class="fw-semibold text-success mb-0">{{ req.certificate_number }}</p>
+        </div>
+        <div class="col-sm-4">
+          <p class="text-muted small mb-1">Service Type</p>
+          <p class="fw-semibold mb-0">{% if req.service_type == 'BIRTH_REGISTRATION' %}Birth Registration{% else %}Death
+            Registration{% endif %}</p>
+        </div>
+        <div class="col-sm-4">
+          <p class="text-muted small mb-1">Submitted By</p>
+          <p class="fw-semibold mb-0">{% if req.submitted_by %}{{ req.submitted_by.get_full_name|default:req.submitted_by.username }}{% else %}—{% endif %}</p>
+        </div>
+        <div class="col-sm-4">
+          <p class="text-muted small mb-1">Submitted At</p>
+          <p class="fw-semibold mb-0">{{ req.submitted_at|date:"d-m-Y H:i"|default:"—" }}</p>
+        </div>
+        <div class="col-sm-4">
+          <p class="text-muted small mb-1">Current Step</p>
+          <p class="fw-semibold mb-0">{{ req.current_step.name|default:"—" }}</p>
+        </div>
+        <div class="col-12">
+          <p class="text-muted small mb-1">Update Reason</p>
+          <p class="fw-semibold mb-0">{{ req.update_reason }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Proposed Changes -->
+  <div class="card border-0 shadow-sm mb-3">
+    <div class="card-body p-4">
+      <h5 class="fw-bold mb-3 pb-2 border-bottom">Proposed Changes</h5>
+      {% if changes_display %}
+      <table class="table table-sm table-bordered">
+        <thead class="table-light">
+          <tr>
+            <th>Field</th>
+            <th class="text-danger">Current Value</th>
+            <th class="text-success">Proposed Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for change in changes_display %}
+          <tr>
+            <td class="fw-semibold small">{{ change.field }}</td>
+            <td class="text-danger small">{{ change.old|default:"—" }}</td>
+            <td class="text-success fw-semibold small">{{ change.new|default:"—" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p class="text-muted small mb-0">No changes recorded.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- 4. Remark Log -->
+  {% if remarks_log %}
+  <div class="card border-0 shadow-sm mb-3">
+    <div class="card-body p-4">
+      <h5 class="fw-bold mb-3 pb-2 border-bottom">Officer Remarks</h5>
+      <table class="table table-sm table-bordered mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Action</th>
+            <th>Step / Role</th>
+            <th>Officer</th>
+            <th>Remark</th>
+            <th class="text-nowrap">At</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in remarks_log %}
+          <tr>
+            <td><code class="small">{{ r.action }}</code></td>
+            <td><small>{{ r.step_name|default:"—" }}<br><span class="text-muted">{{ r.step_role|default:"" }}</span></small></td>
+            <td><small>{% if r.officer %}{{ r.officer.get_full_name|default:r.officer.username }}{% else %}—{% endif %}</small></td>
+            <td><small>{{ r.remark|default:"—" }}</small></td>
+            <td class="text-nowrap"><small>{{ r.created_at|date:"d-m-Y H:i" }}</small></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- 5. Audit History -->
+  <div class="card border-0 shadow-sm mb-3">
+    <div class="card-body p-4">
+      <h5 class="fw-bold mb-3 pb-2 border-bottom">Action History</h5>
+      <table class="table table-sm table-bordered mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Action</th>
+            <th>By</th>
+            <th>At</th>
+            <th>Remarks</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for h in req.status_history.all %}
+          <tr>
+            <td><code class="small">{{ h.action }}</code></td>
+            <td><small>{% if h.changed_by %}{{ h.changed_by.get_full_name|default:h.changed_by.username }}{% else %}—{% endif %}</small></td>
+            <td class="text-nowrap"><small>{{ h.changed_at|date:"d-m-Y H:i" }}</small></td>
+            <td><small>{{ h.remarks|default:"—"|truncatechars:80 }}</small></td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="4" class="text-center text-muted">No history.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+
+  <!-- 3. Action Panel (only for inbox officers on forwardable statuses) -->
+  {% if can_act and req.status not in 'APPROVED,REJECTED,CANCELLED' %}
+  <div class="card border-0 shadow-sm mb-3 d-print-none">
+    <div class="card-body p-4 text-center">
+      {% if is_last_step %}
+      <button type="button" class="btn btn-success btn-sm px-4 me-3" data-bs-toggle="modal"
+        data-bs-target="#approveModal"><i class="ri-checkbox-circle-line me-1"></i> Approve</button>
+      {% else %}
+      <button type="button" class="btn btn-primary btn-sm px-4 me-3" data-bs-toggle="modal"
+        data-bs-target="#forwardModal"><i class="ri-share-forward-line me-1"></i> Forward</button>
+      {% endif %}
+      <button type="button" class="btn btn-danger btn-sm px-4" data-bs-toggle="modal" data-bs-target="#rejectModal"><i
+          class="ri-close-circle-line me-1"></i> Reject</button>
+    </div>
+  </div>
+  {% endif %}
+
+
+<!-- FORWARD MODAL -->
+<div class="modal fade" id="forwardModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="ri-share-forward-line me-2 text-primary"></i>Forward Request</h5><button
+          type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="post" action="{% url 'updation_forward' req.pk %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          <p class="text-muted small mb-3">Forward request <strong>{{ req.certificate_number }}</strong> to the next step.</p>
+          <label class="form-label small fw-semibold">Forwarding Remark <span
+              class="text-muted">(optional)</span></label>
+          <textarea name="remark" class="form-control form-control-sm" rows="3"
+            placeholder="Add a note for the next officer..."></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm"><i class="ri-share-forward-line me-1"></i>
+            Forward</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- APPROVE MODAL -->
+<div class="modal fade" id="approveModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="ri-checkbox-circle-line me-2 text-success"></i>Approve &amp; Apply</h5><button
+          type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="post" action="{% url 'updation_approve' req.pk %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          <p class="text-muted small mb-3">Approving will apply the proposed changes to the original {% if req.service_type == 'BIRTH_REGISTRATION' %}birth{% else %}death{% endif %} certificate and regenerate it.
+          </p>
+          <label class="form-label small fw-semibold">Approval Remark <span class="text-muted">(optional)</span></label>
+          <textarea name="remark" class="form-control form-control-sm" rows="3" placeholder="Add a note..."></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-success btn-sm"><i class="ri-checkbox-circle-line me-1"></i> Confirm
+            Approve</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- REJECT MODAL -->
+<div class="modal fade" id="rejectModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="ri-close-circle-line me-2 text-danger"></i>Reject Request</h5><button
+          type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="post" action="{% url 'updation_reject' req.pk %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          <p class="text-muted small mb-3">Rejecting will <strong>not</strong> modify the original certificate. The
+            original data will remain unchanged.</p>
+          <label class="form-label small fw-semibold">Rejection Reason <span class="text-danger">*</span></label>
+          <textarea name="remark" class="form-control form-control-sm" rows="3"
+            placeholder="Reason for rejection (required)..." required></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger btn-sm"><i class="ri-close-circle-line me-1"></i> Confirm
+            Reject</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

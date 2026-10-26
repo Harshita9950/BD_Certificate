@@ -45,6 +45,22 @@ from bd_registration.views import (
 
 from payments.views import payment_receipt_view
 
+from certificate_updation.views import (
+    UpdationInboxView,
+    UpdationSentboxView,
+    CertificateSearchView,
+    CertificateEditView,
+    UpdationRequestDetailView,
+    UpdationForwardView,
+    UpdationApproveView,
+    UpdationRejectView,
+    UpdationRegisterReportView,
+    UpdationPendingReportView,
+    UpdationDecisionReportView,
+    UpdationFieldChangeReportView,
+    UpdationSummaryReportView,
+)
+
 from fee_master.views import FeeMasterPageView, FeeMasterAddView, FeeMasterEditView
 
 
@@ -206,6 +222,24 @@ urlpatterns = [
     # ── Mailbox ───────────────────────────────────────────────────────────────
     path('mailbox/inbox/',    ApplicationInboxView.as_view(),    name='application_inbox'),
     path('mailbox/sentbox/',  ApplicationSentboxView.as_view(),  name='application_sentbox'),
+    path('mailbox/updation-inbox/',   UpdationInboxView.as_view(),   name='updation_inbox'),
+    path('mailbox/updation-sentbox/', UpdationSentboxView.as_view(), name='updation_sentbox'),
+
+    # ── Certificate Updation ──────────────────────────────────────────────────
+    path('certificate-updation/', include('certificate_updation.urls', namespace='certificate_updation')),
+    # Non-namespaced aliases so templates can use {% url 'certificate_search' %} etc.
+    path('certificate-updation/search/',              CertificateSearchView.as_view(),       name='certificate_search'),
+    path('certificate-updation/<int:app_pk>/edit/',   CertificateEditView.as_view(),         name='certificate_edit'),
+    path('certificate-updation/request/<int:pk>/',    UpdationRequestDetailView.as_view(),   name='updation_request_detail'),
+    path('certificate-updation/request/<int:pk>/forward/', UpdationForwardView.as_view(),    name='updation_forward'),
+    path('certificate-updation/request/<int:pk>/approve/', UpdationApproveView.as_view(),    name='updation_approve'),
+    path('certificate-updation/request/<int:pk>/reject/',  UpdationRejectView.as_view(),     name='updation_reject'),
+    # Report aliases
+    path('certificate-updation/reports/register/',        UpdationRegisterReportView.as_view(),    name='report_updation_register'),
+    path('certificate-updation/reports/pending/',         UpdationPendingReportView.as_view(),     name='report_updation_pending'),
+    path('certificate-updation/reports/decisions/',       UpdationDecisionReportView.as_view(),    name='report_updation_decisions'),
+    path('certificate-updation/reports/field-changes/',   UpdationFieldChangeReportView.as_view(), name='report_updation_field_changes'),
+    path('certificate-updation/reports/summary/',         UpdationSummaryReportView.as_view(),     name='report_updation_summary'),
 
     # ── My Applications (current user's submitted applications) ───────────────
     path('my-applications/', MyApplicationsView.as_view(), name='my_applications'),

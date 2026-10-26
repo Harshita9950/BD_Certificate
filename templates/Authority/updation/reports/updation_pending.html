@@ -1,0 +1,41 @@
+{% extends 'Authority/updation/reports/upd_report_base.html' %}
+{% block filter_form %}
+<form method="get" class="card border-0 shadow-sm mb-4 d-print-none">
+  <div class="card-body"><div class="row g-3">
+    <div class="col-md-3"><label class="form-label small">Service Type</label>
+      <select name="service_type" class="form-select form-select-sm"><option value="">All</option>{% for v,l in service_types %}<option value="{{ v }}"{% if filter_params.service_type == v %} selected{% endif %}>{{ l }}</option>{% endfor %}</select>
+    </div>
+    <div class="col-md-3"><label class="form-label small">From Date</label><input type="date" name="date_from" class="form-control form-control-sm" value="{{ filter_params.date_from }}"></div>
+    <div class="col-md-3"><label class="form-label small">To Date</label><input type="date" name="date_to" class="form-control form-control-sm" value="{{ filter_params.date_to }}"></div>
+    <div class="col-md-3 d-flex align-items-end gap-2">
+      <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+      <a href="{% url 'report_updation_pending' %}" class="btn btn-light btn-sm">Reset</a>
+    </div>
+  </div></div>
+</form>
+{% endblock %}
+{% block report_table %}
+<table class="table table-hover table-bordered align-middle mb-0">
+  <thead class="table-primary">
+    <tr><th>#</th><th>Request No.</th><th>Application No.</th><th>Service Type</th><th>Current Step</th><th>Assigned Role</th><th>Pending Days</th><th>Status</th></tr>
+  </thead>
+  <tbody>
+    {% for item in rows %}
+    {% with req=item.req %}
+    <tr>
+      <td class="text-center">{{ forloop.counter }}</td>
+      <td class="fw-semibold"><a href="{% url 'updation_request_detail' req.pk %}">#{{ req.pk }}</a></td>
+      <td class="text-nowrap">{{ req.original_application.application_number }}</td>
+      <td><small>{% if req.service_type == 'BIRTH_REGISTRATION' %}Birth{% else %}Death{% endif %}</small></td>
+      <td>{{ req.current_step.name|default:"—" }}</td>
+      <td><code class="small">{{ req.current_step.role_code|default:"—" }}</code></td>
+      <td class="text-center"><span class="badge {% if item.pending_days > 30 %}bg-danger{% elif item.pending_days > 15 %}bg-warning text-dark{% else %}bg-success{% endif %}">{{ item.pending_days }} days</span></td>
+      <td><span class="badge bg-warning text-dark">{{ req.smart_status }}</span></td>
+    </tr>
+    {% endwith %}
+    {% empty %}
+    <tr><td colspan="8" class="text-center text-muted py-4">No pending requests.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

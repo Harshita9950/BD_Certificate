@@ -400,6 +400,66 @@
                         </div>
                     </div>
 
+                    <!-- Certificate Updation -->
+                    <button type="button" class="sidebar-link" data-bs-toggle="collapse"
+                        data-bs-target="#sidebarUpdation" aria-expanded="false" aria-controls="sidebarUpdation">
+                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path
+                                d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                        </svg>
+                        <span class="sidebar-label">Certificate Updation</span>
+                        <svg class="sidebar-toggle-arrow" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path
+                                d="M11.9999 13.1714L16.9497 8.22168L18.3639 9.63589L11.9999 15.9999L5.63599 9.63589L7.0502 8.22168L11.9999 13.1714Z" />
+                        </svg>
+                    </button>
+                    <div class="collapse" id="sidebarUpdation">
+                        <div class="submenu">
+                            <a href="{% url 'certificate_search' %}" class="sidebar-link">
+                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path
+                                        d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+                                </svg>
+                                <span class="sidebar-label">Search Certificate</span>
+                            </a>
+                            <a href="{% url 'updation_inbox' %}" class="sidebar-link">
+                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path
+                                        d="M19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM19 19H5V7H19V19ZM7 9H17V11H7V9ZM7 13H14V15H7V13Z" />
+                                </svg>
+                                <span class="sidebar-label">Updation Inbox</span>
+                            </a>
+                            <a href="{% url 'updation_sentbox' %}" class="sidebar-link">
+                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path
+                                        d="M20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 18H4V8L12 13L20 8V18ZM12 11L4 6H20L12 11Z" />
+                                </svg>
+                                <span class="sidebar-label">Updation Sentbox</span>
+                            </a>
+                            <p class="submenu-group-label text-muted small px-3 mt-2 mb-1" style="font-size:11px;text-transform:uppercase;letter-spacing:.05em;">Reports</p>
+                            <a href="{% url 'report_updation_register' %}" class="sidebar-link">
+                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/></svg>
+                                <span class="sidebar-label">Updation Register</span>
+                            </a>
+                            <a href="{% url 'report_updation_pending' %}" class="sidebar-link">
+                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm.5 5H11v6l5.2 3.2.8-1.3-4.5-2.7V7z"/></svg>
+                                <span class="sidebar-label">Pending &amp; Workflow</span>
+                            </a>
+                            <a href="{% url 'report_updation_decisions' %}" class="sidebar-link">
+                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>
+                                <span class="sidebar-label">Approved &amp; Rejected</span>
+                            </a>
+                            <a href="{% url 'report_updation_field_changes' %}" class="sidebar-link">
+                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z"/></svg>
+                                <span class="sidebar-label">Field Changes</span>
+                            </a>
+                            <a href="{% url 'report_updation_summary' %}" class="sidebar-link">
+                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14H7v-2h5v2zm5-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                                <span class="sidebar-label">Summary</span>
+                            </a>
+                        </div>
+                    </div>
+
                     <!-- Reports -->
                     <button type="button" class="sidebar-link" data-bs-toggle="collapse"
                         data-bs-target="#sidebarReports" aria-expanded="false" aria-controls="sidebarReports">

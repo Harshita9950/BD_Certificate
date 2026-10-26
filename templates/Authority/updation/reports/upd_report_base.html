@@ -1,0 +1,54 @@
+{% extends 'Authority/base.html' %}
+{% load static %}
+{% block title %}{{ report_title }} | BD Portal{% endblock %}
+{% block content %}
+<main class="content">
+  <section class="page-inner d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-3">
+    <div class="page-heading">
+      <h1 class="page-title">{{ report_title }}</h1>
+      <nav aria-label="breadcrumb"><ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+        <li class="breadcrumb-item">Certificate Updation</li>
+        <li class="breadcrumb-item active">{{ report_title }}</li>
+      </ol></nav>
+    </div>
+    <div class="ms-auto d-print-none d-flex gap-2">
+      <button onclick="window.print()" class="btn btn-outline-secondary btn-sm"><i class="ri-printer-line me-1"></i> Print</button>
+      <a href="?{% for k,v in filter_params.items %}{% if k != 'page' and k != 'export' %}{{ k }}={{ v }}&{% endif %}{% endfor %}export=csv" class="btn btn-success btn-sm"><i class="ri-file-excel-line me-1"></i> Export CSV</a>
+    </div>
+  </section>
+
+  {% block filter_form %}{% endblock %}
+
+  {% block summary_cards %}{% endblock %}
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-header d-print-none">
+      <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-2">
+          <label class="mb-0 fw-medium text-secondary text-nowrap">Search:</label>
+          <input type="search" id="tableSearch" class="form-control form-control-sm" placeholder="Search records…" style="border-radius:8px;width:280px;">
+        </div>
+        <span class="text-secondary small">{{ total }} record{{ total|pluralize }}</span>
+      </div>
+    </div>
+    <div class="table-responsive" id="printableArea">{% block report_table %}{% endblock %}</div>
+    {% if not is_print %}
+    <div class="card-footer d-print-none">
+      <div class="d-flex justify-content-between align-items-center">
+        <span class="text-secondary small">Page {{ current_page }} of {{ total_pages }}</span>
+        <nav><ul class="pagination pagination-sm mb-0">
+          {% if current_page > 1 %}<li class="page-item"><a class="page-link" href="?{% for k,v in filter_params.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page=1">«</a></li><li class="page-item"><a class="page-link" href="?{% for k,v in filter_params.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ current_page|add:"-1" }}">‹</a></li>{% endif %}
+          <li class="page-item active"><span class="page-link">{{ current_page }}</span></li>
+          {% if current_page < total_pages %}<li class="page-item"><a class="page-link" href="?{% for k,v in filter_params.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ current_page|add:"1" }}">›</a></li><li class="page-item"><a class="page-link" href="?{% for k,v in filter_params.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ total_pages }}">»</a></li>{% endif %}
+        </ul></nav>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</main>
+<style>@media print{.d-print-none{display:none!important}.card{box-shadow:none!important}}</style>
+{% block extra_js %}<script>
+document.addEventListener('DOMContentLoaded',function(){var s=document.getElementById('tableSearch');if(!s)return;var rows=Array.from(document.querySelectorAll('#printableArea table tbody tr'));s.addEventListener('input',function(){var q=this.value.toLowerCase();rows.forEach(function(r){r.style.display=r.innerText.toLowerCase().includes(q)?'':'none';});});});
+</script>{% endblock %}
+{% endblock %}

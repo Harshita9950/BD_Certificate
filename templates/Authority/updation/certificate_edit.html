@@ -1,0 +1,107 @@
+{% extends 'Authority/base.html' %}
+{% block title %}Update Certificate — {{ app.application_number }}{% endblock %}
+{% block content %}
+<main class="content">
+  <section class="page-inner d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-3">
+    <div class="page-heading">
+      <h1 class="page-title">Update Certificate</h1>
+      <nav aria-label="breadcrumb"><ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'certificate_search' %}">Certificate Search</a></li>
+        <li class="breadcrumb-item active">{{ app.application_number }}</li>
+      </ol></nav>
+    </div>
+    <div class="ms-auto d-flex gap-2">
+      <a href="{% url 'certificate_search' %}" class="btn btn-light btn-sm"><i class="ri-arrow-left-line me-1"></i> Back</a>
+    </div>
+  </section>
+
+  {% if error %}<div class="alert alert-danger mb-3">{{ error }}</div>{% endif %}
+
+  {% if pending_request %}
+  <div class="alert alert-warning mb-3">
+    <i class="ri-time-line me-2"></i>
+    A correction request <strong>#{{ pending_request.pk }}</strong> is already pending for this certificate (Status: {{ pending_request.smart_status }}).
+    <a href="{% url 'updation_request_detail' pending_request.pk %}" class="ms-2 btn btn-sm btn-outline-warning">View Request</a>
+  </div>
+  {% endif %}
+
+  <!-- Certificate Summary -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-4">
+      <h5 class="fw-bold mb-3 pb-2 border-bottom">Certificate Details (Current)</h5>
+      <div class="row g-3">
+        <div class="col-md-4"><p class="text-muted small mb-1">Application No.</p><p class="fw-semibold mb-0">{{ app.application_number }}</p></div>
+        <div class="col-md-4"><p class="text-muted small mb-1">Service Type</p><p class="fw-semibold mb-0">{{ app.get_service_type_display }}</p></div>
+        <div class="col-md-4"><p class="text-muted small mb-1">Certificate No.</p><p class="fw-semibold text-success mb-0">{% if birth %}{{ birth.registration_number }}{% elif death %}{{ death.registration_number }}{% else %}—{% endif %}</p></div>
+        <div class="col-md-4"><p class="text-muted small mb-1">Registration Type</p><p class="fw-semibold mb-0">{{ app.registration_type.name|default:"—" }}</p></div>
+        <div class="col-md-4"><p class="text-muted small mb-1">District / ULB</p><p class="fw-semibold mb-0">{{ app.district.name|default:"—" }}, {{ app.ulb.name|default:"—" }}</p></div>
+      </div>
+    </div>
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+
+    {% if birth %}
+    <!-- BIRTH FIELDS -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-3 pb-2 border-bottom">Child Details</h5>
+        <div class="row g-3">
+          <div class="col-md-4"><label class="form-label small">First Name</label><input type="text" name="child_first_name" class="form-control" value="{{ birth.child_first_name }}"></div>
+          <div class="col-md-4"><label class="form-label small">Middle Name</label><input type="text" name="child_middle_name" class="form-control" value="{{ birth.child_middle_name }}"></div>
+          <div class="col-md-4"><label class="form-label small">Last Name</label><input type="text" name="child_last_name" class="form-control" value="{{ birth.child_last_name }}"></div>
+          <div class="col-md-4"><label class="form-label small">Date of Birth</label><input type="date" name="date_of_birth" class="form-control" value="{{ birth.date_of_birth|date:'Y-m-d' }}"></div>
+          <div class="col-md-4"><label class="form-label small">Sex</label><select name="sex" class="form-select"><option value="MALE"{% if birth.sex == 'MALE' %} selected{% endif %}>Male</option><option value="FEMALE"{% if birth.sex == 'FEMALE' %} selected{% endif %}>Female</option><option value="OTHER"{% if birth.sex == 'OTHER' %} selected{% endif %}>Other</option></select></div>
+        </div>
+      </div>
+    </div>
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-3 pb-2 border-bottom">Mother's Details</h5>
+        <div class="row g-3">
+          <div class="col-md-4"><label class="form-label small">Mother's Name</label><input type="text" name="mother_name" class="form-control" value="{{ birth.mother_name }}"></div>
+          <div class="col-md-4"><label class="form-label small">Mother's Aadhaar</label><input type="text" name="mother_aadhaar" class="form-control" value="{{ birth.mother_aadhaar }}"></div>
+          <div class="col-md-4"><label class="form-label small">Father's Name</label><input type="text" name="father_name" class="form-control" value="{{ birth.father_name }}"></div>
+          <div class="col-md-4"><label class="form-label small">Father's Aadhaar</label><input type="text" name="father_aadhaar" class="form-control" value="{{ birth.father_aadhaar }}"></div>
+          <div class="col-md-4"><label class="form-label small">Permanent Address</label><textarea name="permanent_address" class="form-control" rows="2">{{ birth.permanent_address }}</textarea></div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if death %}
+    <!-- DEATH FIELDS -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-3 pb-2 border-bottom">Deceased Details</h5>
+        <div class="row g-3">
+          <div class="col-md-4"><label class="form-label small">First Name</label><input type="text" name="deceased_first_name" class="form-control" value="{{ death.deceased_first_name }}"></div>
+          <div class="col-md-4"><label class="form-label small">Middle Name</label><input type="text" name="deceased_middle_name" class="form-control" value="{{ death.deceased_middle_name }}"></div>
+          <div class="col-md-4"><label class="form-label small">Last Name</label><input type="text" name="deceased_last_name" class="form-control" value="{{ death.deceased_last_name }}"></div>
+          <div class="col-md-4"><label class="form-label small">Date of Death</label><input type="date" name="date_of_death" class="form-control" value="{{ death.date_of_death|date:'Y-m-d' }}"></div>
+          <div class="col-md-4"><label class="form-label small">Sex</label><select name="sex" class="form-select"><option value="MALE"{% if death.sex == 'MALE' %} selected{% endif %}>Male</option><option value="FEMALE"{% if death.sex == 'FEMALE' %} selected{% endif %}>Female</option><option value="OTHER"{% if death.sex == 'OTHER' %} selected{% endif %}>Other</option></select></div>
+          <div class="col-md-4"><label class="form-label small">Father's Name</label><input type="text" name="father_name" class="form-control" value="{{ death.father_name }}"></div>
+          <div class="col-md-4"><label class="form-label small">Mother's Name</label><input type="text" name="mother_name" class="form-control" value="{{ death.mother_name }}"></div>
+          <div class="col-md-4"><label class="form-label small">Spouse's Name</label><input type="text" name="spouse_name" class="form-control" value="{{ death.spouse_name }}"></div>
+          <div class="col-12"><label class="form-label small">Place of Death Address</label><textarea name="place_of_death_address" class="form-control" rows="2">{{ death.place_of_death_address }}</textarea></div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-3 pb-2 border-bottom">Update Reason <span class="text-danger">*</span></h5>
+        <textarea name="update_reason" class="form-control" rows="4" placeholder="Explain why this certificate needs to be updated (required)..." required></textarea>
+      </div>
+    </div>
+
+    <div class="text-center pt-2 pb-4">
+      <button type="submit" class="btn btn-warning btn-sm px-4"><i class="ri-send-plane-line me-1"></i> Submit Update Request</button>
+      <a href="{% url 'certificate_search' %}" class="btn btn-light btn-sm ms-2">Cancel</a>
+    </div>
+  </form>
+</main>
+{% endblock %}

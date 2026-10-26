@@ -1,0 +1,82 @@
+{% extends 'Authority/updation/reports/upd_report_base.html' %}
+
+{% block filter_form %}
+<form method="get" class="card border-0 shadow-sm mb-4 d-print-none">
+  <div class="card-body"><div class="row g-3">
+    <div class="col-md-2"><label class="form-label small">From Date</label><input type="date" name="date_from" class="form-control form-control-sm" value="{{ filter_params.date_from }}"></div>
+    <div class="col-md-2"><label class="form-label small">To Date</label><input type="date" name="date_to" class="form-control form-control-sm" value="{{ filter_params.date_to }}"></div>
+    <div class="col-md-2"><label class="form-label small">Service Type</label>
+      <select name="service_type" class="form-select form-select-sm">
+        <option value="">All</option>
+        {% for v,l in service_types %}<option value="{{ v }}"{% if filter_params.service_type == v %} selected{% endif %}>{{ l }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2 d-flex align-items-end gap-2">
+      <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+      <a href="{% url 'report_updation_summary' %}" class="btn btn-light btn-sm">Reset</a>
+    </div>
+  </div></div>
+</form>
+{% endblock %}
+
+{% block summary_cards %}
+<div class="row g-3 mb-4 d-print-none">
+  <div class="col-6 col-md-3">
+    <div class="card border-0 shadow-sm text-center p-3">
+      <div class="fs-2 fw-bold text-dark">{{ total }}</div>
+      <div class="small text-muted mt-1">Total Requests</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card border-0 shadow-sm text-center p-3">
+      <div class="fs-2 fw-bold text-warning">{{ pending }}</div>
+      <div class="small text-muted mt-1">Pending</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card border-0 shadow-sm text-center p-3">
+      <div class="fs-2 fw-bold text-success">{{ approved }}</div>
+      <div class="small text-muted mt-1">Approved</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card border-0 shadow-sm text-center p-3">
+      <div class="fs-2 fw-bold text-danger">{{ rejected }}</div>
+      <div class="small text-muted mt-1">Rejected</div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block report_table %}
+<div class="p-3">
+  <div class="row g-4 mb-4">
+    <div class="col-md-6">
+      <h6 class="fw-bold mb-3 border-bottom pb-2">By Service Type</h6>
+      <table class="table table-sm table-bordered">
+        <thead class="table-light"><tr><th>Service</th><th class="text-end">Count</th></tr></thead>
+        <tbody>
+          {% for r in by_service %}
+          <tr>
+            <td><small>{% if r.service_type == 'BIRTH_REGISTRATION' %}<span class="text-primary fw-semibold">Birth Registration</span>{% elif r.service_type == 'DEATH_REGISTRATION' %}<span class="text-danger fw-semibold">Death Registration</span>{% else %}{{ r.service_type }}{% endif %}</small></td>
+            <td class="text-end fw-semibold">{{ r.count }}</td>
+          </tr>
+          {% empty %}<tr><td colspan="2" class="text-muted text-center">—</td></tr>{% endfor %}
+          <tr class="table-light fw-bold"><td>Total</td><td class="text-end">{{ total }}</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="col-md-6">
+      <h6 class="fw-bold mb-3 border-bottom pb-2">By Status</h6>
+      <table class="table table-sm table-bordered">
+        <thead class="table-light"><tr><th>Status</th><th class="text-end">Count</th></tr></thead>
+        <tbody>
+          {% for r in by_status %}
+          <tr><td><small>{{ r.status }}</small></td><td class="text-end fw-semibold">{{ r.count }}</td></tr>
+          {% empty %}<tr><td colspan="2" class="text-muted text-center">—</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
