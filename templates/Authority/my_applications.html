@@ -108,20 +108,36 @@
                             {% if app.registration_type %}{{ app.registration_type.name }}{% else %}—{% endif %}
                         </td>
 
-                        <td class="text-nowrap">{% if app.birth_registration %}{{ app.birth_registration.date_of_birth|date:"d-m-Y" }}{% elif app.death_registration %}{{ app.death_registration.date_of_death|date:"d-m-Y" }}{% elif app.still_birth_registration %}{{ app.still_birth_registration.date_of_birth|date:"d-m-Y" }}{% elif app.adopted_birth_registration %}{{ app.adopted_birth_registration.date_of_birth|date:"d-m-Y" }}{% else %}&#8212;{% endif %}</td>
+                        <td class="text-nowrap">{% if app.birth_registration %}{{ app.birth_registration.date_of_birth|date:"d-m-Y" }}{% elif app.death_registration %}{{ app.death_registration.date_of_death|date:"d-m-Y" }}{% elif app.still_birth_registration %}{{ app.still_birth_registration.date_of_birth|date:"d-m-Y" }}{% elif app.adopted_birth_registration %}{{ app.adopted_birth_registration.date_of_birth|date:"d-m-Y" }}{% else %}&#8212;{% endif %}
+                        </td>
 
                         <td>
                             {{ app.district.name|default:"—" }}<br>
                             <small class="text-muted">{{ app.ulb.name|default:"" }}</small>
                         </td>
 
-                        <td class="text-nowrap">{% if app.birth_registration %}{{ app.birth_registration.date_of_birth|date:"d-m-Y" }}{% elif app.death_registration %}{{ app.death_registration.date_of_death|date:"d-m-Y" }}{% elif app.still_birth_registration %}{{ app.still_birth_registration.date_of_birth|date:"d-m-Y" }}{% elif app.adopted_birth_registration %}{{ app.adopted_birth_registration.date_of_birth|date:"d-m-Y" }}{% else %}&#8212;{% endif %}</td>
+                        <td class="text-nowrap">{% if app.birth_registration %}{{ app.birth_registration.date_of_birth|date:"d-m-Y" }}{% elif app.death_registration %}{{ app.death_registration.date_of_death|date:"d-m-Y" }}{% elif app.still_birth_registration %}{{ app.still_birth_registration.date_of_birth|date:"d-m-Y" }}{% elif app.adopted_birth_registration %}{{ app.adopted_birth_registration.date_of_birth|date:"d-m-Y" }}{% else %}&#8212;{% endif %}
+                        </td>
 
-                        <td class="text-center">{% with order=app.payment_order %}{% if order %}{% if order.status == 'PAID' %}<span class="badge bg-success">Paid</span><br><small class="text-muted">&#8377;{{ order.amount }}</small>{% elif order.status == 'PENDING' %}<span class="badge bg-warning text-dark">Pending</span>{% else %}<span class="badge bg-secondary">{{ order.status }}</span>{% endif %}{% else %}<span class="text-muted small">&#8212;</span>{% endif %}{% endwith %}</td>
+                        <td class="text-center">{% with order=app.payment_order %}{% if order %}{% if order.status == 'PAID' %}<span class="badge bg-success">Paid</span><br><small class="text-muted">&#8377;{{ order.amount }}</small>{% elif order.status == 'PENDING' %}<span
+                                class="badge bg-warning text-dark">Pending</span>{% else %}<span
+                                class="badge bg-secondary">{{ order.status }}</span>{% endif %}{% else %}<span
+                                class="text-muted small">&#8212;</span>{% endif %}{% endwith %}</td>
 
-                        <td class="text-center text-nowrap">{% if app.status == 'SUBMITTED' %}<span class="badge text-bg-primary">Submitted</span>{% elif app.status == 'UNDER_SCRUTINY' %}<span class="badge text-bg-info text-dark">Under Scrutiny</span>{% elif app.status == 'PENDING_DOCS' %}<span class="badge text-bg-warning text-dark">Pending Docs</span>{% elif app.status == 'UNDER_PROCESS' %}<span class="badge text-bg-info text-dark">Under Process</span>{% elif app.status == 'APPROVED' %}<span class="badge text-bg-success">Approved</span>{% elif app.status == 'REGISTERED' %}<span class="badge text-bg-success">Registered</span>{% elif app.status == 'REJECTED' %}<span class="badge text-bg-danger">Rejected</span>{% elif app.status == 'CANCELLED' %}<span class="badge text-bg-dark">Cancelled</span>{% elif app.status == 'PAYMENT_PENDING' %}<span class="badge text-bg-warning text-dark">Payment Pending</span>{% else %}<span class="badge text-bg-secondary">{{ app.smart_status }}</span>{% endif %}</td>
+                        <td class="text-center text-nowrap">{% if app.status == 'SUBMITTED' %}<span
+                                class="badge text-bg-primary">Submitted</span>{% elif app.status == 'UNDER_SCRUTINY' %}<span class="badge text-bg-info text-dark">Under Scrutiny</span>{% elif app.status == 'PENDING_DOCS' %}<span class="badge text-bg-warning text-dark">Pending Docs</span>{% elif app.status == 'UNDER_PROCESS' %}<span class="badge text-bg-info text-dark">Under
+                                Process</span>{% elif app.status == 'APPROVED' %}<span
+                                class="badge text-bg-success">Approved</span>{% elif app.status == 'REGISTERED' %}<span
+                                class="badge text-bg-success">Registered</span>{% elif app.status == 'REJECTED' %}<span
+                                class="badge text-bg-danger">Rejected</span>{% elif app.status == 'CANCELLED' %}<span
+                                class="badge text-bg-dark">Cancelled</span>{% elif app.status == 'PAYMENT_PENDING' %}<span class="badge text-bg-warning text-dark">Payment Pending</span>{% else %}<span
+                                class="badge text-bg-secondary">{{ app.smart_status }}</span>{% endif %}</td>
 
-                        <td class="text-center text-nowrap">{% if app.status == 'PAYMENT_PENDING' %}<a href="{% url 'application_review' app.pk %}" class="btn btn-xs btn-warning app-open-btn my-1" title="Pay Now">PAY</a>{% else %}<a href="{% url 'application_detail' app.pk %}" class="btn btn-xs btn-primary app-open-btn my-1" title="View">VIEW</a>{% endif %}</td>
+                        <td class="text-center text-nowrap">{% if app.status == 'PAYMENT_PENDING' %}<a
+                                href="{% url 'application_review' app.pk %}?from=my_applications"
+                                class="btn btn-xs btn-warning app-open-btn my-1" title="Pay Now">PAY</a>{% else %}<a
+                                href="{% url 'application_detail' app.pk %}"
+                                class="btn btn-xs btn-primary app-open-btn my-1" title="View">VIEW</a>{% endif %}</td>
                     </tr>
                     {% empty %}
                     <tr>

@@ -256,10 +256,16 @@
             {% endif %}
 
             <!-- Back button -->
+            {% if request.GET.from == 'my_applications' %}
+            <a href="{% url 'my_applications' %}" class="btn btn-light w-100">
+                <i class="ri-arrow-left-line me-1"></i> Back to My Applications
+            </a>
+            {% else %}
             <a href="{% if app.service_type == 'DEATH_REGISTRATION' %}{% url 'death_registration' %}?app={{ app.pk }}{% else %}{% url 'birth_registration' %}?app={{ app.pk }}{% endif %}"
                 class="btn btn-light w-100">
                 <i class="ri-arrow-left-line me-1"></i> Back to Application Form
             </a>
+            {% endif %}
 
         </div><!-- /right col -->
 
