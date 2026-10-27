@@ -401,7 +401,12 @@
                 const options = {
                     key: rzpKey, amount: Math.round(parseFloat(order.amount) * 100), currency: order.currency || 'INR',
                     name: 'Birth & Death Registration', description: `Application ${order.application_number}`,
-                    order_id: order.razorpay_order_id, prefill: {}, notes: { application_number: order.application_number }, theme: { color: '#1572e8' },
+                    order_id: order.razorpay_order_id,
+                    prefill: { name: '', email: '', contact: '' },
+                    notes: { application_number: order.application_number },
+                    theme: { color: '#1572e8' },
+                    retry: { enabled: false },
+                    timeout: 300,
                     handler: async (response) => {
                         setLoading(btnProceedOnline, 'onlineSpinner', true);
                         try {
@@ -414,7 +419,17 @@
                             setTimeout(() => { window.location.href = "{% url 'application_inbox' %}"; }, 2500);
                         } catch (ve) { showAlert(`❌ Verification failed: ${ve?.data?.detail || ve?.message}`); setLoading(btnProceedOnline, 'onlineSpinner', false); }
                     },
-                    modal: { ondismiss: () => { showAlert('⚠️ Payment cancelled. You can retry.', 'warning'); setLoading(btnProceedOnline, 'onlineSpinner', false); } },
+                    modal: {
+                        ondismiss: () => {
+                            showAlert('⚠️ Payment cancelled. You can retry.', 'warning');
+                            setLoading(btnProceedOnline, 'onlineSpinner', false);
+                        },
+                        animation: false,
+                        backdropclose: false,
+                        escape: false,
+                        handleback: false,
+                        confirm_close: false,
+                    },
                 };
                 const rzp = new Razorpay(options);
                 rzp.on('payment.failed', (resp) => { showAlert(`❌ Payment failed: ${resp.error?.description || 'Unknown error.'}`); setLoading(btnProceedOnline, 'onlineSpinner', false); });
